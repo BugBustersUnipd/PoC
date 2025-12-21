@@ -1,4 +1,6 @@
-# Pulisce i dati esistenti (prima i toni, poi le aziende)
+# Pulisce i dati esistenti (prima messaggi e conversazioni, poi toni e aziende)
+Message.delete_all
+Conversation.delete_all
 Tone.delete_all
 Company.delete_all
 
@@ -22,4 +24,8 @@ company = Company.create!(
   )
 end
 
-puts "Seed completato: Company #{company.id} (#{company.name}) con #{company.tones.count} toni."
+conversation = company.conversations.create!(title: "Esempio")
+conversation.messages.create!(role: "user", content: "Scrivi un breve post di prova.")
+conversation.messages.create!(role: "assistant", content: "Ecco un breve post di prova per la suite B2B di Acme.")
+
+puts "Seed completato: Company #{company.id} (#{company.name}) con #{company.tones.count} toni e conversazione #{conversation.id}."

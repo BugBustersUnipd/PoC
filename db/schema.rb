@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_120000) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_21_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,6 +19,25 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_120000) do
     t.text "description"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.text "summary"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_conversations_on_company_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "content", null: false
+    t.bigint "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.string "role", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["created_at"], name: "index_messages_on_created_at"
   end
 
   create_table "tones", force: :cascade do |t|
@@ -30,5 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_120000) do
     t.index ["company_id"], name: "index_tones_on_company_id"
   end
 
+  add_foreign_key "conversations", "companies"
+  add_foreign_key "messages", "conversations"
   add_foreign_key "tones", "companies"
 end

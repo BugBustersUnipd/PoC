@@ -4,16 +4,17 @@ class GeneratorController < ActionController::API
     prompt     = params[:prompt]
     tone_name  = params[:tone]
     company_id = params[:company_id]
+    conversation_id = params[:conversation_id]
 
     if prompt.blank? || tone_name.blank? || company_id.blank?
       return render json: { error: "prompt, tone e company_id sono obbligatori" }, status: :unprocessable_entity
     end
 
-    text = AiService.new.genera(prompt, company_id, tone_name)
-    render json: { text: text }, status: :ok
+    text, conversation = AiService.new.genera(prompt, company_id, tone_name, conversation_id: conversation_id)
+    render json: { text: text, conversation_id: conversation.id }, status: :ok
   rescue ActiveRecord::RecordNotFound => e
     Rails.logger.error "Record non trovato: #{e.message}"
-    render json: { error: "Azienda o tono non trovati" }, status: :not_found
+    render json: { error: "Azienda, tono o conversazione non trovati" }, status: :not_found
   rescue => e
     Rails.logger.error "Errore interno: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     render json: { error: "Errore interno: #{e.message}" }, status: :internal_server_error
@@ -32,5 +33,14 @@ class GeneratorController < ActionController::API
       company: { id: company.id, name: company.name },
       tones: tones
     }, status: :ok
+  end
+
+  # GET /conversazioni?company_id=:id
+  def conversations
+    company_id = params[:company_id]
+    return render json: { error: "company_id mancante" }, status: :bad_request if company_id.blank?
+
+    conversations = Conversation.where(company_id: company_id).order(updated_at: :desc).limit(50)
+    render json: conversations.as_json(only: [:id, :title, :created_at, :updated_at, :summary])
   end
 end

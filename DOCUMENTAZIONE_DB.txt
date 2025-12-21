@@ -1,0 +1,1047 @@
+================================================================================
+                    DOCUMENTAZIONE COMPLETA - NEXUM POC
+                   Struttura Database e Funzionamento Sistema
+================================================================================
+
+INDICE:
+1. Architettura Generale
+2. Schema Database Dettagliato
+3. Relazioni tra Tabelle
+4. Flusso di Generazione dei Contenuti
+5. API Endpoints
+6. Configurazione Ambiente
+7. Esempi Pratici
+8. Comandi Utili Rails
+
+================================================================================
+1. ARCHITETTURA GENERALE
+================================================================================
+
+Il sistema è un'applicazione Rails API che permette di generare contenuti usando
+AWS Bedrock mantenendo uno storico di conversazioni per fornire contesto all'IA.
+
+Componenti principali:
+- PostgreSQL: Database per persistenza
+- Rails API: Backend che espone endpoints HTTP
+- AWS Bedrock: Servizio IA per la generazione di testi
+- dotenv: Gestione variabili d'ambiente (credenziali AWS)
+
+Flusso principale:
+  Utente (Browser) → Tester HTML → API Rails → Bedrock AWS → Risposta
+                     ↓ Salva storico
+               Database PostgreSQL
+
+================================================================================
+2. SCHEMA DATABASE DETTAGLIATO
+================================================================================
+
+TABELLA: COMPANIES (Aziende)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Colonna              Tipo        Descrizione
+──────────────────────────────────────────────────────────────────────────────
+id                  bigint       Identificatore unico (chiave primaria)
+name                string       Nome azienda (es: "Acme")
+description         text         Descrizione dell'azienda (utilizzata nel prompt)
+created_at          timestamp    Data di creazione
+updated_at          timestamp    Data ultimo aggiornamento
+
+Esempio:
+  ID: 1
+  Name: "Acme"
+  Description: "Suite B2B per la gestione di progetti"
+
+Relazioni:
+  - Ha molti TONES (relazione 1:N)
+  - Ha molti CONVERSATIONS (relazione 1:N)
+
+Eliminazione:
+  - Se elimini una Company, vengono eliminate in cascata tutti i TONES
+    e tutte le CONVERSATIONS collegate (e i loro MESSAGES)
+
+
+TABELLA: TONES (Toni di Voce)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Colonna              Tipo        Descrizione
+──────────────────────────────────────────────────────────────────────────────
+id                  bigint       Identificatore unico (chiave primaria)
+company_id          bigint       FK → Companies (quale azienda?)
+name                string       Nome tono (es: "Formale", "Simpatico")
+instructions        text         Istruzioni per il tono (es: "Usa un linguaggio
+                                  professionale e conciso")
+created_at          timestamp    Data di creazione
+updated_at          timestamp    Data ultimo aggiornamento
+
+Indici:
+  - company_id (per velocizzare ricerche per azienda)
+
+Esempio:
+  ID: 1
+  Company_ID: 1
+  Name: "Formale"
+  Instructions: "Tono professionale e conciso. Evita colloquialismi."
+
+Relazioni:
+  - Appartiene a una COMPANY (relazione N:1)
+
+Uso:
+  - Quando generi un contenuto, scegli un tono
+  - Le instructions del tono vengono incluse nel system prompt per Bedrock
+  - Bedrock adatta il tono della risposta di conseguenza
+
+
+TABELLA: CONVERSATIONS (Conversazioni/Thread)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Colonna              Tipo        Descrizione
+──────────────────────────────────────────────────────────────────────────────
+id                  bigint       Identificatore unico (chiave primaria)
+company_id          bigint       FK → Companies (quale azienda?)
+title               string       Titolo opzionale (es: "Post LinkedIn 21/12")
+summary             text         Riassunto opzionale della conversazione
+                                  (utile per compressione contesto)
+created_at          timestamp    Data di creazione
+updated_at          timestamp    Data ultimo aggiornamento
+
+Indici:
+  - company_id (per velocizzare ricerche per azienda)
+
+Esempio:
+  ID: 1
+  Company_ID: 1
+  Title: "Email di Presentazione"
+  Summary: null (di default)
+  Created_at: 2025-12-21 12:30:00
+  Updated_at: 2025-12-21 12:45:00
+
+Relazioni:
+  - Appartiene a una COMPANY (relazione N:1)
+  - Ha molti MESSAGES (relazione 1:N)
+
+Uso:
+  - Una conversation rappresenta un thread di chat
+  - Puoi avere N conversazioni parallele con la stessa azienda
+  - Ogni volta che generi senza conversation_id, ne viene creata una nuova
+  - Se fornisci conversation_id, continui quella conversazione
+
+
+TABELLA: MESSAGES (Messaggi nella Conversazione)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Colonna              Tipo        Descrizione
+──────────────────────────────────────────────────────────────────────────────
+id                  bigint       Identificatore unico (chiave primaria)
+conversation_id     bigint       FK → Conversations (quale thread?)
+role                string       "user" o "assistant" (chi ha scritto?)
+content             text         Il testo del messaggio
+created_at          timestamp    Data di creazione
+updated_at          timestamp    Data ultimo aggiornamento
+
+Indici:
+  - conversation_id (per velocizzare ricerche per conversazione)
+  - created_at (per ordinare i messaggi cronologicamente)
+
+Esempio Conversation 1:
+  Message 1:
+    ID: 1, Conversation_ID: 1, Role: "user"
+    Content: "Scrivi un'email di presentazione del prodotto"
+    Created_at: 2025-12-21 12:30:00
+
+  Message 2:
+    ID: 2, Conversation_ID: 1, Role: "assistant"
+    Content: "Caro cliente,\nSiamo felici di presentarvi il nostro nuovo prodotto..."
+    Created_at: 2025-12-21 12:31:00
+
+  Message 3:
+    ID: 3, Conversation_ID: 1, Role: "user"
+    Content: "Rendilo più breve"
+    Created_at: 2025-12-21 12:32:00
+
+  Message 4:
+    ID: 4, Conversation_ID: 1, Role: "assistant"
+    Content: "Caro cliente,\nAbbiamo lanciato un nuovo prodotto innovativo..."
+    Created_at: 2025-12-21 12:33:00
+
+Relazioni:
+  - Appartiene a una CONVERSATION (relazione N:1)
+
+Validazioni:
+  - role DEVE essere "user" o "assistant" (non altri valori)
+  - content NON PUÒ essere vuoto
+
+Uso:
+  - Ogni volta che generi, vengono salvati 2 messaggi:
+    1. Un messaggio con role: "user" (il tuo prompt)
+    2. Un messaggio con role: "assistant" (la risposta di Bedrock)
+  - Quando generi di nuovo con la stessa conversation_id, gli ultimi
+    8 messaggi vengono caricati come contesto per Bedrock
+
+
+================================================================================
+3. RELAZIONI TRA TABELLE (Entity Relationship Diagram)
+================================================================================
+
+STRUTTURA GERARCHICA:
+
+┌─ COMPANY (1 azienda)
+│
+├─ TONES (N toni per azienda)
+│  └─ Uno a molti: 1 company → N tones
+│
+└─ CONVERSATIONS (N conversazioni per azienda)
+   │
+   └─ MESSAGES (N messaggi per conversazione)
+      └─ Uno a molti: 1 conversation → N messages
+
+
+RELAZIONI DETTAGLIATE:
+
+1. Company ↔ Tone (Uno a Molti)
+   ─────────────────────────────
+   - Una COMPANY ha MOLTI TONES
+   - Un TONE appartiene a UNA COMPANY
+   - Chiave esterna: tones.company_id → companies.id
+   - Cascata: Se cancelli Company → cancelli tutti i Tones
+
+   Esempio:
+     Company "Acme" (id: 1)
+       ├─ Tone "Formale" (company_id: 1)
+       ├─ Tone "Simpatico" (company_id: 1)
+       └─ Tone "Istituzionale" (company_id: 1)
+
+
+2. Company ↔ Conversation (Uno a Molti)
+   ────────────────────────────────────
+   - Una COMPANY ha MOLTE CONVERSATIONS
+   - Una CONVERSATION appartiene a UNA COMPANY
+   - Chiave esterna: conversations.company_id → companies.id
+   - Cascata: Se cancelli Company → cancelli tutte le Conversations
+
+   Esempio:
+     Company "Acme" (id: 1)
+       ├─ Conversation 1 (company_id: 1, created: 2025-12-21 12:30)
+       ├─ Conversation 2 (company_id: 1, created: 2025-12-21 13:00)
+       └─ Conversation 3 (company_id: 1, created: 2025-12-21 14:15)
+
+
+3. Conversation ↔ Message (Uno a Molti)
+   ──────────────────────────────────────
+   - Una CONVERSATION ha MOLTI MESSAGES
+   - Un MESSAGE appartiene a UNA CONVERSATION
+   - Chiave esterna: messages.conversation_id → conversations.id
+   - Cascata: Se cancelli Conversation → cancelli tutti i Messages
+
+   Esempio:
+     Conversation 1 (company_id: 1)
+       ├─ Message 1 (conversation_id: 1, role: "user")
+       ├─ Message 2 (conversation_id: 1, role: "assistant")
+       ├─ Message 3 (conversation_id: 1, role: "user")
+       └─ Message 4 (conversation_id: 1, role: "assistant")
+
+
+MODELLI RAILS (Rails Associations):
+
+app/models/company.rb:
+  class Company < ApplicationRecord
+    has_many :tones, dependent: :destroy
+    has_many :conversations, dependent: :destroy
+  end
+
+app/models/tone.rb:
+  class Tone < ApplicationRecord
+    belongs_to :company, optional: true
+  end
+
+app/models/conversation.rb:
+  class Conversation < ApplicationRecord
+    belongs_to :company
+    has_many :messages, dependent: :destroy
+  end
+
+app/models/message.rb:
+  class Message < ApplicationRecord
+    belongs_to :conversation
+    VALID_ROLES = %w[user assistant].freeze
+    validates :role, inclusion: { in: VALID_ROLES }
+  end
+
+
+================================================================================
+4. FLUSSO DI GENERAZIONE DEI CONTENUTI
+================================================================================
+
+SCENARIO 1: PRIMO PROMPT (Nuova Conversazione)
+═════════════════════════════════════════════════
+
+Passo 1: Utente scrive prompt nel tester.html
+─────────────────────────────────────────────
+Input:
+  - Prompt: "Scrivi un'email di presentazione del prodotto"
+  - Tone: "Formale"
+  - Company_ID: 1
+  - Conversation_ID: (NON fornito = crea nuovo)
+
+Passo 2: Browser invia POST /genera
+──────────────────────────────────
+Request JSON:
+{
+  "prompt": "Scrivi un'email di presentazione del prodotto",
+  "tone": "Formale",
+  "company_id": 1
+}
+
+Passo 3: GeneratorController#create riceve la richiesta
+───────────────────────────────────────────────────────
+File: app/controllers/generator_controller.rb
+
+  def create
+    prompt = params[:prompt]                    # "Scrivi un'email..."
+    tone_name = params[:tone]                   # "Formale"
+    company_id = params[:company_id]            # 1
+    conversation_id = params[:conversation_id]  # nil (non fornito)
+
+    # Chiama il servizio di generazione
+    text, conversation = AiService.new.genera(
+      prompt, 
+      company_id, 
+      tone_name, 
+      conversation_id: nil
+    )
+
+    # Ritorna la risposta al browser
+    render json: { text: text, conversation_id: conversation.id }
+  end
+
+Passo 4: AiService.genera() elabora la richiesta
+─────────────────────────────────────────────────
+File: app/services/ai_service.rb
+
+  def genera(testo_utente, company_id, nome_tono, conversation_id: nil)
+    
+    # 4a. Carica l'azienda dal DB
+    company = Company.find(1)  # Acme
+    
+    # 4b. Crea o recupera conversazione
+    if conversation_id.present?
+      conversation = company.conversations.find(conversation_id)
+    else
+      conversation = company.conversations.create!  # Crea nuova
+      # → Conversazione 1 creata nel DB
+    end
+    
+    # 4c. Carica il tono dal DB
+    tono_db = company.tones.find_by(name: "Formale")
+    istruzioni_tono = tono_db.instructions
+    # → "Tono professionale e conciso"
+    
+    # 4d. Costruisce il system prompt
+    system_prompt = <<~PROMPT
+      Stai scrivendo per conto di "Acme".
+      Descrizione: Suite B2B per la gestione di progetti
+      Usando un tono: Tono professionale e conciso
+      
+      Rispondi SOLO con il contenuto richiesto, senza prefissi...
+    PROMPT
+    
+    # 4e. Carica lo storico della conversazione
+    context_messages = conversation.messages.order(:created_at).last(8)
+    # → [] (vuoto, è il primo messaggio)
+    
+    # 4f. Costruisce il context block
+    context_block = ""  # Vuoto perché è il primo messaggio
+    
+    # 4g. Assembla il payload finale per Bedrock
+    payload = {
+      inputText: [
+        system_prompt,
+        context_block,
+        "Nuova richiesta: Scrivi un'email di presentazione del prodotto"
+      ].reject(&:empty?).join("\n\n"),
+      textGenerationConfig: {
+        maxTokenCount: 500,
+        temperature: 0.4
+      }
+    }
+    
+    # 4h. Invia a AWS Bedrock
+    response = @client.invoke_model({
+      model_id: "amazon.titan-text-express-v1",
+      body: payload.to_json,
+      content_type: "application/json",
+      accept: "application/json"
+    })
+    
+    # 4i. Parsa la risposta JSON
+    json_response = JSON.parse(response.body.string)
+    output_text = json_response["results"][0]["outputText"]
+    # → "Caro cliente,\nSiamo felici di presentarvi..."
+    
+    # 4l. Salva i messaggi nel DB
+    conversation.messages.create!(role: "user", content: testo_utente)
+    # → Message 1: role: "user", content: "Scrivi un'email..."
+    
+    conversation.messages.create!(role: "assistant", content: output_text)
+    # → Message 2: role: "assistant", content: "Caro cliente,..."
+    
+    # 4m. Ritorna il risultato
+    [output_text, conversation]
+  end
+
+Passo 5: GeneratorController ritorna la risposta al browser
+───────────────────────────────────────────────────────────
+Response JSON:
+{
+  "text": "Caro cliente,\nSiamo felici di presentarvi...",
+  "conversation_id": 1
+}
+
+Passo 6: Browser mostra il risultato
+─────────────────────────────────────
+- Visualizza il testo generato
+- Salva conversation_id in memoria
+- Mostra i messaggi nello storico (user + assistant)
+
+
+SCENARIO 2: SECONDO PROMPT (Stessa Conversazione con Contesto)
+═══════════════════════════════════════════════════════════════
+
+Passo 1: Utente scrive nuovo prompt nello stesso thread
+──────────────────────────────────────────────────────
+Input:
+  - Prompt: "Rendilo più breve"
+  - Tone: "Formale"
+  - Company_ID: 1
+  - Conversation_ID: 1 (FORNITO! = continua stessa conversazione)
+
+Passo 2: Browser invia POST /genera CON conversation_id
+────────────────────────────────────────────────────────
+Request JSON:
+{
+  "prompt": "Rendilo più breve",
+  "tone": "Formale",
+  "company_id": 1,
+  "conversation_id": 1  ← DIFFERENZA CHIAVE
+}
+
+Passo 3-4: AiService.genera() con conversation_id fornito
+──────────────────────────────────────────────────────────
+File: app/services/ai_service.rb
+
+  def genera(testo_utente, company_id, nome_tono, conversation_id: 1)
+    
+    # Recupera la conversazione ESISTENTE
+    conversation = company.conversations.find(1)
+    
+    # Carica lo storico della conversazione
+    context_messages = conversation.messages.order(:created_at).last(8)
+    # → [
+    #     Message 1: role: "user", content: "Scrivi un'email...",
+    #     Message 2: role: "assistant", content: "Caro cliente,..."
+    #   ]
+    
+    # Costruisce il context block
+    context_block = <<~BLOCK
+      Storico conversazione (più recente in fondo):
+      User: Scrivi un'email di presentazione del prodotto
+      Assistant: Caro cliente,
+      Siamo felici di presentarvi...
+    BLOCK
+    
+    # Assembla il payload CON CONTESTO
+    payload = {
+      inputText: [
+        system_prompt,
+        context_block,           # ← INCLUSO ORA!
+        "Nuova richiesta: Rendilo più breve"
+      ].join("\n\n"),
+      textGenerationConfig: { ... }
+    }
+    
+    # Invia a Bedrock CON CONTESTO PRECEDENTE
+    # Bedrock "legge" lo storico e capisce che deve accorciare l'email
+    # precedente
+    
+    response = @client.invoke_model(...)
+    output_text = json_response["results"][0]["outputText"]
+    # → "Caro cliente,\nTi presentiamo il nostro nuovo prodotto..."
+    
+    # Salva i due nuovi messaggi
+    conversation.messages.create!(role: "user", content: "Rendilo più breve")
+    # → Message 3
+    
+    conversation.messages.create!(role: "assistant", content: output_text)
+    # → Message 4
+    
+    [output_text, conversation]
+  end
+
+Passo 5-6: Browser mostra il risultato
+──────────────────────────────────────
+- Nuovo testo più breve visualizzato
+- Conversation_id rimane 1
+- Storico mostra tutti 4 messaggi (2 vecchi + 2 nuovi)
+
+
+DIFFERENZA CHIAVE TRA I DUE SCENARI:
+
+Scenario 1 (Primo prompt):
+  - Conversation_ID: NON fornito → Crea NUOVA
+  - Context messages: [] (vuoto)
+  - Bedrock: NON ha contesto precedente
+  - Risultato: Risposta generico
+
+Scenario 2 (Prompt successivo):
+  - Conversation_ID: 1 (fornito) → Recupera ESISTENTE
+  - Context messages: [user msg, assistant msg] (storico precedente)
+  - Bedrock: HA contesto precedente
+  - Risultato: Risposta consapevole del contesto (più breve, come richiesto)
+
+
+================================================================================
+5. API ENDPOINTS
+================================================================================
+
+ENDPOINT 1: GET /toni?company_id=1
+═══════════════════════════════════
+
+Scopo: Recuperare la lista dei toni disponibili per un'azienda
+
+Request:
+  Metodo: GET
+  URL: http://localhost:3000/toni?company_id=1
+  Query Parameters:
+    - company_id (obbligatorio): ID dell'azienda
+
+Response (200 OK):
+{
+  "company": {
+    "id": 1,
+    "name": "Acme"
+  },
+  "tones": [
+    {
+      "id": 1,
+      "name": "Formale",
+      "instructions": "Tono professionale e conciso"
+    },
+    {
+      "id": 2,
+      "name": "Simpatico",
+      "instructions": "Tono amichevole e leggero"
+    },
+    {
+      "id": 3,
+      "name": "Istituzionale",
+      "instructions": "Tono autorevole e preciso"
+    }
+  ]
+}
+
+Error (400 Bad Request):
+{
+  "error": "company_id mancante"
+}
+
+Error (404 Not Found):
+{
+  "error": "Azienda non trovata"
+}
+
+Controller: app/controllers/generator_controller.rb#index
+
+
+ENDPOINT 2: GET /conversazioni?company_id=1
+════════════════════════════════════════════
+
+Scopo: Recuperare la lista di tutte le conversazioni per un'azienda
+
+Request:
+  Metodo: GET
+  URL: http://localhost:3000/conversazioni?company_id=1
+  Query Parameters:
+    - company_id (obbligatorio): ID dell'azienda
+
+Response (200 OK):
+[
+  {
+    "id": 1,
+    "title": null,
+    "created_at": "2025-12-21T12:30:00.000Z",
+    "updated_at": "2025-12-21T12:45:00.000Z",
+    "summary": null
+  },
+  {
+    "id": 2,
+    "title": "Post LinkedIn",
+    "created_at": "2025-12-21T13:00:00.000Z",
+    "updated_at": "2025-12-21T13:15:00.000Z",
+    "summary": null
+  }
+]
+
+Note:
+  - Ordinato per updated_at DESC (più recente primo)
+  - Massimo 50 risultati
+
+Error (400 Bad Request):
+{
+  "error": "company_id mancante"
+}
+
+Controller: app/controllers/generator_controller.rb#conversations
+
+
+ENDPOINT 3: POST /genera
+════════════════════════
+
+Scopo: Generare un contenuto via Bedrock (nuovo o continuo)
+
+Request:
+  Metodo: POST
+  URL: http://localhost:3000/genera
+  Content-Type: application/json
+
+Body (Primo prompt - nuova conversazione):
+{
+  "prompt": "Scrivi un'email di presentazione del prodotto",
+  "tone": "Formale",
+  "company_id": 1
+}
+
+Body (Secondo prompt - stessa conversazione):
+{
+  "prompt": "Rendilo più breve",
+  "tone": "Formale",
+  "company_id": 1,
+  "conversation_id": 1
+}
+
+Response (200 OK):
+{
+  "text": "Caro cliente,\nSiamo felici di presentarvi il nostro nuovo prodotto...",
+  "conversation_id": 1
+}
+
+Error (422 Unprocessable Entity):
+{
+  "error": "prompt, tone e company_id sono obbligatori"
+}
+
+Error (404 Not Found):
+{
+  "error": "Azienda, tono o conversazione non trovati"
+}
+
+Error (500 Internal Server Error):
+{
+  "error": "Errore interno: [motivo errore]"
+}
+
+Controller: app/controllers/generator_controller.rb#create
+
+Parametri:
+  - prompt (obbligatorio): Il testo di richiesta
+  - tone (obbligatorio): Nome del tono (es: "Formale", "Simpatico")
+  - company_id (obbligatorio): ID dell'azienda
+  - conversation_id (opzionale): ID della conversazione per continuare
+
+
+================================================================================
+6. CONFIGURAZIONE AMBIENTE
+================================================================================
+
+File: .env (PRIVATO - NON committare)
+File: .env.example (PUBBLICO - committare)
+
+Le credenziali AWS si caricano da .env tramite dotenv-rails.
+
+Variabili d'Ambiente Richieste:
+
+AWS_ACCESS_KEY_ID
+  - Tipo: string
+  - Descrizione: Access key ID dal tuo account AWS IAM
+  - Obbligatorio: SÌ
+  - Esempio: AKIAIOSFODNN7EXAMPLE
+
+AWS_SECRET_ACCESS_KEY
+  - Tipo: string
+  - Descrizione: Secret access key dal tuo account AWS IAM
+  - Obbligatorio: SÌ
+  - Esempio: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+AWS_SESSION_TOKEN
+  - Tipo: string
+  - Descrizione: Token di sessione (per AWS SSO o credenziali temporanee)
+  - Obbligatorio: NO
+  - Esempio: AQoDYXdzEJr...[long token]...
+
+AWS_REGION
+  - Tipo: string
+  - Descrizione: Regione AWS dove hai abilitato Bedrock
+  - Obbligatorio: NO (default: "us-east-1")
+  - Valori validi: us-east-1, us-west-2, eu-central-1, ap-southeast-1
+  - Link: https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html
+
+Database:
+  - DATABASE_URL (opzionale): Sovrascrive database.yml se presente
+
+Come impostare le credenziali:
+
+1. Opzione: IAM User (credenziali permanenti)
+   a. Vai su AWS Console → IAM → Users
+   b. Crea nuovo user o seleziona uno esistente
+   c. Aggiungi policy: AmazonBedrockFullAccess
+   d. Vai su "Security credentials" → "Create access key"
+   e. Copia access_key_id e secret_access_key
+   f. Nel file .env:
+      AWS_ACCESS_KEY_ID=your_access_key_id
+      AWS_SECRET_ACCESS_KEY=your_secret_access_key
+      AWS_REGION=us-east-1
+
+2. Opzione: AWS SSO (credenziali temporanee)
+   a. Esegui: aws sso login --profile your-profile
+   b. Esegui: aws configure export-credentials --profile your-profile
+   c. Copia le 3 variabili (access_key, secret_key, session_token)
+   d. Nel file .env:
+      AWS_ACCESS_KEY_ID=...
+      AWS_SECRET_ACCESS_KEY=...
+      AWS_SESSION_TOKEN=...
+      AWS_REGION=us-east-1
+   e. NOTA: I token SSO scadono dopo ore, dovrai rinnovarli
+
+
+================================================================================
+7. ESEMPI PRATICI
+================================================================================
+
+ESEMPIO 1: Generare un'email da zero
+════════════════════════════════════
+
+Step 1: Apri il tester
+  URL: http://localhost:3000/tester.html
+
+Step 2: Compila il form
+  Company ID: 1
+  Tone: "Formale"
+  Prompt: "Scrivi un'email di ringraziamento per un cliente importante"
+
+Step 3: Clicca "Genera"
+
+Cosa accade internamente:
+  1. Browser invia: POST /genera
+     {
+       prompt: "Scrivi un'email di ringraziamento...",
+       tone: "Formale",
+       company_id: 1
+     }
+  
+  2. Server crea nuova Conversation (id: 1)
+  
+  3. AiService manda a Bedrock:
+     "Stai scrivendo per Acme, tono Formale.
+      Nuova richiesta: Scrivi un'email di ringraziamento..."
+  
+  4. Bedrock risponde
+  
+  5. Server salva nel DB:
+     - Message: role="user", content="Scrivi un'email..."
+     - Message: role="assistant", content="Caro cliente,\nDesideriamo..."
+  
+  6. Browser mostra il testo generato
+  7. Browser salva conversation_id = 1 in memoria
+
+Risultato nel DB:
+  Conversation 1 (company_id: 1)
+    ├─ Message 1: user → "Scrivi un'email di ringraziamento..."
+    └─ Message 2: assistant → "Caro cliente,\nDesideriamo..."
+
+
+ESEMPIO 2: Iterare su una conversazione
+════════════════════════════════════════
+
+Dopo aver generato l'email, vuoi modificarla.
+
+Step 1: Nel prompt scrivi
+  "Rendilo più breve e aggiungi un call-to-action"
+
+Step 2: Clicca "Genera"
+
+Cosa accade internamente:
+  1. Browser invia: POST /genera
+     {
+       prompt: "Rendilo più breve e aggiungi CTA",
+       tone: "Formale",
+       company_id: 1,
+       conversation_id: 1  ← IMPORTANTE
+     }
+  
+  2. Server recupera Conversation 1 (NON crea una nuova)
+  
+  3. AiService legge lo storico:
+     "User: Scrivi un'email di ringraziamento...
+      Assistant: Caro cliente, Desideriamo..."
+  
+  4. AiService manda a Bedrock:
+     "Stai scrivendo per Acme, tono Formale.
+      
+      Storico conversazione:
+      User: Scrivi un'email di ringraziamento...
+      Assistant: Caro cliente, Desideriamo...
+      
+      Nuova richiesta: Rendilo più breve e aggiungi CTA"
+  
+  5. Bedrock capisce il contesto e risponde:
+     "Caro cliente,
+      La ringraziamo vivamente per la fiducia.
+      Scopri le nostre soluzioni: www.acme.it"
+  
+  6. Server salva:
+     - Message 3: role="user", content="Rendilo più breve..."
+     - Message 4: role="assistant", content="Caro cliente, La ringraziamo..."
+
+Risultato nel DB:
+  Conversation 1 (company_id: 1)
+    ├─ Message 1: user → "Scrivi un'email di ringraziamento..."
+    ├─ Message 2: assistant → "Caro cliente,\nDesideriamo..."
+    ├─ Message 3: user → "Rendilo più breve e aggiungi CTA"
+    └─ Message 4: assistant → "Caro cliente,\nLa ringraziamo..."
+
+
+ESEMPIO 3: Iniziare un nuovo thread
+═══════════════════════════════════
+
+Vuoi generare un post LinkedIn, non un'email.
+
+Step 1: Clicca "Nuova conversazione"
+  - Browser resetta conversation_id a null
+  - Pulisce lo storico visualizzato
+
+Step 2: Scrivi nel prompt
+  "Scrivi un post LinkedIn divertente su AI"
+
+Step 3: Clicca "Genera"
+
+Cosa accade:
+  1. Browser invia: POST /genera
+     {
+       prompt: "Scrivi un post LinkedIn divertente su AI",
+       tone: "Simpatico",
+       company_id: 1
+       // NO conversation_id
+     }
+  
+  2. Server crea NUOVA Conversation (id: 2, NON riusa Conversation 1)
+  
+  3. Il nuovo prompt è indipendente dal precedente
+  4. Bedrock NON vede lo storico dell'email
+  
+  5. Server salva in Conversation 2:
+     - Message: role="user", content="Scrivi post LinkedIn divertente..."
+     - Message: role="assistant", content="Ecco il post..."
+
+Risultato:
+  - Conversation 1 contiene ancora l'email e i suoi messaggi
+  - Conversation 2 contiene il nuovo post LinkedIn
+  - GET /conversazioni?company_id=1 ritorna entrambe
+
+
+================================================================================
+8. COMANDI UTILI RAILS
+================================================================================
+
+GESTIONE DATABASE
+═════════════════
+
+rails db:create
+  Crea i database per development e test (definiti in config/database.yml)
+
+rails db:migrate
+  Esegue tutte le migration non ancora applicate
+
+rails db:rollback
+  Annulla l'ultima migration applicata
+
+rails db:drop
+  Elimina i database (ATTENZIONE: perdi tutti i dati)
+
+rails db:seed
+  Popola il database con i dati definiti in db/seeds.rb
+
+rails db:schema:load
+  Carica lo schema da db/schema.rb (più veloce di migrazioni per setup nuovo)
+
+rails db:reset
+  Equivalente a: drop + create + schema:load + seed
+
+
+CONSOLE RAILS (InteractiveIRB)
+══════════════════════════════
+
+rails console
+
+All'interno della console:
+
+# Creare un'azienda
+company = Company.create!(name: "NewCo", description: "Nuova azienda")
+
+# Creare un tono
+Tone.create!(company: company, name: "Casual", instructions: "Tono leggero")
+
+# Vedere tutte le conversazioni di un'azienda
+company.conversations
+
+# Vedere tutti i messaggi di una conversazione
+conversation = Conversation.find(1)
+conversation.messages.order(:created_at)
+
+# Eliminare dati
+company.destroy  # Elimina azienda + tones + conversations in cascata
+
+# Query utili
+Message.where(role: "assistant").count
+Message.joins(:conversation).where(conversations: { company_id: 1 })
+
+
+ROUTING E TESTING
+════════════════════
+
+rails routes
+  Mostra tutti gli endpoint definiti
+
+rails routes | grep generator
+  Filtra solo le rotte del GeneratorController
+
+rails server
+  Avvia il server Puma in localhost:3000
+
+rails test
+  Esegue i test unitari/integration
+
+
+COMANDI UTILI DEVELOPMENT
+═════════════════════════
+
+rails generate model ModelName column1:type column2:type
+  Crea un nuovo modello e migration
+
+rails generate migration AddColumnToTable
+  Crea una nuova migration
+
+bundle install
+  Installa le gem definite in Gemfile
+
+spring stop
+  Ferma il server Rails in background
+
+
+QUERY COMUNI DAL DATABASE
+═════════════════════════
+
+# Tutti i messaggi di una conversazione, in ordine cronologico
+Conversation.find(1).messages.order(:created_at)
+
+# Ultime 10 conversazioni di un'azienda
+Company.find(1).conversations.order(created_at: :desc).limit(10)
+
+# Contare messaggi per conversazione
+Conversation.find(1).messages.count
+
+# Trovare messaggi di un certo ruolo
+Message.where(role: "user").count
+
+# Query complessa: trovare tutte le conversation con almeno 5 messaggi
+Conversation.joins(:messages)
+            .group("conversations.id")
+            .having("count(messages.id) >= 5")
+
+
+================================================================================
+9. STRUTTURA FILE PRINCIPALI
+================================================================================
+
+app/
+├── controllers/
+│   └── generator_controller.rb      API endpoints (GET /toni, POST /genera, GET /conversazioni)
+├── models/
+│   ├── company.rb                   Modello azienda
+│   ├── tone.rb                      Modello tono
+│   ├── conversation.rb              Modello conversazione
+│   └── message.rb                   Modello messaggio
+└── services/
+    └── ai_service.rb                Logica di generazione con Bedrock
+
+config/
+├── routes.rb                        Definizione endpoint API
+├── database.yml                     Configurazione PostgreSQL
+└── environments/
+    ├── development.rb               Settings development
+    └── production.rb                Settings production
+
+db/
+├── schema.rb                        Schema attuale del database (auto-generato)
+├── seeds.rb                         Dati iniziali per il database
+└── migrate/
+    ├── 20251219090625_create_tones.rb
+    ├── 20251219120000_create_companies_and_link_tones.rb
+    ├── 20251221120000_create_conversations.rb
+    └── 20251221120001_create_messages.rb
+
+public/
+└── tester.html                      Interfaccia web per testare il sistema
+
+.env                                 Variabili d'ambiente (credenziali AWS) - PRIVATO
+.env.example                         Template .env - PUBBLICO
+
+
+================================================================================
+10. TROUBLESHOOTING
+================================================================================
+
+ERROR: "No route matches [GET] /conversazioni"
+────────────────────────────────────────────
+Soluzione: Riavvia il server Rails
+  Ctrl+C per fermare
+  rails server per riavviare
+
+
+ERROR: "PG::ConnectionBad: connection to server at localhost:5432 failed"
+─────────────────────────────────────────────────────────────────────────
+Soluzione:
+  1. Verifica che PostgreSQL sia avviato
+  2. Controlla le credenziali in config/database.yml
+  3. Verifica che il database sia stato creato: rails db:create
+
+
+ERROR: "Aws::BedrockRuntime::Errors::ValidationException"
+────────────────────────────────────────────────────────
+Soluzione:
+  1. Controlla le credenziali AWS nel .env
+  2. Verifica che Bedrock sia abilitato nella region
+  3. Verifica che il modello "amazon.titan-text-express-v1" sia disponibile
+
+
+ERROR: "undefined method 'conversations' for Company"
+────────────────────────────────────────────────────
+Soluzione: Aggiungi la relazione nel modello Company:
+  has_many :conversations, dependent: :destroy
+  Poi riavvia il server
+
+
+ERROR: "Template txt not found"
+──────────────────────────────
+Soluzione: Il controller non ha una view. È un'API REST, quindi torna JSON.
+  Non c'è bisogno di template.
+
+
+================================================================================
+FIN QUI LA DOCUMENTAZIONE COMPLETA
+================================================================================
+
+Data: 21 Dicembre 2025
+Sistema: NEXUM POC - AI Content Generator con Conversazione Persistente
+Database: PostgreSQL
+API Server: Rails 8.1.1
+AI Service: AWS Bedrock (amazon.titan-text-express-v1)
+
+================================================================================

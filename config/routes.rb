@@ -23,6 +23,10 @@ Rails.application.routes.draw do
   # come `?company_id=1` e leggerla con `params[:company_id]` nel controller.
   get "toni", to: "generator#index"
 
+  # GET /conversazioni → GeneratorController#conversations
+  # Restituisce la lista delle conversazioni per una company
+  get "conversazioni", to: "generator#conversations"
+
   # Esempio di root (pagina principale) — al momento non usata:
   # root "posts#index"
 end
