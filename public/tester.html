@@ -90,14 +90,35 @@
     let currentConversationId = null;
     let conversations = [];
 
-    async function loadTones() {
+    async function extractErrorText(res) {
+      // Try parse JSON error, otherwise return trimmed text (strip HTML tags) limited length
+      try {
+        const json = await res.clone().json();
+        return (json && (json.error || JSON.stringify(json))) || res.statusText;
+      } catch (_e) {
+        try {
+          const txt = await res.clone().text();
+          // strip simple HTML tags for readability
+          const stripped = txt.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+          return stripped.length > 300 ? stripped.slice(0, 300) + '...' : stripped || res.statusText;
+        } catch (_e2) {
+          return res.statusText;
+        }
+      }
+    }
+
+    // tryCount: number of attempts left (default 1 retry)
+    async function loadTones(tryCount = 1) {
       const companyId = companyIdEl.value;
       tonesStatus.textContent = 'Carico...';
       toneSelect.innerHTML = '';
       
       try {
         const res = await fetch(`/toni?company_id=${encodeURIComponent(companyId)}`);
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const msg = await extractErrorText(res);
+          throw new Error(msg);
+        }
         const data = await res.json();
         (data.tones || []).forEach(t => {
           const opt = document.createElement('option');
@@ -107,18 +128,27 @@
         });
         tonesStatus.textContent = `✅ ${(data.tones || []).length} toni caricati`;
       } catch (err) {
+        if (tryCount > 0) {
+          // breve ritardo e retry una volta
+          setTimeout(() => loadTones(tryCount - 1), 300);
+          tonesStatus.textContent = `⏳ Ritento...`;
+          return;
+        }
         tonesStatus.textContent = `❌ Errore: ${err.message}`;
       }
     }
 
-    async function loadConversations() {
+    async function loadConversations(tryCount = 1) {
       const companyId = companyIdEl.value;
       convStatus.textContent = 'Carico conversazioni...';
       conversationsList.innerHTML = '';
       
       try {
         const res = await fetch(`/conversazioni?company_id=${encodeURIComponent(companyId)}`);
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const msg = await extractErrorText(res);
+          throw new Error(msg);
+        }
         conversations = await res.json();
         
         if (conversations.length === 0) {
@@ -145,6 +175,11 @@
         
         convStatus.textContent = `✅ ${conversations.length} conversazioni caricate`;
       } catch (err) {
+        if (tryCount > 0) {
+          setTimeout(() => loadConversations(tryCount - 1), 300);
+          convStatus.textContent = `⏳ Ritento...`;
+          return;
+        }
         convStatus.textContent = `❌ Errore: ${err.message}`;
       }
     }

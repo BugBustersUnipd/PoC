@@ -10,8 +10,8 @@ class GeneratorController < ActionController::API
       return render json: { error: "prompt, tone e company_id sono obbligatori" }, status: :unprocessable_entity
     end
 
-    text, conversation = AiService.new.genera(prompt, company_id, tone_name, conversation_id: conversation_id)
-    render json: { text: text, conversation_id: conversation.id }, status: :ok
+    result = AiService.new.genera(prompt, company_id, tone_name, conversation_id: conversation_id)
+    render json: result, status: :ok
   rescue ActiveRecord::RecordNotFound => e
     Rails.logger.error "Record non trovato: #{e.message}"
     render json: { error: "Azienda, tono o conversazione non trovati" }, status: :not_found
@@ -41,6 +41,6 @@ class GeneratorController < ActionController::API
     return render json: { error: "company_id mancante" }, status: :bad_request if company_id.blank?
 
     conversations = Conversation.where(company_id: company_id).order(updated_at: :desc).limit(50)
-    render json: conversations.as_json(only: [:id, :title, :created_at, :updated_at, :summary])
+    render json: conversations.as_json(only: [ :id, :title, :created_at, :updated_at, :summary ])
   end
 end
