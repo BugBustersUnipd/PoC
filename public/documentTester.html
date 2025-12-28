@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexum API Tester</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .box { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .success { color: green; }
+        .processing { color: orange; }
+        .error { color: red; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Nexum AI Tester</h1>
+    <p>Carica un documento (PDF/IMG) per testare l'API di analisi.</p>
+
+    <div class="box">
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Carica e Analizza</button>
+    </div>
+
+    <div id="statusBox" class="box" style="display:none;">
+        <h3>Stato Analisi: <span id="statusText">...</span></h3>
+        <div id="resultContent"></div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) return alert("Seleziona un file!");
+
+            const formData = new FormData();
+            formData.append('document[original_file]', fileInput.files[0]);
+
+            document.getElementById('statusBox').style.display = 'block';
+            document.getElementById('statusText').innerText = 'Caricamento...';
+            document.getElementById('statusText').className = 'processing';
+            document.getElementById('resultContent').innerHTML = '';
+
+            try {
+                // 1. CARICAMENTO
+                const response = await fetch('/documents', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error("Errore upload");
+                
+                const data = await response.json();
+                const docId = data.id;
+                
+                // 2. POLLING (Chiediamo lo stato ogni 2 secondi)
+                checkStatus(docId);
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusText').innerText = 'Errore Upload';
+                document.getElementById('statusText').className = 'error';
+            }
+        }
+
+        async function checkStatus(docId) {
+            document.getElementById('statusText').innerText = 'L\'AI sta leggendo...';
+            
+            const interval = setInterval(async () => {
+                const res = await fetch(`/documents/${docId}`);
+                const doc = await res.json();
+
+                if (doc.status === 'completed') {
+                    clearInterval(interval);
+                    document.getElementById('statusText').innerText = 'COMPLETATO ✅';
+                    document.getElementById('statusText').className = 'success';
+                    
+                    // Mostra il JSON formattato
+                    document.getElementById('resultContent').innerHTML = 
+                        `<p><strong>Tipo Documento:</strong> ${doc.doc_type}</p>
+                         <pre>${JSON.stringify(doc.ai_data, null, 2)}</pre>`;
+                } 
+                else if (doc.status === 'failed') {
+                    clearInterval(interval);
+                    document.getElementById('statusText').innerText = 'FALLITO ❌';
+                    document.getElementById('statusText').className = 'error';
+                    document.getElementById('resultContent').innerHTML = 
+                        `<p>Errore: ${doc.ai_data?.error || 'Sconosciuto'}</p>`;
+                }
+            }, 2000); // Controlla ogni 2 secondi
+        }
+    </script>
+</body>
+</html>

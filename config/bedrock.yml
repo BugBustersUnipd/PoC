@@ -1,0 +1,40 @@
+default: &defaults
+  region: <%= ENV.fetch("AWS_REGION", "us-east-1") %>
+
+# Profilo per analisi documenti (OCR, estrazione dati rigida)
+document_analysis: &document_analysis
+  <<: *defaults
+  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_ANALYSIS", "amazon.nova-lite-v1:0") %>
+  temperature: 0.0
+  max_tokens: 1000
+  supported_formats:
+    - application/pdf
+    - image/png
+    - image/jpeg
+    - image/jpg
+    - image/webp
+
+# Profilo per generazione testo conversazionale
+text_generation: &text_generation
+  <<: *defaults
+  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_GENERATION", "amazon.nova-lite-v1:0") %>
+  temperature: 0.0
+  max_tokens: 1000
+
+development:
+  document_analysis:
+    <<: *document_analysis
+  text_generation:
+    <<: *text_generation
+
+test:
+  document_analysis:
+    <<: *document_analysis
+  text_generation:
+    <<: *text_generation
+
+production:
+  document_analysis:
+    <<: *document_analysis
+  text_generation:
+    <<: *text_generation

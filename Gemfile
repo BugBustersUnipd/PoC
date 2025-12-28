@@ -52,3 +52,9 @@ group :development, :test do
 end
 
 gem "aws-sdk-bedrockruntime", "~> 1.68"
+
+# Per manipolare i PDF (unirli, dividerli, leggere pagine)
+gem "combine_pdf"
+
+# Per gestire i lavori in background (Code)
+gem "sidekiq"

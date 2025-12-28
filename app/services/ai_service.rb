@@ -10,14 +10,16 @@ class AiService
   # Numero massimo di messaggi di contesto da mantenere
   MAX_CONTEXT_MESSAGES = 10
 
+  # Carica il profilo di configurazione per la generazione testo
+  BEDROCK_CONFIG = ::BEDROCK_CONFIG_GENERATION
+
   # Default e configurazione
-  DEFAULT_MODEL_ID   = "amazon.nova-lite-v1:0"
   FALLBACK_MODEL_ENV = "BEDROCK_FALLBACK_MODEL_ID"
   REGION_DEFAULT     = "us-east-1"
 
   def initialize
     # Regione Bedrock: assicurarsi che i modelli siano abilitati nella stessa regione
-    @region = ENV["AWS_REGION"].presence || REGION_DEFAULT
+    @region = BEDROCK_CONFIG["region"]
     @client = Aws::BedrockRuntime::Client.new(
       access_key_id: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
@@ -53,8 +55,8 @@ class AiService
     # - Unire messaggi consecutivi riduce rumore e token sprecati, migliorando costi e qualità output.
     messages = build_clean_messages(context_messages, testo_utente)
 
-    # Selezione modello (di default Nova Lite) con override da ENV
-    model_id = ENV["BEDROCK_MODEL_ID"].presence || DEFAULT_MODEL_ID
+    # Selezione modello dal profilo text_generation
+    model_id = BEDROCK_CONFIG["model_id"]
     Rails.logger.debug("Bedrock converse → region=#{@region} model_id=#{model_id}")
 
     response = invoke_bedrock_with_fallback(model_id, messages, system_prompt)
@@ -96,13 +98,13 @@ class AiService
     )
   end
 
-  # Impostazioni di inferenza
+  # Impostazioni di inferenza dal profilo text_generation
   # - max_tokens: limita la lunghezza dell'output (controllo costi)
-  # - temperature: bassa per risposte coerenti e aderenti alle istruzioni
+  # - temperature: 0.7 per risposte più creative e naturali
   def bedrock_inference_config
     {
-      max_tokens: 1000,
-      temperature: 0.0
+      max_tokens: BEDROCK_CONFIG["max_tokens"],
+      temperature: BEDROCK_CONFIG["temperature"]
     }
   end
 
