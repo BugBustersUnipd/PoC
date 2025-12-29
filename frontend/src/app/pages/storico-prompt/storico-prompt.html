@@ -1,0 +1,56 @@
+<div class="storico-container">
+
+  <!-- Canvas area (left side) -->
+  <div class="canvas-area">
+
+    <div class="prompt-box">
+      <h1>Storico</h1>
+      <p>Qui puoi vedere lo storico delle tue generazioni</p>
+    </div>
+
+    <!-- Stato caricamento -->
+    <p *ngIf="loading">Caricamento conversazioni...</p>
+
+    <!-- Lista conversazioni -->
+    <div
+      *ngFor="let convo of filtered"
+      class="conversation-card">
+
+      <h3>{{ convo.title || 'Conversazione senza titolo' }}</h3>
+
+      <p class="summary">
+        {{ convo.summary || 'Nessun riepilogo disponibile' }}
+      </p>
+
+      <small>
+        {{ convo.updated_at | date:'dd/MM/yyyy HH:mm' }}
+      </small>
+
+    </div>
+
+    <p *ngIf="!loading && filtered.length === 0">
+      Nessuna conversazione trovata
+    </p>
+
+  </div>
+
+  <!-- Button panel (right side) -->
+  <div class="button-panel">
+
+    <input
+      type="text"
+      class="search-bar"
+      placeholder="Cerca..."
+      (input)="search($event.target.value)">
+
+    <button class="btn btn-white" disabled>
+      Riutilizza
+    </button>
+
+    <button class="btn btn-white" disabled>
+      Duplica
+    </button>
+
+  </div>
+
+</div>

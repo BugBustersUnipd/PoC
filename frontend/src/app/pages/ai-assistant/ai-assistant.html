@@ -1,0 +1,30 @@
+<div class="ai-assistant-container">
+  <!-- Canvas area (left side) -->
+  <div class="canvas-area">
+    <div class="prompt-box">
+      <h1 class="responsive-title">Inserisci il prompt nel box qua sotto.</h1>
+      <textarea class="prompt-textarea"
+        [(ngModel)]="prompt"
+        placeholder="Inserisci qui il prompt"
+        rows="6"
+      ></textarea>
+    </div>
+  </div>
+
+  <!-- Button panel (right side) -->
+  <div class="button-panel">
+    <button class="btn btn-white" (click)="navigateToStoricoPrompt()">Storico</button>
+    
+    <select class="btn btn-white" [(ngModel)]="selectedTone">
+      <option value="" disabled>Seleziona tono</option>
+      @for (tone of tones; track tone.name) {
+        <option [value]="tone.name">
+          {{ tone.name }}
+        </option>
+      }
+    </select>
+
+    <button class="btn btn-white">Stile</button>
+    <button class="btn btn-green" (click)="genera()">Genera</button>
+  </div>
+</div>

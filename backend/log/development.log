@@ -7284,3 +7284,208 @@ Processing by DocumentsController#show as */*
 Completed 200 OK in 3ms (Views: 0.1ms | ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.0ms)
 
 
+[dotenv] Set [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mAWS_SESSION_TOKEN[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[36mActiveRecord::SchemaMigration Load (1.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35m (146.1ms)[0m  [1m[35mDROP DATABASE IF EXISTS "nexum_poc_development" /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35m (120.0ms)[0m  [1m[35mDROP DATABASE IF EXISTS "nexum_poc_test" /*application='NexumPoc'*/[0m
+[dotenv] Set [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mAWS_SESSION_TOKEN[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35m (229.7ms)[0m  [1m[35mCREATE DATABASE "nexum_poc_development" ENCODING = 'unicode' /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.3ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35m (359.9ms)[0m  [1m[35mCREATE DATABASE "nexum_poc_test" ENCODING = 'unicode' /*application='NexumPoc'*/[0m
+[dotenv] Set [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mAWS_SESSION_TOKEN[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[35mSQL (0.3ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='NexumPoc'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_attachments" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (11.5ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" bigserial primary key, "blob_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "name" character varying NOT NULL, "record_id" bigint NOT NULL, "record_type" character varying NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id") /*application='NexumPoc'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id") /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_blobs" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "active_storage_blobs" ("id" bigserial primary key, "byte_size" bigint NOT NULL, "checksum" character varying, "content_type" character varying, "created_at" timestamp(6) NOT NULL, "filename" character varying NOT NULL, "key" character varying NOT NULL, "metadata" text, "service_name" character varying NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key") /*application='NexumPoc'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_variant_records" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" bigserial primary key, "blob_id" bigint NOT NULL, "variation_digest" character varying NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest") /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "companies" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "companies" ("id" bigserial primary key, "created_at" timestamp(6) NOT NULL, "description" text, "name" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mDROP TABLE IF EXISTS "conversations" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.8ms)[0m  [1m[35mCREATE TABLE "conversations" ("id" bigserial primary key, "company_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "summary" text, "title" character varying, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_conversations_on_company_id" ON "conversations" ("company_id") /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "documents" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.8ms)[0m  [1m[35mCREATE TABLE "documents" ("id" bigserial primary key, "ai_data" jsonb, "created_at" timestamp(6) NOT NULL, "doc_type" character varying, "status" character varying, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "messages" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "messages" ("id" bigserial primary key, "content" text NOT NULL, "conversation_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "role" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_messages_on_conversation_id" ON "messages" ("conversation_id") /*application='NexumPoc'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE INDEX "index_messages_on_created_at" ON "messages" ("created_at") /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "tones" CASCADE /*application='NexumPoc'*/[0m
+  [1m[35m (1.9ms)[0m  [1m[35mCREATE TABLE "tones" ("id" bigserial primary key, "company_id" bigint, "created_at" timestamp(6) NOT NULL, "instructions" text, "name" character varying, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE INDEX "index_tones_on_company_id" ON "tones" ("company_id") /*application='NexumPoc'*/[0m
+  [1m[35m (4.0ms)[0m  [1m[35mALTER TABLE "active_storage_attachments" ADD CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+ /*application='NexumPoc'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "active_storage_variant_records" ADD CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+ /*application='NexumPoc'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "conversations" ADD CONSTRAINT "fk_rails_ea2d28a6d9"
+FOREIGN KEY ("company_id")
+  REFERENCES "companies" ("id")
+ /*application='NexumPoc'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mALTER TABLE "messages" ADD CONSTRAINT "fk_rails_7f927086d2"
+FOREIGN KEY ("conversation_id")
+  REFERENCES "conversations" ("id")
+ /*application='NexumPoc'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mALTER TABLE "tones" ADD CONSTRAINT "fk_rails_defed01769"
+FOREIGN KEY ("company_id")
+  REFERENCES "companies" ("id")
+ /*application='NexumPoc'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.7ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20251228141607) /*application='NexumPoc'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20251228141545),
+(20251221120001),
+(20251221120000),
+(20251219120000),
+(20251219090625); /*application='NexumPoc'*/[0m
+  [1m[35m (2.9ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.7ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.8ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2025-12-29 10:40:42.021224', '2025-12-29 10:40:42.021226') RETURNING "key" /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.3ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', '91b61a1e9c536e1349ebfe4c79f18e47ec6ac5cd', '2025-12-29 10:40:42.024970', '2025-12-29 10:40:42.024972') RETURNING "key" /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(169507127648478270) /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='NexumPoc'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(169507127648478270) /*application='NexumPoc'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[35mSET search_path TO public /*application='NexumPoc'*/[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[35mSET search_path TO "$user", public /*application='NexumPoc'*/[0m
+[dotenv] Set [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mAWS_SESSION_TOKEN[0m
+[dotenv] Loaded [33m.env[0m
+  [1m[36mActiveRecord::SchemaMigration Load (1.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+  [1m[36mMessage Delete All (0.8ms)[0m  [1m[31mDELETE FROM "messages" /*application='NexumPoc'*/[0m
+  [1m[36mConversation Delete All (0.9ms)[0m  [1m[31mDELETE FROM "conversations" /*application='NexumPoc'*/[0m
+  [1m[36mTone Delete All (0.8ms)[0m  [1m[31mDELETE FROM "tones" /*application='NexumPoc'*/[0m
+  [1m[36mCompany Delete All (0.5ms)[0m  [1m[31mDELETE FROM "companies" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mCompany Create (1.7ms)[0m  [1m[32mINSERT INTO "companies" ("id", "created_at", "description", "name", "updated_at") VALUES (1, '2025-12-29 10:40:49.555231', 'Suite B2B', 'Acme', '2025-12-29 10:40:49.555231') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mTone Create (2.0ms)[0m  [1m[32mINSERT INTO "tones" ("company_id", "created_at", "instructions", "name", "updated_at") VALUES (1, '2025-12-29 10:40:49.614476', 'Tono amichevole e leggero', 'Simpatico', '2025-12-29 10:40:49.614476') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mTone Create (1.4ms)[0m  [1m[32mINSERT INTO "tones" ("company_id", "created_at", "instructions", "name", "updated_at") VALUES (1, '2025-12-29 10:40:49.619005', 'Tono professionale e conciso', 'Formale', '2025-12-29 10:40:49.619005') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mTone Create (1.3ms)[0m  [1m[32mINSERT INTO "tones" ("company_id", "created_at", "instructions", "name", "updated_at") VALUES (1, '2025-12-29 10:40:49.622927', 'Tono autorevole e preciso', 'Istituzionale', '2025-12-29 10:40:49.622927') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mConversation Create (2.0ms)[0m  [1m[32mINSERT INTO "conversations" ("company_id", "created_at", "summary", "title", "updated_at") VALUES (1, '2025-12-29 10:40:49.715047', NULL, 'Esempio', '2025-12-29 10:40:49.715047') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mMessage Create (1.8ms)[0m  [1m[32mINSERT INTO "messages" ("content", "conversation_id", "created_at", "role", "updated_at") VALUES ('Scrivi un breve post di prova.', 1, '2025-12-29 10:40:49.722500', 'user', '2025-12-29 10:40:49.722500') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN /*application='NexumPoc'*/[0m
+  [1m[36mMessage Create (1.3ms)[0m  [1m[32mINSERT INTO "messages" ("content", "conversation_id", "created_at", "role", "updated_at") VALUES ('Ecco un breve post di prova per la suite B2B di Acme.', 1, '2025-12-29 10:40:49.727026', 'assistant', '2025-12-29 10:40:49.727026') RETURNING "id" /*application='NexumPoc'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='NexumPoc'*/[0m
+  [1m[36mTone Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "tones" WHERE "tones"."company_id" = 1 /*application='NexumPoc'*/[0m
+[dotenv] Set [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mAWS_SESSION_TOKEN[0m
+[dotenv] Loaded [33m.env[0m
+Started GET "/toni?company_id=1" for ::1 at 2025-12-29 11:41:19 +0100
+  [1m[36mActiveRecord::SchemaMigration Load (0.9ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='NexumPoc'*/[0m
+Processing by GeneratorController#index as HTML
+  Parameters: {"company_id" => "1"}
+  [1m[36mCompany Load (1.1ms)[0m  [1m[34mSELECT "companies".* FROM "companies" WHERE "companies"."id" = 1 LIMIT 1 /*action='index',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:28:in 'GeneratorController#index'
+  [1m[36mTone Load (1.1ms)[0m  [1m[34mSELECT "tones"."id", "tones"."name", "tones"."instructions" FROM "tones" WHERE "tones"."company_id" = 1 /*action='index',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:32:in 'GeneratorController#index'
+Completed 200 OK in 306ms (Views: 2.7ms | ActiveRecord: 16.4ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/genera" for ::1 at 2025-12-29 11:41:31 +0100
+Processing by GeneratorController#create as HTML
+  Parameters: {"prompt" => "ciaoo", "tone" => "Formale", "company_id" => 1, "conversation_id" => nil, "generator" => {"prompt" => "ciaoo", "tone" => "Formale", "company_id" => 1, "conversation_id" => nil}}
+  [1m[36mCompany Load (0.4ms)[0m  [1m[34mSELECT "companies".* FROM "companies" WHERE "companies"."id" = 1 LIMIT 1 /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:39:in 'AiService#genera'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:177:in 'AiService#fetch_or_create_conversation'
+  [1m[36mConversation Create (2.4ms)[0m  [1m[32mINSERT INTO "conversations" ("company_id", "created_at", "summary", "title", "updated_at") VALUES (1, '2025-12-29 10:41:32.758217', NULL, NULL, '2025-12-29 10:41:32.758217') RETURNING "id" /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:177:in 'AiService#fetch_or_create_conversation'
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:177:in 'AiService#fetch_or_create_conversation'
+  [1m[36mTone Load (0.2ms)[0m  [1m[34mSELECT "tones".* FROM "tones" WHERE "tones"."company_id" = 1 AND "tones"."name" = 'Formale' LIMIT 1 /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:42:in 'AiService#genera'
+  [1m[36mMessage Load (1.1ms)[0m  [1m[34mSELECT "messages".* FROM "messages" WHERE "messages"."conversation_id" = 2 ORDER BY "messages"."created_at" DESC LIMIT 10 /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:49:in 'AiService#genera'
+Bedrock converse → region=us-east-1 model_id=amazon.nova-lite-v1:0
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:67:in 'AiService#genera'
+  [1m[36mMessage Create (2.6ms)[0m  [1m[32mINSERT INTO "messages" ("content", "conversation_id", "created_at", "role", "updated_at") VALUES ('ciaoo', 2, '2025-12-29 10:41:33.626741', 'user', '2025-12-29 10:41:33.626741') RETURNING "id" /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:67:in 'AiService#genera'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:67:in 'AiService#genera'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:68:in 'AiService#genera'
+  [1m[36mMessage Create (1.5ms)[0m  [1m[32mINSERT INTO "messages" ("content", "conversation_id", "created_at", "role", "updated_at") VALUES ('Buongiorno,
+
+Grazie per il tuo messaggio. Come possiamo assisterti oggi?
+
+Cordiali saluti,
+Acme', 2, '2025-12-29 10:41:33.633624', 'assistant', '2025-12-29 10:41:33.633624') RETURNING "id" /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:68:in 'AiService#genera'
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT /*action='create',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/services/ai_service.rb:68:in 'AiService#genera'
+Completed 200 OK in 1836ms (Views: 0.1ms | ActiveRecord: 11.5ms (6 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/toni?company_id=1" for ::1 at 2025-12-29 11:41:49 +0100
+Processing by GeneratorController#index as HTML
+  Parameters: {"company_id" => "1"}
+  [1m[36mCompany Load (0.3ms)[0m  [1m[34mSELECT "companies".* FROM "companies" WHERE "companies"."id" = 1 LIMIT 1 /*action='index',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:28:in 'GeneratorController#index'
+  [1m[36mTone Load (0.2ms)[0m  [1m[34mSELECT "tones"."id", "tones"."name", "tones"."instructions" FROM "tones" WHERE "tones"."company_id" = 1 /*action='index',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:32:in 'GeneratorController#index'
+Completed 200 OK in 3ms (Views: 1.2ms | ActiveRecord: 0.5ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/conversazioni?company_id=1" for ::1 at 2025-12-29 11:41:50 +0100
+Processing by GeneratorController#conversations as HTML
+  Parameters: {"company_id" => "1"}
+  [1m[36mConversation Load (0.4ms)[0m  [1m[34mSELECT "conversations".* FROM "conversations" WHERE "conversations"."company_id" = 1 ORDER BY "conversations"."updated_at" DESC LIMIT 50 /*action='conversations',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:44:in 'GeneratorController#conversations'
+Completed 200 OK in 2ms (Views: 0.1ms | ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/conversazioni?company_id=1" for ::1 at 2025-12-29 11:41:56 +0100
+Processing by GeneratorController#conversations as HTML
+  Parameters: {"company_id" => "1"}
+  [1m[36mConversation Load (0.5ms)[0m  [1m[34mSELECT "conversations".* FROM "conversations" WHERE "conversations"."company_id" = 1 ORDER BY "conversations"."updated_at" DESC LIMIT 50 /*action='conversations',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:44:in 'GeneratorController#conversations'
+Completed 200 OK in 2ms (Views: 0.1ms | ActiveRecord: 0.5ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/conversazioni?company_id=1" for ::1 at 2025-12-29 11:42:39 +0100
+Processing by GeneratorController#conversations as HTML
+  Parameters: {"company_id" => "1"}
+  [1m[36mConversation Load (0.4ms)[0m  [1m[34mSELECT "conversations".* FROM "conversations" WHERE "conversations"."company_id" = 1 ORDER BY "conversations"."updated_at" DESC LIMIT 50 /*action='conversations',application='NexumPoc',controller='generator'*/[0m
+  ↳ app/controllers/generator_controller.rb:44:in 'GeneratorController#conversations'
+Completed 200 OK in 3ms (Views: 0.1ms | ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/favicon.ico" for ::1 at 2025-12-29 11:42:39 +0100
+  
+ActionController::RoutingError (No route matches [GET] "/favicon.ico"):
+  

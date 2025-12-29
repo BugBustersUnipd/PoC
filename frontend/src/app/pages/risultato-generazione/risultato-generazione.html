@@ -1,0 +1,32 @@
+<div class="risultato-generazione-container">
+  <!-- Canvas area (left side) -->
+  <div class="canvas-area">
+    <div class="prompt-box">    
+      <h1>Risultato Generazione</h1>
+      
+      <div *ngIf="generatedText; else noResult" class="generated-content">
+        <p class="generated-text">{{ generatedText }}</p>
+      </div>
+      
+      <ng-template #noResult>
+        <p class="no-content">Nessun contenuto generato disponibile</p>
+      </ng-template>
+      
+      <!-- Debug info (rimuovi in produzione) -->
+      <!--<div *ngIf="result" class="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; font-size: 12px;">
+         <strong>Debug - Risposta completa:</strong>
+        <pre>{{ result | json }}</pre>
+      </div>-->
+    </div>
+  </div>
+  
+  <!-- Button panel (right side) -->
+  <div class="button-panel">
+    <button class="btn btn-green" (click)="rigenera()">Rigenera</button>
+    <button class="btn btn-white" (click)="navigateToModificaGenerazione()">Modifica</button>
+    <button class="btn btn-white" (click)="valuta()">Valuta</button>
+    <button class="btn btn-white" (click)="salvaPost()">Salva Post</button>
+    <button class="btn btn-red" (click)="scarta()">Scarta</button>
+    <button class="btn btn-blue" (click)="pubblica()">Pubblica</button>
+  </div>
+</div>
