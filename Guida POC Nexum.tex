@@ -1,0 +1,427 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{float}
+\usepackage{ifthen}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{colortbl}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{tocloft}
+
+% Comando per la versione corrente
+\newcommand{\CurrentVersion}{1.0.0}
+\pgfplotsset{compat=1.16}
+
+% Configurazione delle didascalie per tabelle
+\captionsetup[table]{
+  position=below,
+  labelfont=it,
+  textfont=it,
+  justification=centering,
+  singlelinecheck=false
+}
+\captionsetup[longtable]{
+  position=below,
+  labelfont=it,
+  textfont=it,
+  justification=centering,
+  singlelinecheck=false
+}
+
+% Definizione colori
+\definecolor{primaryblue}{RGB}{0,102,204}
+\definecolor{secondaryblue}{RGB}{51,153,255}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{darkgray}{RGB}{100,100,100}
+
+% Formattazione titoli con colori
+\titleformat{\section}
+  {\Large\bfseries\color{primaryblue}}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\large\bfseries\color{secondaryblue}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{secondaryblue}}
+  {\thesubsubsection}{1em}{}
+
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\setlength{\headheight}{14pt}
+
+\setlist[itemize]{leftmargin=*,itemsep=3pt}
+\setlist[enumerate]{leftmargin=*,itemsep=3pt}
+
+% Configurazione per indice più dettagliato
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+% Stili per i blocchi di codice
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{orange},
+    showstringspaces=false
+}
+
+% Intestazione e piè di pagina
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Guida POC Nexum}
+\fancyhead[R]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Comando per registro versioni
+\newcommand{\pediceG}{\textsuperscript{G}}
+
+\begin{document}
+
+% Prima pagina
+\begin{center}
+  \IfFileExists{../assets/Logo.jpg}{%
+    \includegraphics[width=6cm,height=3cm,keepaspectratio]{../assets/Logo.jpg} \\[0.8cm]
+  }{%
+    \fbox{\parbox[c][2.5cm][c]{6cm}{\centering Logo non trovato\\(../assets/Logo.jpg)}}\\[0.5cm]
+  }
+  
+  {\Large\bfseries\color{primaryblue} BugBusters}\\[0.5cm]
+
+  {\Huge\bfseries\color{primaryblue} Come Usare il POC Nexum}\\[0.3cm]
+  {\Large\color{secondaryblue} Guida all'installazione e utilizzo}\\[0.8cm]
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[colback=lightgray,colframe=primaryblue,width=0.85\textwidth,arc=3mm,boxrule=0.5pt]
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}X@{}}
+	{Stato} & In redazione \\
+	{Responsabile} &  \\
+	{Verificatore} &  \\
+	{Redattori} & Alberto Autiero \\
+	{Destinatari} & BugBusters, Eggon, Prof. Tullio Vardanega, Prof. Riccardo Cardin \\
+\end{tabularx}
+\end{tcolorbox}
+\end{center}
+
+% Pagina 2: Registro delle Modifiche
+\newpage
+\thispagestyle{empty}
+\section*{\color{primaryblue}Registro delle Modifiche}
+
+\arrayrulecolor{primaryblue}
+{\footnotesize
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{2cm}|X|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{2cm}|}
+\hline
+\rowcolor{primaryblue!40}
+\textbf{\color{white} Versione} & \textbf{\color{white} Data} & \textbf{\color{white} Descrizione} & \textbf{\color{white} Redatto} & \textbf{\color{white} Verificato} & \textbf{\color{white} Approvato} \\
+\hline
+0.0.1 & 29/12/2025 & Prima stesura della guida all'utilizzo del POC del documento & Alberto Autiero & - & - \\
+\hline
+\end{tabularx}
+}
+
+% Indice
+\newpage
+\pagestyle{fancy}
+\tableofcontents
+\newpage
+
+% Sezione 1: Introduzione
+\section{Introduzione}
+\label{sec:introduzione}
+Questa guida spiega in dettaglio come configurare, avviare e utilizzare il Proof of Concept (POC) Nexum. Seguire attentamente le istruzioni per garantire il corretto funzionamento di tutti i componenti.
+
+% Sezione 2: Prerequisiti
+\section{Prerequisiti}
+\label{sec:prerequisiti}
+Prima di iniziare, assicurarsi di avere installato:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Ruby} (versione 3.0 o superiore)
+    \item \textbf{PostgreSQL} (versione 12 o superiore)
+    \item \textbf{Node.js} (versione 16 o superiore, per il frontend Angular)
+    \item \textbf{Credenziali AWS} con accesso a Bedrock
+    \item \textbf{PowerShell} (già incluso in Windows)
+\end{itemize}
+
+% Sezione 3: Configurazione Iniziale
+\section{Configurazione Iniziale}
+\label{sec:configurazione}
+
+\subsection{Configurare PostgreSQL}
+\label{subsec:postgresql}
+Il POC richiede PostgreSQL in esecuzione con le credenziali corrette.
+
+\subsubsection{Modificare la password nel file di configurazione}
+\label{subsubsec:password-config}
+Aprire il file \texttt{backend/config/database.yml} e modificare la password PostgreSQL in tutte le sezioni (development, test, production):
+
+\begin{lstlisting}[caption=Configurazione database.yml]
+development:
+  <<: *default
+  database: nexum_poc_development
+  username: postgres
+  password: "TUA_PASSWORD_QUI"  # <-- Modifica questa riga
+  host: 127.0.0.1
+  port: 5432
+\end{lstlisting}
+
+\textbf{Nota}: Sostituire \texttt{"TUA\_PASSWORD\_QUI"} con la password dell'utente PostgreSQL.
+
+\subsubsection{Verificare che PostgreSQL sia in esecuzione}
+\label{subsubsec:verifica-postgres}
+Verificare che PostgreSQL sia attivo eseguendo:
+
+\begin{lstlisting}[language=bash, caption=Verifica PostgreSQL]
+Test-NetConnection -ComputerName localhost -Port 5432
+\end{lstlisting}
+
+Se la porta non risponde, avviare il servizio PostgreSQL da "Servizi" di Windows.
+
+\subsection{Configurare le Credenziali AWS}
+\label{subsec:aws}
+Il POC necessita delle credenziali AWS per accedere a Bedrock. Creare un file \texttt{.env} nella cartella \texttt{backend}.
+
+\subsubsection{Creare il file .env}
+\label{subsubsec:crea-env}
+Creare un file chiamato \texttt{.env} nella cartella \texttt{backend/} con il seguente contenuto:
+
+\begin{lstlisting}[caption=File .env di esempio]
+AWS_ACCESS_KEY_ID=la_tua_access_key
+AWS_SECRET_ACCESS_KEY=la_tua_secret_key
+AWS_SESSION_TOKEN=la_tua_session_token
+AWS_REGION=us-east-1
+\end{lstlisting}
+
+\textbf{Dove trovare le credenziali AWS:}
+
+\begin{enumerate}
+    \item Accedere al portale AWS IAM Identity Center (solitamente \url{https://eggon.awsapps.com/start/})
+    \item Selezionare il ruolo "Bedrock-Bugbuster"
+    \item Copiare le credenziali temporanee (Access Key ID, Secret Access Key, Session Token)
+    \item Incollare i valori nel file \texttt{.env}
+\end{enumerate}
+
+\textbf{Importante:}
+\begin{itemize}
+    \item Il file \texttt{.env} è già ignorato da git (non verrà committato)
+    \item Le credenziali AWS scadono dopo alcune ore
+    \item Quando le credenziali scadono, crearne di nuove dal portale AWS
+\end{itemize}
+
+% Sezione 4: Avvio del POC
+\section{Avvio del POC}
+\label{sec:avvio}
+
+\subsection{Script PowerShell avvia-poc.ps1}
+\label{subsec:script-avvio}
+Il modo più semplice per avviare tutto:
+
+\begin{lstlisting}[language=bash, caption=Script combinato]
+.\avvia-poc.ps1
+\end{lstlisting}
+
+Questo script:
+\begin{itemize}
+    \item Apre una nuova finestra PowerShell per il Backend
+    \item Apre una nuova finestra PowerShell per il Frontend
+    \item Mostra un messaggio con tutti gli URL disponibili
+\end{itemize}
+
+\textbf{Per fermare i servizi}: Premere CTRL+C
+
+% Sezione 5: URL Disponibili
+\section{URL Disponibili}
+\label{sec:url}
+Una volta avviati i servizi, avrai accesso a:
+
+\subsection{Applicazioni Principali}
+\label{subsec:app-principali}
+\begin{itemize}
+    \item \textbf{Frontend Angular}: \url{http://localhost:4200}
+    \item \textbf{Backend Rails API}: \url{http://localhost:3000}
+\end{itemize}
+
+\subsection{Pagine di Test HTML}
+\label{subsec:pagine-test}
+\begin{itemize}
+    \item \textbf{Generazione Testo}: \url{http://localhost:3000/tester.html}
+    \item \textbf{Analisi Documenti}: \url{http://localhost:3000/documentTester.html}
+\end{itemize}
+
+% Sezione 6: Come Testare il POC
+\section{Come Testare il POC}
+\label{sec:test}
+
+\subsection{Test 1: Analisi Documenti}
+\label{subsec:test-analisi}
+\begin{enumerate}
+    \item Aprire \url{http://localhost:3000/documentTester.html}
+    \item Assicurarsi che "Company ID" sia impostato a \texttt{1}
+    \item Cliccare su "Scegli file" e selezionare \texttt{documento-test.pdf} presente nella cartella backend 
+    \item Cliccare su "Carica e Analizza"
+    \item Attendere che l'AI analizzi il documento
+    \item Visualizzare i risultati estratti
+\end{enumerate}
+
+\textbf{Creare un PDF di test:}
+Se non hai il file \texttt{documento-test.pdf}, puoi crearne uno eseguendo:
+
+\begin{lstlisting}[language=bash]
+ruby crea-pdf-test.rb
+\end{lstlisting}
+
+\subsection{Test 2: Generazione Testo con Conversazioni}
+\label{subsec:test-generazione}
+\begin{enumerate}
+    \item Aprire \url{http://localhost:3000/tester.html}
+    \item Impostare "Company ID" a \texttt{1}
+    \item Cliccare su "Carica toni" per vedere i toni disponibili
+    \item Selezionare un tono dal menu a tendina
+    \item Scrivere un prompt (es: "Scrivi un'email di presentazione")
+    \item Cliccare su "Genera"
+    \item Visualizzare la risposta dell'AI
+\end{enumerate}
+
+% Sezione 7: Script PowerShell Disponibili
+\section{Script PowerShell Disponibili}
+\label{sec:script}
+Il progetto include diversi script PowerShell utili:
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Script} & \textbf{Descrizione} \\
+\midrule
+\texttt{avvia-poc.ps1} & Avvia sia Backend che Frontend (apre due finestre) \\
+\texttt{avvia-backend.ps1} & Avvia solo il Backend Rails \\
+\texttt{avvia-frontend.ps1} & Avvia solo il Frontend Angular \\
+\texttt{verifica-postgres.ps1} & Verifica la connessione a PostgreSQL (chiede password) \\
+\texttt{crea-pdf-test.rb} & Crea un PDF di test per l'API di analisi \\
+\bottomrule
+\end{tabularx}
+\caption{Script disponibili nel progetto}
+\label{tab:script}
+\end{table}
+
+% Sezione 8: Troubleshooting
+\section{Troubleshooting}
+\label{sec:troubleshooting}
+
+\subsection{Errore: "company\_id mancante"}
+\label{subsec:errore-company}
+\begin{itemize}
+    \item Assicurati di includere \texttt{company\_id=1} nella query string o nel form
+    \item Le pagine HTML di test ora includono un campo per il Company ID
+\end{itemize}
+
+\subsection{Errore: "Database non inizializzato"}
+\label{subsec:errore-database}
+\begin{itemize}
+    \item Esegui manualmente: \texttt{cd backend \&\& bundle exec rails db:create db:migrate db:seed}
+\end{itemize}
+
+\subsection{Errore: "Password PostgreSQL errata"}
+\label{subsec:errore-password}
+\begin{itemize}
+    \item Verifica che la password in \texttt{backend/config/database.yml} corrisponda alla password del tuo utente PostgreSQL
+    \item Usa lo script \texttt{verifica-postgres.ps1} per testare la connessione
+\end{itemize}
+
+\subsection{Errore: "AWS credentials expired"}
+\label{subsec:errore-aws}
+\begin{itemize}
+    \item Le credenziali AWS scadono dopo alcune ore
+    \item Ottieni nuove credenziali dal portale AWS IAM Identity Center
+    \item Aggiorna il file \texttt{backend/.env} con le nuove credenziali
+\end{itemize}
+
+\subsection{Errore: "Could not find gem"}
+\label{subsec:errore-gem}
+\begin{itemize}
+    \item Esegui: \texttt{cd backend \&\& bundle install}
+\end{itemize}
+
+\subsection{Errore: "Port already in use"}
+\label{subsec:errore-porta}
+\begin{itemize}
+    \item La porta 3000 (backend) o 4200 (frontend) è già in uso
+    \item Chiudi l'applicazione che usa quella porta o modifica la porta nel file di configurazione
+\end{itemize}
+
+\subsection{Il server non si avvia}
+\label{subsec:errore-server}
+\begin{itemize}
+    \item Verifica che PostgreSQL sia in esecuzione
+    \item Controlla che le variabili AWS siano configurate nel file \texttt{.env}
+    \item Controlla i log in \texttt{backend/log/development.log}
+\end{itemize}
+
+\subsection{Warning VIPS}
+\label{subsec:warning-vips}
+\begin{itemize}
+    \item I warning VIPS (riguardanti moduli opzionali per immagini) possono essere ignorati - non bloccano il funzionamento dell'applicazione.
+\end{itemize}
+
+% Sezione 9: Note Importanti
+\section{Note Importanti}
+\label{sec:note}
+\begin{itemize}
+    \item \textbf{Database}: Il seed iniziale crea una Company con ID=1, alcuni Tone di esempio e una conversazione di esempio
+    \item \textbf{Company ID}: La maggior parte delle API richiede \texttt{company\_id=1} (la company di default)
+    \item \textbf{Storage}: I file caricati vengono salvati localmente in \texttt{backend/storage/}
+    \item \textbf{Log}: I log del backend sono disponibili in \texttt{backend/log/development.log}
+    \item \textbf{Hot Reload}:
+    \begin{itemize}
+        \item Rails: Si ricarica automaticamente quando modifichi i file Ruby
+        \item Angular: Si ricompila automaticamente quando modifichi i file TypeScript/HTML
+    \end{itemize}
+\end{itemize}
+
+% Sezione 10: Riavvio Dopo Modifiche
+\section{Riavvio Dopo Modifiche}
+\label{sec:riavvio}
+Dopo aver modificato:
+
+\begin{itemize}
+    \item \textbf{File Ruby (modelli, controller, ecc.)}: Rails si ricarica automaticamente
+    \item \textbf{File di configurazione Rails}: Riavviare il POC (Ctrl+C e rieseguire \texttt{.\textbackslash avvia-poc.ps1})
+    \item \textbf{File Angular}: Angular si ricompila automaticamente
+    \item \textbf{File .env}: Riavviare il POC (Ctrl+C e rieseguire \texttt{.\textbackslash avvia-poc.ps1)}
+\end{itemize}
+
+% Sezione 11: Risorse Aggiuntive
+\section{Risorse Aggiuntive}
+\label{sec:risorse}
+\begin{itemize}
+    \item \textbf{Documentazione Backend}: Vedere \texttt{backend/docs/SETUP\_E\_DOCUMENTAZIONE.txt}
+    \item \textbf{Gemfile}: Lista delle dipendenze Ruby in \texttt{backend/Gemfile}
+    \item \textbf{package.json}: Lista delle dipendenze Node.js in \texttt{frontend/package.json}
+\end{itemize}
+
+\end{document}
