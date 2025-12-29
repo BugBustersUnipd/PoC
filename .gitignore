@@ -4,30 +4,46 @@
 # belong in git's global ignore instead:
 # `$XDG_CONFIG_HOME/git/ignore` or `~/.config/git/ignore`
 
-# Ignore bundler config.
-/.bundle
+# Ignore bundler config (Backend).
+/backend/.bundle
 
 # Ignore all environment files.
 /.env*
+/backend/.env*
 
-# Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+# Ignore all logfiles and tempfiles (Backend).
+/backend/log/*
+/backend/tmp/*
+!/backend/log/.keep
+!/backend/tmp/.keep
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/
-!/tmp/pids/.keep
+# Ignore pidfiles, but keep the directory (Backend).
+/backend/tmp/pids/*
+!/backend/tmp/pids/
+!/backend/tmp/pids/.keep
 
-# Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/
-!/tmp/storage/.keep
+# Ignore storage (uploaded files in development and any SQLite databases) - Backend.
+/backend/storage/*
+!/backend/storage/.keep
+/backend/tmp/storage/*
+!/backend/tmp/storage/
+!/backend/tmp/storage/.keep
 
-# Ignore key files for decrypting credentials and more.
-/config/*.key
+# Ignore key files for decrypting credentials and more (Backend).
+/backend/config/*.key
+/backend/config/credentials.yml.enc
+/backend/config/master.key
+
+# Frontend node_modules and build artifacts.
+/frontend/node_modules
+/frontend/dist
+/frontend/.angular/cache
+
+# IDE and OS files.
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 

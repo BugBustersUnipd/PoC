@@ -27,7 +27,7 @@ Rails.application.routes.draw do
   # Restituisce la lista delle conversazioni per una company
   get "conversazioni", to: "generator#conversations"
 
-  resources :documents, only: [ :new, :create, :show ]
+  resources :documents, only: [ :index, :create, :show ]
 
   # Esempio di root (pagina principale) — al momento non usata:
   # root "posts#index"

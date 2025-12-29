@@ -1,5 +1,6 @@
 class Document < ApplicationRecord
   # Associazioni
+  belongs_to :company
   has_one_attached :original_file
 
   # Estados possibili
@@ -7,7 +8,11 @@ class Document < ApplicationRecord
 
   # Validazioni
   validates :original_file, presence: true
+  validates :company_id, presence: true
   validate :original_file_mime_type, if: -> { original_file.attached? }
+
+  # Callbacks per calcolare checksum quando il file viene allegato
+  after_save :compute_checksum, if: :original_file_changed?
 
   private
 
@@ -17,5 +22,13 @@ class Document < ApplicationRecord
     return if supported.include?(original_file.content_type)
 
     errors.add(:original_file, "formato non supportato (#{original_file.content_type})")
+  end
+
+  def compute_checksum
+    return unless original_file.attached?
+
+    require "digest"
+    self.checksum = Digest::SHA256.hexdigest(original_file.download)
+    save if will_save_change_to_checksum?
   end
 end
