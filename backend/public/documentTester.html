@@ -30,6 +30,9 @@
     </div>
 
     <script>
+        // Company ID di default (creato dal seed)
+        const COMPANY_ID = 1;
+
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
             if (!fileInput.files[0]) return alert("Seleziona un file!");
@@ -43,13 +46,19 @@
             document.getElementById('resultContent').innerHTML = '';
 
             try {
-                // 1. CARICAMENTO
-                const response = await fetch('/documents', {
+                // 1. CARICAMENTO - Aggiungi company_id come query parameter
+                const response = await fetch(`/documents?company_id=${COMPANY_ID}`, {
                     method: 'POST',
                     body: formData
                 });
                 
-                if (!response.ok) throw new Error("Errore upload");
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Errore sconosciuto' }));
+                    const errorMessage = errorData.error || 
+                                        (Array.isArray(errorData.errors) ? errorData.errors.join(', ') : errorData.errors) || 
+                                        `Errore HTTP ${response.status}`;
+                    throw new Error(errorMessage);
+                }
                 
                 const data = await response.json();
                 const docId = data.id;
@@ -59,8 +68,9 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('statusText').innerText = 'Errore Upload';
+                document.getElementById('statusText').innerText = `Errore Upload: ${error.message}`;
                 document.getElementById('statusText').className = 'error';
+                document.getElementById('resultContent').innerHTML = `<p style="color: red;">${error.message}</p>`;
             }
         }
 
@@ -68,7 +78,7 @@
             document.getElementById('statusText').innerText = 'L\'AI sta leggendo...';
             
             const interval = setInterval(async () => {
-                const res = await fetch(`/documents/${docId}`);
+                const res = await fetch(`/documents/${docId}?company_id=${COMPANY_ID}`);
                 const doc = await res.json();
 
                 if (doc.status === 'completed') {

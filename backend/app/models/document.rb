@@ -12,7 +12,7 @@ class Document < ApplicationRecord
   validate :original_file_mime_type, if: -> { original_file.attached? }
 
   # Callbacks per calcolare checksum quando il file viene allegato
-  after_save :compute_checksum, if: :original_file_changed?
+  after_commit :compute_checksum, on: [:create, :update]
 
   private
 
@@ -26,9 +26,10 @@ class Document < ApplicationRecord
 
   def compute_checksum
     return unless original_file.attached?
+    return if checksum.present? # Evita di ricalcolare se già presente
 
     require "digest"
-    self.checksum = Digest::SHA256.hexdigest(original_file.download)
-    save if will_save_change_to_checksum?
+    new_checksum = Digest::SHA256.hexdigest(original_file.download)
+    update_column(:checksum, new_checksum) if checksum != new_checksum
   end
 end

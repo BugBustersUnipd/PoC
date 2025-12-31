@@ -138,6 +138,7 @@
 \hline
 \rowcolor{primaryblue!40}
 \textbf{\color{white} Versione} & \textbf{\color{white} Data} & \textbf{\color{white} Descrizione} & \textbf{\color{white} Redatto} & \textbf{\color{white} Verificato} & \textbf{\color{white} Approvato} \\
+0.0.2 & 31/12/2025 & Migliorie alla guida & Alberto Autiero & - & - \\
 \hline
 0.0.1 & 29/12/2025 & Prima stesura della guida all'utilizzo del POC del documento & Alberto Autiero & - & - \\
 \hline
@@ -161,14 +162,135 @@ Questa guida spiega in dettaglio come configurare, avviare e utilizzare il Proof
 Prima di iniziare, assicurarsi di avere installato:
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Ruby} (versione 3.0 o superiore)
-    \item \textbf{PostgreSQL} (versione 12 o superiore)
-    \item \textbf{Node.js} (versione 16 o superiore, per il frontend Angular)
+    \item \textbf{Ruby}
+    \item \textbf{PostgreSQL}
+    \item \textbf{Node.js} (per il frontend Angular)
     \item \textbf{Credenziali AWS} con accesso a Bedrock
     \item \textbf{PowerShell} (già incluso in Windows)
 \end{itemize}
 
-% Sezione 3: Configurazione Iniziale
+% Sezione 3: Installazione
+\section{Installazione}
+\label{sec:installazione}
+
+\subsubsection{Scaricare Ruby}
+\label{subsubsec:download-ruby}
+\begin{enumerate}
+    \item Visitare \url{https://rubyinstaller.org/downloads/}
+    \item Scaricare Ruby+Devkit
+    \item Scegliere la versione x64 (64-bit)
+\end{enumerate}
+
+\subsubsection{Installare Ruby}
+\label{subsubsec:install-ruby-steps}
+\begin{enumerate}
+    \item Eseguire il file di installazione scaricato
+    \item Durante l'installazione, selezionare tutte le opzioni predefinite
+    \item \textbf{Importante}: Selezionare l'opzione per installare MSYS2 e le componenti di sviluppo (DevKit)
+    \item Al termine dell'installazione, verificare l'installazione aprendo PowerShell e digitando:
+    \begin{lstlisting}[language=bash, caption=Verifica installazione Ruby]
+ruby --version
+    \end{lstlisting}
+    \item Dovrebbe essere visualizzata la versione installata)
+\end{enumerate}
+
+\subsubsection{Installare Bundler}
+\label{subsubsec:install-bundler}
+Bundler è necessario per gestire le gem Ruby del progetto.
+
+\begin{lstlisting}[language=bash, caption=Installazione Bundler]
+gem install bundler
+    \end{lstlisting}
+
+\subsection{Installare PostgreSQL}
+
+\subsubsection{Scaricare PostgreSQL}
+\label{subsubsec:download-postgresql}
+\begin{enumerate}
+    \item Visitare \url{https://www.postgresql.org/download/windows/}
+    \item Scaricare il PostgreSQL Installer per Windows
+\end{enumerate}
+
+\subsubsection{Installare PostgreSQL}
+\label{subsubsec:install-postgresql-steps}
+\begin{enumerate}
+    \item Eseguire il file di installazione
+    \item Durante l'installazione:
+    \begin{itemize}
+        \item Scegliere tutte le componenti predefinite
+        \item \textbf{Importante}: Impostare una password per l'utente \texttt{postgres} (ricordarla, servirà per la configurazione)
+        \item Lasciare la porta predefinita (5432)
+    \end{itemize}
+    \item Al termine dell'installazione, verificare che il servizio PostgreSQL sia in esecuzione
+\end{enumerate}
+
+\subsubsection{Configurare l'avvio automatico di PostgreSQL}
+\label{subsubsec:postgresql-autostart}
+Per evitare di dover avviare manualmente PostgreSQL ogni volta, è possibile configurarlo per l'avvio automatico:
+
+\begin{lstlisting}[language=bash, caption=Configurazione avvio automatico PostgreSQL]
+Set-Service postgresql-x64-18 -StartupType Automatic
+    \end{lstlisting}
+
+\textbf{Nota}: Sostituire \texttt{postgresql-x64-18} con il nome corretto del servizio PostgreSQL installato. Per trovare il nome esatto del servizio:
+
+\begin{lstlisting}[language=bash, caption=Trovare il nome del servizio PostgreSQL]
+Get-Service | Where-Object {$_.Name -like "*postgresql*"}
+    \end{lstlisting}
+
+\subsection{Installare Node.js}
+\label{subsec:install-nodejs}
+Node.js è necessario per il frontend Angular.
+
+\subsubsection{Installare Node.js con winget}
+\label{subsubsec:install-nodejs-winget}
+\begin{enumerate}
+    \item Aprire PowerShell e eseguire:
+    \begin{lstlisting}[language=bash, caption=Installazione Node.js con winget]
+winget install OpenJS.NodeJS.LTS
+    \end{lstlisting}
+    \item Verificare l'installazione con:
+    \begin{lstlisting}[language=bash, caption=Verifica installazione Node.js]
+node --version
+npm --version
+    \end{lstlisting}
+    \item Dovrebbero essere visualizzate le versioni installate
+\end{enumerate}
+
+\subsubsection{Installare le dipendenze del progetto}
+\label{subsubsec:install-dipendenze-nodejs}
+Dopo aver clonato o scaricato il progetto, è necessario installare le dipendenze Node.js per il frontend:
+
+\begin{enumerate}
+    \item Aprire CMD nella cartella del progetto
+    \item Spostarsi nella cartella frontend:
+    \begin{lstlisting}[language=bash, caption=Spostarsi nella cartella frontend]
+cd frontend
+    \end{lstlisting}
+    \item Installare le dipendenze usando \texttt{cmd} (necessario su Windows per evitare problemi con PowerShell):
+    \begin{lstlisting}[language=bash, caption=Installazione dipendenze Node.js]
+cmd /c "npm install"
+    \end{lstlisting}
+    \item Attendere il completamento dell'installazione
+\end{enumerate}
+
+\textbf{Nota}: L'uso di \texttt{cmd /c} è necessario perché PowerShell su Windows può avere problemi nell'eseguire direttamente i comandi npm.
+
+\subsection{Configurare PowerShell}
+\label{subsec:config-powershell}
+Per eseguire gli script PowerShell del progetto, è necessario modificare la policy di esecuzione.
+
+\subsubsection{Cambiare la policy di esecuzione}
+\label{subsubsec:execution-policy}
+Esegui il seguente comando:
+
+\begin{lstlisting}[language=bash, caption=Cambiare policy di esecuzione PowerShell]
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+    \end{lstlisting}
+
+\textbf{Nota}: Potrebbe essere richiesto di confermare con \texttt{T}.
+
+% Sezione 4: Configurazione Iniziale
 \section{Configurazione Iniziale}
 \label{sec:configurazione}
 
@@ -194,13 +316,13 @@ development:
 
 \subsubsection{Verificare che PostgreSQL sia in esecuzione}
 \label{subsubsec:verifica-postgres}
-Verificare che PostgreSQL sia attivo eseguendo:
+Avviare il servizio PostgreSQL con il seguente comando:
 
-\begin{lstlisting}[language=bash, caption=Verifica PostgreSQL]
-Test-NetConnection -ComputerName localhost -Port 5432
+\begin{lstlisting}[language=bash, caption=Avviare servizio PostgreSQL]
+Start-Service postgresql-x64-18
 \end{lstlisting}
 
-Se la porta non risponde, avviare il servizio PostgreSQL da "Servizi" di Windows.
+\textbf{Nota}: Sostituire \texttt{postgresql-x64-18} con il nome corretto del servizio PostgreSQL installato.
 
 \subsection{Configurare le Credenziali AWS}
 \label{subsec:aws}
@@ -220,7 +342,7 @@ AWS_REGION=us-east-1
 \textbf{Dove trovare le credenziali AWS:}
 
 \begin{enumerate}
-    \item Accedere al portale AWS IAM Identity Center (solitamente \url{https://eggon.awsapps.com/start/})
+    \item Accedere al portale AWS Eggon (\url{https://eggon.awsapps.com/start/})
     \item Selezionare il ruolo "Bedrock-Bugbuster"
     \item Copiare le credenziali temporanee (Access Key ID, Secret Access Key, Session Token)
     \item Incollare i valori nel file \texttt{.env}
@@ -233,13 +355,13 @@ AWS_REGION=us-east-1
     \item Quando le credenziali scadono, crearne di nuove dal portale AWS
 \end{itemize}
 
-% Sezione 4: Avvio del POC
+% Sezione 5: Avvio del POC
 \section{Avvio del POC}
 \label{sec:avvio}
 
 \subsection{Script PowerShell avvia-poc.ps1}
 \label{subsec:script-avvio}
-Il modo più semplice per avviare tutto:
+Il modo più semplice per avviare il POC:
 
 \begin{lstlisting}[language=bash, caption=Script combinato]
 .\avvia-poc.ps1
@@ -254,7 +376,7 @@ Questo script:
 
 \textbf{Per fermare i servizi}: Premere CTRL+C
 
-% Sezione 5: URL Disponibili
+% Sezione 6: URL Disponibili
 \section{URL Disponibili}
 \label{sec:url}
 Una volta avviati i servizi, avrai accesso a:
@@ -273,7 +395,7 @@ Una volta avviati i servizi, avrai accesso a:
     \item \textbf{Analisi Documenti}: \url{http://localhost:3000/documentTester.html}
 \end{itemize}
 
-% Sezione 6: Come Testare il POC
+% Sezione 7: Come Testare il POC
 \section{Come Testare il POC}
 \label{sec:test}
 
@@ -281,7 +403,6 @@ Una volta avviati i servizi, avrai accesso a:
 \label{subsec:test-analisi}
 \begin{enumerate}
     \item Aprire \url{http://localhost:3000/documentTester.html}
-    \item Assicurarsi che "Company ID" sia impostato a \texttt{1}
     \item Cliccare su "Scegli file" e selezionare \texttt{documento-test.pdf} presente nella cartella backend 
     \item Cliccare su "Carica e Analizza"
     \item Attendere che l'AI analizzi il documento
@@ -299,15 +420,14 @@ ruby crea-pdf-test.rb
 \label{subsec:test-generazione}
 \begin{enumerate}
     \item Aprire \url{http://localhost:3000/tester.html}
-    \item Impostare "Company ID" a \texttt{1}
-    \item Cliccare su "Carica toni" per vedere i toni disponibili
+    \item I toni verranno caricato in automatico all'apertura
     \item Selezionare un tono dal menu a tendina
     \item Scrivere un prompt (es: "Scrivi un'email di presentazione")
     \item Cliccare su "Genera"
     \item Visualizzare la risposta dell'AI
 \end{enumerate}
 
-% Sezione 7: Script PowerShell Disponibili
+% Sezione 8: Script PowerShell Disponibili
 \section{Script PowerShell Disponibili}
 \label{sec:script}
 Il progetto include diversi script PowerShell utili:
@@ -319,8 +439,8 @@ Il progetto include diversi script PowerShell utili:
 \textbf{Script} & \textbf{Descrizione} \\
 \midrule
 \texttt{avvia-poc.ps1} & Avvia sia Backend che Frontend (apre due finestre) \\
-\texttt{avvia-backend.ps1} & Avvia solo il Backend Rails \\
-\texttt{avvia-frontend.ps1} & Avvia solo il Frontend Angular \\
+\texttt{avvia-backend.ps1} & Avvia solo il Backend \\
+\texttt{avvia-frontend.ps1} & Avvia solo il Frontend \\
 \texttt{verifica-postgres.ps1} & Verifica la connessione a PostgreSQL (chiede password) \\
 \texttt{crea-pdf-test.rb} & Crea un PDF di test per l'API di analisi \\
 \bottomrule
@@ -329,7 +449,7 @@ Il progetto include diversi script PowerShell utili:
 \label{tab:script}
 \end{table}
 
-% Sezione 8: Troubleshooting
+% Sezione 9: Troubleshooting
 \section{Troubleshooting}
 \label{sec:troubleshooting}
 
@@ -388,7 +508,23 @@ Il progetto include diversi script PowerShell utili:
     \item I warning VIPS (riguardanti moduli opzionali per immagini) possono essere ignorati - non bloccano il funzionamento dell'applicazione.
 \end{itemize}
 
-% Sezione 9: Note Importanti
+\subsection{Errore: "Script execution is disabled on this system"}
+\label{subsec:errore-powershell-policy}
+Se ricevi un errore quando provi a eseguire gli script PowerShell:
+
+\textbf{Soluzione 1: Cambiare la policy di esecuzione (permanente)}
+\label{subsubsec:soluzione-powershell-1}
+Per l'utente corrente:
+
+\begin{lstlisting}[language=bash, caption=Cambiare policy di esecuzione PowerShell]
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+\end{lstlisting}
+
+Questo comando permette l'esecuzione di script locali e richiede la firma solo per script scaricati da Internet.
+
+\textbf{Nota}: Potrebbe essere richiesto di confermare con \texttt{S} o \texttt{Y}.
+
+% Sezione 10: Note Importanti
 \section{Note Importanti}
 \label{sec:note}
 \begin{itemize}
@@ -403,7 +539,7 @@ Il progetto include diversi script PowerShell utili:
     \end{itemize}
 \end{itemize}
 
-% Sezione 10: Riavvio Dopo Modifiche
+% Sezione 11: Riavvio Dopo Modifiche
 \section{Riavvio Dopo Modifiche}
 \label{sec:riavvio}
 Dopo aver modificato:
@@ -415,11 +551,10 @@ Dopo aver modificato:
     \item \textbf{File .env}: Riavviare il POC (Ctrl+C e rieseguire \texttt{.\textbackslash avvia-poc.ps1)}
 \end{itemize}
 
-% Sezione 11: Risorse Aggiuntive
+% Sezione 12: Risorse Aggiuntive
 \section{Risorse Aggiuntive}
 \label{sec:risorse}
 \begin{itemize}
-    \item \textbf{Documentazione Backend}: Vedere \texttt{backend/docs/SETUP\_E\_DOCUMENTAZIONE.txt}
     \item \textbf{Gemfile}: Lista delle dipendenze Ruby in \texttt{backend/Gemfile}
     \item \textbf{package.json}: Lista delle dipendenze Node.js in \texttt{frontend/package.json}
 \end{itemize}

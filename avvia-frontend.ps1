@@ -9,7 +9,7 @@ Set-Location frontend
 # Verifica che le dipendenze siano installate
 if (-not (Test-Path "node_modules")) {
     Write-Host "Installazione dipendenze Node.js..." -ForegroundColor Yellow
-    npm install
+    cmd /c "npm install"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Errore durante l'installazione delle dipendenze!" -ForegroundColor Red
         Set-Location ..
@@ -19,7 +19,7 @@ if (-not (Test-Path "node_modules")) {
 
 # Avvia il server di sviluppo
 Write-Host "Avvio server Angular su http://localhost:4200" -ForegroundColor Green
-npm start
+cmd /c "npm start"
 
 # Torna alla directory principale quando il server si ferma
 Set-Location ..
