@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient,HttpClientModule  } from '@angular/common/http';
+import { HttpClient  } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -13,13 +13,14 @@ interface Tone {
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [FormsModule,HttpClientModule,CommonModule],
+  imports: [FormsModule,CommonModule,],
   templateUrl: './ai-assistant.html',
   styleUrl: './ai-assistant.css',
 })
 export class AiAssistant implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
 
   prompt = '';
   tones: Tone[] = [];
@@ -45,6 +46,7 @@ export class AiAssistant implements OnInit {
         console.log('Numero toni:', res.tones?.length);
         
         this.tones = res.tones || [];
+        this.cdr.detectChanges();
         
         console.log('this.tones dopo assegnazione:', this.tones);
       },
