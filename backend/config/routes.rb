@@ -8,24 +8,34 @@ Rails.application.routes.draw do
   # Come si usano: facendo una richiesta HTTP a quell’URL (browser, curl, codice).
 
   # GET /up → controlla lo stato dell’app.
-  # `as: :rails_health_check` crea l'helper `rails_health_check_path`
-  # utile per link o test.
+  # Input: nessuno. Output: 200 OK con payload di health.
+  # `as: :rails_health_check` crea l'helper `rails_health_check_path` utile per link o test.
   get "up" => "rails/health#show", as: :rails_health_check
 
   # POST /genera → GeneratorController#create
-  # Serve per generare il testo via AI.
-  # Il body JSON del client (es. prompt, tone, company_id) sarà in `params`
-  # e, se necessario, in `request.body.read`.
+  # Input (body JSON): prompt (req), tone (req), company_id (req), conversation_id (opt).
+  # Output: { text, conversation_id } oppure errore 4xx/5xx.
   post "genera", to: "generator#create"
 
   # GET /toni → GeneratorController#index
-  # Restituisce la lista dei toni. Puoi passare query string
-  # come `?company_id=1` e leggerla con `params[:company_id]` nel controller.
+  # Input (query): company_id (req).
+  # Output: { company: {id,name}, tones: [ {id,name,instructions} ] } o 404 se company mancante.
   get "toni", to: "generator#index"
 
   # GET /conversazioni → GeneratorController#conversations
-  # Restituisce la lista delle conversazioni per una company
+  # Input (query): company_id (req).
+  # Output: lista max 50 conversazioni della company [{id,title,created_at,updated_at,summary}].
   get "conversazioni", to: "generator#conversations"
+
+  # GET /conversazioni/:id → GeneratorController#show_conversation
+  # Input: :id (req path), company_id (opt query per verifica ownership).
+  # Output: conversazione con metadati e messages ordinati [{id,role,content,created_at}].
+  get "conversazioni/:id", to: "generator#show_conversation"
+
+  # GET /conversazioni/ricerca → GeneratorController#search_conversations
+  # Input (query): q o query (req), company_id (opt filtro).
+  # Output: { total, conversations: [{id,title,summary,updated_at}] }.
+  get "conversazioni/ricerca", to: "generator#search_conversations"
 
   resources :documents, only: [ :index, :create, :show ]
 
