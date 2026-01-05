@@ -41,6 +41,7 @@ Write-Host ""
 Write-Host "Pagine di test HTML:" -ForegroundColor Cyan
 Write-Host "  - http://localhost:3000/tester.html" -ForegroundColor White
 Write-Host "  - http://localhost:3000/documentTester.html" -ForegroundColor White
+Write-Host "  - http://localhost:3000/test-generator.html" -ForegroundColor White
 Write-Host ""
 Write-Host "Per arrestare i servizi, chiudi le finestre aperte" -ForegroundColor Yellow
 Write-Host ""
