@@ -10,9 +10,11 @@ class Document < ApplicationRecord
   validates :original_file, presence: true
   validates :company_id, presence: true
   validate :original_file_mime_type, if: -> { original_file.attached? }
+  validate :checksum_uniqueness_for_company, if: -> { checksum.present? }
 
-  # Callbacks per calcolare checksum quando il file viene allegato
-  after_commit :compute_checksum, on: [:create, :update]
+
+  # Calcola il checksum del file prima della validazione
+  before_validation :compute_checksum, if: -> { original_file.attached? }
 
   private
 
@@ -25,11 +27,15 @@ class Document < ApplicationRecord
   end
 
   def compute_checksum
-    return unless original_file.attached?
-    return if checksum.present? # Evita di ricalcolare se già presente
-
     require "digest"
-    new_checksum = Digest::SHA256.hexdigest(original_file.download)
-    update_column(:checksum, new_checksum) if checksum != new_checksum
+    self.checksum = Digest::SHA256.hexdigest(original_file.download)
+  end
+
+  def checksum_uniqueness_for_company
+    return unless company_id
+
+    if Document.where(company_id: company_id, checksum: checksum).exists?
+      errors.add(:base, "Documento già caricato")
+    end
   end
 end
