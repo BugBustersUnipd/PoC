@@ -19,9 +19,14 @@ class AnalyzeDocumentJob < ApplicationJob
     # Errore di analisi (formato non supportato, Bedrock fallisce, ecc.)
     Rails.logger.error("Document analysis error: #{e.message}")
     doc.update(status: "failed", ai_data: { error: e.message })
+  rescue ActiveRecord::RecordInvalid => e
+    # Errore di validazione (es. checksum duplicato)
+    Rails.logger.error("Validation error analyzing document #{document_id}: #{e.message}")
+    doc.update(status: "failed", ai_data: { error: e.message })
   rescue StandardError => e
-    # Errori generici: lancia di nuovo per attivare il retry
+    # Errori generici: segna come fallito e lancia di nuovo per attivare il retry
     Rails.logger.error("Unexpected error analyzing document #{document_id}: #{e.message}")
+    doc.update(status: "failed", ai_data: { error: e.message }) rescue nil
     raise
   end
 end
