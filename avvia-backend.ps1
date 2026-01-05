@@ -35,7 +35,10 @@ if (-not $dbExists -or $hasPendingMigrations) {
         
         # Crea database
         Write-Host "Creazione database..." -ForegroundColor Cyan
-        bundle exec rails db:create 2>&1 | Out-Host
+        bundle exec rails db:create 2>&1 | Where-Object {
+            $_ -notmatch "VIPS-WARNING" -and 
+            $_ -notmatch "unable to load.*vips-.*\.dll"
+        } | Out-Host
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Errore nella creazione del database. Verifica che PostgreSQL sia in esecuzione e che le credenziali in config/database.yml siano corrette." -ForegroundColor Red
             Set-Location ..
@@ -45,7 +48,10 @@ if (-not $dbExists -or $hasPendingMigrations) {
     
     # Esegui migrazioni (anche se il database esiste già, potrebbe esserci una migrazione pendente)
     Write-Host "Esecuzione migrazioni..." -ForegroundColor Cyan
-    bundle exec rails db:migrate 2>&1 | Out-Host
+    bundle exec rails db:migrate 2>&1 | Where-Object {
+        $_ -notmatch "VIPS-WARNING" -and 
+        $_ -notmatch "unable to load.*vips-.*\.dll"
+    } | Out-Host
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Errore durante le migrazioni!" -ForegroundColor Red
         Set-Location ..
@@ -55,7 +61,10 @@ if (-not $dbExists -or $hasPendingMigrations) {
     # Popola database solo se non esisteva prima
     if (-not $dbExists) {
         Write-Host "Popolazione database con dati iniziali..." -ForegroundColor Cyan
-        bundle exec rails db:seed 2>&1 | Out-Host
+        bundle exec rails db:seed 2>&1 | Where-Object {
+            $_ -notmatch "VIPS-WARNING" -and 
+            $_ -notmatch "unable to load.*vips-.*\.dll"
+        } | Out-Host
     }
     Write-Host "Database pronto!" -ForegroundColor Green
 }
@@ -76,6 +85,7 @@ if (-not (Test-Path ".env")) {
 }
 
 # Avvia il server
+# Nota: I warning VIPS all'avvio sono innocui (moduli opzionali non disponibili su Windows)
 Write-Host "Avvio server Rails su http://localhost:3000" -ForegroundColor Green
 bundle exec rails s
 
