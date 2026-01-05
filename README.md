@@ -19,3 +19,8 @@ Il POC si concentra su due ambiti funzionali principali:
 - **Frontend:** Angular / Next.js
 - **Backend:** Ruby on Rails
 - **Database:** PostgreSQL
+
+## Configurazione database locale
+- Copia [backend/config/database.yml.example](backend/config/database.yml.example) in [backend/config/database.yml](backend/config/database.yml).
+- Imposta le variabili d'ambiente richieste (es. `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME_DEVELOPMENT`, `DB_NAME_TEST`, `DB_NAME_PRODUCTION*`); se non impostate, verranno usati i default nel file.
+- Riavvia il backend dopo eventuali modifiche alla configurazione.

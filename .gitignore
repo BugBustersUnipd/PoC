@@ -7,9 +7,12 @@
 # Ignore bundler config (Backend).
 /backend/.bundle
 
+
 # Ignore all environment files.
 /.env*
 /backend/.env*
+# Keep the shared example for backend env.
+!/backend/.env.example
 
 # Ignore all logfiles and tempfiles (Backend).
 /backend/log/*
