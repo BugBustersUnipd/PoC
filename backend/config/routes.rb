@@ -37,6 +37,12 @@ Rails.application.routes.draw do
   # Output: { total, conversations: [{id,title,summary,updated_at}] }.
   get "conversazioni/ricerca", to: "generator#search_conversations"
 
+  # POST /genera-immagine → GeneratorController#create_image
+  # Genera un'immagine che può essere associata a una conversazione testuale.
+  # Input (body JSON): prompt (req), company_id (req), conversation_id (opt), width (opt), height (opt), seed (opt).
+  # Output: { image_url, image_id, width, height, model_id, created_at }.
+  post "genera-immagine", to: "generator#create_image"
+
   resources :documents, only: [ :index, :create, :show ]
 
   # Esempio di root (pagina principale) — al momento non usata:

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Generatore Testo & Immagini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result.hidden {
+            display: none;
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .result p {
+            color: #666;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .result img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .config {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .config label {
+            margin-bottom: 3px;
+        }
+        
+        .meta-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Test Generatore Testo & Immagini</h1>
+            <p>Prova gli endpoint /genera e /genera-immagine</p>
+        </div>
+        
+        <div class="content">
+            <!-- SEZIONE TESTO -->
+            <div class="section">
+                <h2>📝 Generazione Testo</h2>
+                
+                <div class="config">
+                    <div class="form-group">
+                        <label>Company ID:</label>
+                        <input type="number" id="companyId" value="1" min="1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Prompt Testo:</label>
+                    <textarea id="textPrompt" placeholder="Es: Scrivi una descrizione accattivante per un prodotto...">Scrivi una descrizione breve e accattivante di un orologio da polso lussuoso.</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tono:</label>
+                    <select id="tone">
+                        <option value="formale">Formale</option>
+                        <option value="informale">Informale</option>
+                        <option value="creativo">Creativo</option>
+                    </select>
+                </div>
+                
+                <button onclick="generateText()" id="btnGenerateText">
+                    ⚡ Genera Testo
+                </button>
+                
+                <div class="status hidden" id="statusText"></div>
+                
+                <div class="result hidden" id="resultText">
+                    <h3>Testo Generato</h3>
+                    <p id="textOutput"></p>
+                    <div class="meta-info">
+                        <strong>ID Conversazione:</strong> <span id="conversationId">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SEZIONE IMMAGINE -->
+            <div class="section">
+                <h2>🖼️ Generazione Immagine</h2>
+                
+                <div class="config">
+                    <div class="form-group">
+                        <label>Company ID:</label>
+                        <input type="number" id="companyIdImage" value="1" min="1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Prompt Immagine:</label>
+                    <textarea id="imagePrompt" placeholder="Es: Un orologio da polso lussuoso in oro con quadrante blu...">Un orologio da polso elegante in oro con quadrante blu scuro, stile minimalista, su sfondo bianco.</textarea>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Larghezza:</label>
+                        <select id="width">
+                            <option value="512">512</option>
+                            <option value="1024" selected>1024</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Altezza:</label>
+                        <select id="height">
+                            <option value="512">512</option>
+                            <option value="1024" selected>1024</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Seed (opzionale):</label>
+                        <input type="number" id="seed" placeholder="Lascia vuoto per casuale">
+                    </div>
+                </div>
+                
+                <button onclick="generateImage()" id="btnGenerateImage" disabled>
+                    ⚡ Genera Immagine
+                </button>
+                <p style="font-size: 12px; color: #999; margin-top: 5px;">💡 Genera prima il testo per collegare l'immagine alla stessa conversazione</p>
+                
+                <div class="status hidden" id="statusImage"></div>
+                
+                <div class="result hidden" id="resultImage">
+                    <h3>Immagine Generata</h3>
+                    <img id="imageOutput" src="" alt="Immagine generata">
+                    <div class="meta-info">
+                        <strong>ID Immagine:</strong> <span id="imageId">-</span><br>
+                        <strong>Dimensioni:</strong> <span id="imageDims">-</span><br>
+                        <strong>Modello:</strong> <span id="imageModel">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentConversationId = null;
+        
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `status ${type}`;
+            el.classList.remove('hidden');
+        }
+        
+        function hideStatus(elementId) {
+            document.getElementById(elementId).classList.add('hidden');
+        }
+        
+        function hideResult(elementId) {
+            document.getElementById(elementId).classList.add('hidden');
+        }
+        
+        function showResult(elementId) {
+            document.getElementById(elementId).classList.remove('hidden');
+        }
+        
+        async function generateText() {
+            const prompt = document.getElementById('textPrompt').value;
+            const companyId = document.getElementById('companyId').value;
+            const tone = document.getElementById('tone').value;
+            
+            if (!prompt.trim()) {
+                showStatus('statusText', '❌ Inserisci un prompt!', 'error');
+                return;
+            }
+            
+            showStatus('statusText', '⏳ Generazione in corso...', 'loading');
+            document.getElementById('btnGenerateText').disabled = true;
+            
+            try {
+                const response = await fetch('/genera', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        company_id: parseInt(companyId),
+                        tone: tone
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Errore sconosciuto');
+                }
+                
+                currentConversationId = data.conversation_id;
+                document.getElementById('textOutput').textContent = data.text;
+                document.getElementById('conversationId').textContent = data.conversation_id;
+                
+                showResult('resultText');
+                showStatus('statusText', '✅ Testo generato con successo!', 'success');
+                
+                // Abilita bottone immagine
+                document.getElementById('btnGenerateImage').disabled = false;
+                document.getElementById('companyIdImage').value = companyId;
+                
+            } catch (error) {
+                showStatus('statusText', `❌ Errore: ${error.message}`, 'error');
+                console.error('Errore:', error);
+            } finally {
+                document.getElementById('btnGenerateText').disabled = false;
+            }
+        }
+        
+        async function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value;
+            const companyId = document.getElementById('companyIdImage').value;
+            const width = parseInt(document.getElementById('width').value);
+            const height = parseInt(document.getElementById('height').value);
+            const seed = document.getElementById('seed').value;
+            
+            if (!prompt.trim()) {
+                showStatus('statusImage', '❌ Inserisci un prompt!', 'error');
+                return;
+            }
+            
+            if (!currentConversationId) {
+                showStatus('statusImage', '❌ Genera prima il testo!', 'error');
+                return;
+            }
+            
+            showStatus('statusImage', '⏳ Generazione immagine in corso...', 'loading');
+            document.getElementById('btnGenerateImage').disabled = true;
+            
+            try {
+                const body = {
+                    prompt: prompt,
+                    company_id: parseInt(companyId),
+                    conversation_id: currentConversationId,
+                    width: width,
+                    height: height
+                };
+                
+                if (seed) {
+                    body.seed = parseInt(seed);
+                }
+                
+                const response = await fetch('/genera-immagine', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Errore sconosciuto');
+                }
+                
+                if (data.image_url) {
+                    document.getElementById('imageOutput').src = data.image_url;
+                    document.getElementById('imageId').textContent = data.image_id;
+                    document.getElementById('imageDims').textContent = `${data.width}x${data.height}`;
+                    document.getElementById('imageModel').textContent = data.model_id;
+                    
+                    showResult('resultImage');
+                    showStatus('statusImage', '✅ Immagine generata con successo!', 'success');
+                } else {
+                    throw new Error('Nessuna immagine nel response');
+                }
+                
+            } catch (error) {
+                showStatus('statusImage', `❌ Errore: ${error.message}`, 'error');
+                console.error('Errore:', error);
+            } finally {
+                document.getElementById('btnGenerateImage').disabled = false;
+            }
+        }
+        
+        // Permetti invio con Enter
+        document.getElementById('textPrompt').addEventListener('keypress', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') generateText();
+        });
+        
+        document.getElementById('imagePrompt').addEventListener('keypress', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') generateImage();
+        });
+    </script>
+</body>
+</html>

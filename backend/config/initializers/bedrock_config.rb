@@ -20,3 +20,4 @@ end.freeze
 # Costanti separate per ogni profilo (facile da riferenziare con ::)
 BEDROCK_CONFIG_ANALYSIS = BEDROCK_CONFIG["document_analysis"].freeze
 BEDROCK_CONFIG_GENERATION = BEDROCK_CONFIG["text_generation"].freeze
+BEDROCK_CONFIG_IMAGE_GENERATION = BEDROCK_CONFIG["image_generation"].freeze

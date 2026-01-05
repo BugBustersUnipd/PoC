@@ -1,7 +1,27 @@
+# Configurazione Amazon Bedrock per Nexum POC
+#
+# Questo file centralizza la configurazione per i 3 profili di utilizzo di Bedrock:
+#   1. document_analysis: OCR e estrazione dati rigida da documenti
+#   2. text_generation: generazione testo conversazionale con AI
+#   3. image_generation: generazione immagini con Nova Canvas
+#
+# I valori possono essere sovrascritti tramite variabili d'ambiente:
+#   - AWS_REGION (default: us-east-1)
+#   - BEDROCK_MODEL_ID_ANALYSIS (default: amazon.nova-lite-v1:0)
+#   - BEDROCK_MODEL_ID_GENERATION (default: amazon.nova-lite-v1:0)
+#   - BEDROCK_MODEL_ID_IMAGE (default: amazon.nova-canvas-v1:0)
+#
+# Caricamento: config/initializers/bedrock_config.rb
+# Utilizzo: BEDROCK_CONFIG_ANALYSIS, BEDROCK_CONFIG_GENERATION, BEDROCK_CONFIG_IMAGE_GENERATION
+#
 default: &defaults
   region: <%= ENV.fetch("AWS_REGION", "us-east-1") %>
 
 # Profilo per analisi documenti (OCR, estrazione dati rigida)
+# - Modello: Nova Lite v1 (buon bilanciamento velocità/accuratezza per analisi)
+# - Temperature: 0.0 (output deterministico, nessuna creatività)
+# - Max tokens: 1000 (sufficiente per estrazioni strutturate JSON)
+# - Supporta: PDF, PNG, JPEG, WebP (formati comuni documenti)
 document_analysis: &document_analysis
   <<: *defaults
   model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_ANALYSIS", "amazon.nova-lite-v1:0") %>
@@ -15,26 +35,52 @@ document_analysis: &document_analysis
     - image/webp
 
 # Profilo per generazione testo conversazionale
+# - Modello: Nova Lite v1 (leggero, veloce, economico per chat)
+# - Temperature: 0.0 (risposte consistenti, senza variazioni creative)
+# - Max tokens: 1000 (adeguato per messaggi chat standard)
+# - Usa l'API Converse di Bedrock (supporta conversazioni multi-turn)
 text_generation: &text_generation
   <<: *defaults
   model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_GENERATION", "amazon.nova-lite-v1:0") %>
   temperature: 0.0
   max_tokens: 1000
 
+# Profilo per generazione immagini
+# - Modello: Nova Canvas v1 (modello immagini Amazon, rilasciato fine 2024)
+# - Width/Height: default 1024x1024 (quadrato standard)
+# - Quality: "standard" (Nova Canvas ignora questo parametro, mantenuto per compatibilità)
+# - Usa invoke_model API (NON Converse - Canvas non lo supporta)
+# - Dimensioni supportate: 1024x1024, 1280x720, 720x1280 (validate in ImageService)
+# 
+# NOTA IMPORTANTE: Nova Canvas usa invoke_model, non Converse API
+# Se provi a usare Converse, riceverai "required key [messages] not found"
+image_generation: &image_generation
+  <<: *defaults
+  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_IMAGE", "amazon.nova-canvas-v1:0") %>
+  width: 1024    # Default: quadrato 1024x1024
+  height: 1024
+  quality: "standard" # Parametro legacy (non usato da Nova Canvas)
+
 development:
   document_analysis:
     <<: *document_analysis
   text_generation:
     <<: *text_generation
+  image_generation:
+    <<: *image_generation
 
 test:
   document_analysis:
     <<: *document_analysis
   text_generation:
     <<: *text_generation
+  image_generation:
+    <<: *image_generation
 
 production:
   document_analysis:
     <<: *document_analysis
   text_generation:
     <<: *text_generation
+  image_generation:
+    <<: *image_generation

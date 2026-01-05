@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_04_180646) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_05_135211) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_04_180646) do
     t.index ["company_id"], name: "index_documents_on_company_id"
   end
 
+  create_table "generated_images", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "conversation_id"
+    t.datetime "created_at", null: false
+    t.integer "height", null: false
+    t.string "model_id", null: false
+    t.text "prompt", null: false
+    t.string "quality", default: "standard", null: false
+    t.datetime "updated_at", null: false
+    t.integer "width", null: false
+    t.index ["company_id", "created_at"], name: "index_generated_images_on_company_id_and_created_at"
+    t.index ["company_id"], name: "index_generated_images_on_company_id"
+    t.index ["conversation_id"], name: "index_generated_images_on_conversation_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.text "content", null: false
     t.bigint "conversation_id", null: false
@@ -94,6 +109,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_04_180646) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "conversations", "companies"
   add_foreign_key "documents", "companies"
+  add_foreign_key "generated_images", "companies"
+  add_foreign_key "generated_images", "conversations"
   add_foreign_key "messages", "conversations"
   add_foreign_key "tones", "companies"
 end
