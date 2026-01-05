@@ -45,11 +45,6 @@ export class RisultatoGenerazione implements OnInit {
     console.log('Rigenera con lo stesso prompt');
   }
 
-  valuta() {
-    // TODO: implementa la valutazione
-    console.log('Valuta il risultato');
-  }
-
   salvaPost() {
     // TODO: implementa il salvataggio
     console.log('Salva il post');
