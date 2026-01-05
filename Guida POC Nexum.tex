@@ -138,6 +138,8 @@
 \hline
 \rowcolor{primaryblue!40}
 \textbf{\color{white} Versione} & \textbf{\color{white} Data} & \textbf{\color{white} Descrizione} & \textbf{\color{white} Redatto} & \textbf{\color{white} Verificato} & \textbf{\color{white} Approvato} \\
+0.0.2 & 05/01/2026 & Aggiunta sezione image generator & Alberto Autiero & - & - \\
+\hline
 0.0.2 & 31/12/2025 & Migliorie alla guida & Alberto Autiero & - & - \\
 \hline
 0.0.1 & 29/12/2025 & Prima stesura della guida all'utilizzo del POC del documento & Alberto Autiero & - & - \\
@@ -393,6 +395,7 @@ Una volta avviati i servizi, avrai accesso a:
 \begin{itemize}
     \item \textbf{Generazione Testo}: \url{http://localhost:3000/tester.html}
     \item \textbf{Analisi Documenti}: \url{http://localhost:3000/documentTester.html}
+    \item \textbf{Generatore Immagini}: \url{http://localhost:3000/test-generator.html}
 \end{itemize}
 
 % Sezione 7: Come Testare il POC
@@ -403,14 +406,23 @@ Una volta avviati i servizi, avrai accesso a:
 \label{subsec:test-analisi}
 \begin{enumerate}
     \item Aprire \url{http://localhost:3000/documentTester.html}
-    \item Cliccare su "Scegli file" e selezionare \texttt{documento-test.pdf} presente nella cartella backend 
+    \item Cliccare su "Scegli file" e selezionare un documento dalla cartella \texttt{documenti-test-ocr} (sia pdf che immagini)
     \item Cliccare su "Carica e Analizza"
     \item Attendere che l'AI analizzi il documento
     \item Visualizzare i risultati estratti
 \end{enumerate}
 
-\textbf{Creare un PDF di test:}
-Se non hai il file \texttt{documento-test.pdf}, puoi crearne uno eseguendo:
+\textbf{Creare documenti di test:}
+Per generare documenti di test più realistici, puoi eseguire:
+
+\begin{lstlisting}[language=bash, caption=Generare documenti realistici]
+python genera-immagini-test.py
+\end{lstlisting}
+
+Questo script crea vari tipi di documenti (cedolini, fatture, CUD, ricevute) sia come immagini che PDF.
+
+\textbf{Alternativa:}
+Se preferisci creare un PDF semplice, puoi ancora usare:
 
 \begin{lstlisting}[language=bash]
 ruby crea-pdf-test.rb
@@ -425,6 +437,16 @@ ruby crea-pdf-test.rb
     \item Scrivere un prompt (es: "Scrivi un'email di presentazione")
     \item Cliccare su "Genera"
     \item Visualizzare la risposta dell'AI
+\end{enumerate}
+
+\subsection{Test 3: Generazione Immagini}
+\label{subsec:test-immagini}
+\begin{enumerate}
+    \item Aprire \url{http://localhost:3000/test-generator.html}
+    \item Scrivere un prompt ed attendere la risposta
+    \item Spostarsi ora nella sezione genera immagine e compilare i campi richiesti (prompt, dimensioni).
+    \item Cliccare su "Genera"
+    \item Attendere che l'immagine venga creata
 \end{enumerate}
 
 % Sezione 8: Script PowerShell Disponibili
