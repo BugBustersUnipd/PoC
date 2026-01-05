@@ -27,8 +27,15 @@ class Document < ApplicationRecord
   end
 
   def compute_checksum
+    return unless original_file.attached?
+
     require "digest"
-    self.checksum = Digest::SHA256.hexdigest(original_file.download)
+
+    uploaded_file = original_file.blob.instance_variable_get(:@record)
+
+    if uploaded_file.respond_to?(:tempfile)
+      self.checksum = Digest::SHA256.file(uploaded_file.tempfile.path).hexdigest
+    end
   end
 
   def checksum_uniqueness_for_company
