@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ConversationsService } from '../../services/conversation.service';
+import { Router } from '@angular/router';
 
 interface PromptRow {
   conversationId: number;
@@ -20,6 +21,7 @@ interface PromptRow {
 })
 export class StoricoPrompt implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   rows: PromptRow[] = [];
   filteredRows: PromptRow[] = [];
@@ -86,5 +88,12 @@ export class StoricoPrompt implements OnInit {
       r.risultato.toLowerCase().includes(term)
     );
   }
+
+  goToConversation(id: number) {
+    this.router.navigate(['/risultato-generazione'], { 
+      queryParams: { conversation_id: id } 
+    });
+  }
+
 }
 

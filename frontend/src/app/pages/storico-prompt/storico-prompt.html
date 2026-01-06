@@ -22,7 +22,9 @@
 
     <tbody>
       @for (r of filteredRows; track r.conversationId) {
-        <tr>
+        <tr
+          (click)="goToConversation(r.conversationId)"
+        >
           <td class="prompt">{{ r.prompt }}</td>
           <td class="risultato">{{ r.risultato }}</td>
           <td>{{ r.timestamp | date:'short' }}</td>

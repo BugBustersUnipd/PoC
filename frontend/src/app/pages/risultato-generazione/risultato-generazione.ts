@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient  } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 interface Message{
   id: number;
   role: string;
@@ -19,6 +20,7 @@ interface Message{
 })
 
 export class RisultatoGenerazione implements OnInit {
+  private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -34,36 +36,37 @@ export class RisultatoGenerazione implements OnInit {
   companyId: number | null = null;
   tone: string | null = null;
   newMessage: string = '';
-  ngOnInit() {
-    // Recupera i dati passati dalla navigazione
-    const state = history.state;
-    if (state && state['result']) {
-      // questo per ora non serve ma lascio magari poi serve
-      this.result = state['result']; 
-      this.companyId = state['company_id'] || null;
-      this.tone = state['tone'] || null;
-      this.conversationId = state['result'].conversation_id || null;
-      console.log(' Risultato ricevuto:', this.result);
-      
 
-      //commentato perche non serve più teoricamente
-      // Estrai il testo generato (adatta in base alla struttura della response del tuo backend) 
-      // this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
-      // this.generatedImage = this.result.image_url || null;
-      
+
+ngOnInit() {
+  const state = history.state;
+
+  // Sottoscriviamo ai parametri dell'URL
+  this.route.queryParams.subscribe(params => {
+    const id_param = params['conversation_id'];
+
+    if (id_param) {
+      //se è stato generato un testo (pulsante Genera) allora carica la conversazione
+      this.conversationId = +id_param;
+      this.companyId = state?.['company_id'] || null;
+      this.tone = state?.['tone'] || null;
       this.loadConversation();
+    } //se è stata generata un'immagien (quindi non associata ad una conversazione) allora vengono passati i dati 
+    else if (state && state.result) {
+      this.result = state.result;
       
-      // Estrai il testo generato (adatta in base alla struttura della response del tuo backend)
-      this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
-      if (this.result.image_url) {
-        this.generatedImage = `http://localhost:3000${this.result.image_url}`;
-      } else {
-        this.generatedImage = null;
-      }      this.conversationId = this.result.conversation_id || null;
-    } else {
-      console.warn(' Nessun risultato dalla navigazione, carico ultima conversazione...');
+      if (state.result.image_url) {
+        this.generatedImage = `http://localhost:3000${state.result.image_url}`;
+        this.generatedText = '';
+      } 
+
+      this.cdr.detectChanges();
     }
-  }
+    else {
+      console.warn('Nessun dato disponibile');
+    }
+  });
+}
 
   navigateToModificaGenerazione() {
     this.router.navigate(['/modifica-generazione'], {
@@ -86,33 +89,30 @@ export class RisultatoGenerazione implements OnInit {
   }
 
   loadConversation() {
-    if (!this.conversationId) {
-      return;
-    }
+    if (!this.conversationId) return;
 
-  this.http
-    .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {
-      params: { company_id: this.companyId?.toString() || '' }
-    })
-    .subscribe({
-      next: (res) => {
-        this.conversation = res.messages || [];
-        console.log('Conversazione caricata:', this.conversation);
-        // Forza l'aggiornamento della variabile usata nel template
-        // Usiamo la logica del getter ma la salviamo esplicitamente
-        const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
-        if (assistantMessages.length > 0) {
-           const lastContent = assistantMessages[assistantMessages.length - 1].content;
-           this.generatedText = lastContent;
-           this.cdr.detectChanges()
-        }
-      },
-      error: (err) => {
-        console.error('Errore:', err);
-      }
-    });
-}
+    this.http
+      .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {
+        params: { company_id: this.companyId?.toString() || '' }
+      })
+      .subscribe({
+        next: (res) => {
+          this.conversation = res.messages || [];
+          
+          // Se l'immagine è parte della conversazione o del risultato, gestiscila qui
+          if (res.image_url) {
+            this.generatedImage = `http://localhost:3000${res.image_url}`;
+          }
 
+          const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
+          if (assistantMessages.length > 0) {
+             this.generatedText = assistantMessages[assistantMessages.length - 1].content;
+             this.cdr.detectChanges();
+          }
+        },
+        error: (err) => console.error('Errore caricamento:', err)
+      });
+  }
   toggleConversations() {
     this.showConversations = !this.showConversations;
     // console.log('Mostra conversazioni:', this.showConversations);

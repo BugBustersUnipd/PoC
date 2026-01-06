@@ -103,54 +103,48 @@ export class AiAssistant implements OnInit {
       company_id: this.filterCompany,
       conversation_id: null
     };
-    
-    this.http.post('http://localhost:3000/genera', payload)
-    .subscribe({
+    this.http.post<any>('http://localhost:3000/genera', payload)
+      .subscribe({
         next: (response) => {
           this.router.navigate(['/risultato-generazione'], {
-            state: { 
-              result: response,
-              company_id: this.filterCompany,
-              tone: this.selectedTone
-            }
+
+            //passa come parametro conversation_id l'id della conversazione (aggiungo per permettere la visualizzazione della singola conversazione nello storico, con tutti i suoi dettagli)
+            queryParams: { conversation_id: response.conversation_id },
+
+            //i dati che ci servono per recuperare tono e la company (entrambe per permettere la modifica, perchè usano GET /genera)
+            state: { company_id: this.filterCompany, tone: this.selectedTone }
           });
         },
-        error: () => {
-          alert('Errore nella generazione');
-        }
+        error: () => alert('Errore nella generazione')
       });
   }
   
 
   generaImmagine() {
-    // 1. Validazione: serve almeno il prompt
     if (!this.prompt.trim()) {
       alert('Inserisci un prompt per generare l\'immagine');
       return;
     }
 
-    // 2. Prepara i dati (nota: company_id è obbligatorio)
     const payload = {
       prompt: this.prompt,
       company_id: this.filterCompany,
       conversation_id: null 
     };
 
-    console.log('Invio richiesta immagine:', payload);
-
-    // 3. Chiamata all'API /genera-immagine
-    this.http.post('http://localhost:3000/genera-immagine', payload)
+    this.http.post<any>('http://localhost:3000/genera-immagine', payload)
       .subscribe({
         next: (response) => {
-          console.log('Immagine generata:', response);
-          // 4. Vai alla pagina risultati passando la risposta
           this.router.navigate(['/risultato-generazione'], {
-            state: { result: response }
+            state: { 
+              result: response, //ci serve per avere l'effetiva immagine
+              isImage: true //permette di capoire che è un'immagine, altrimenti risultato-generazione non sa se usare renderizzare un testo o un'immagine
+            }
           });
         },
         error: (err) => {
           console.error('Errore generazione immagine:', err);
-          alert('Errore durante la generazione dell\'immagine. Controlla la console.');
+          alert('Errore durante la generazione dell\'immagine');
         }
       });
   }

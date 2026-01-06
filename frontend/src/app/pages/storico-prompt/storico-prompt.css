@@ -55,6 +55,7 @@ div[ng-reflect-ng-if] {
 
 .storico-table tbody tr:hover {
   background-color: #fafafa;
+  cursor: pointer;
 }
 
 /* Prompt e Risultato */
