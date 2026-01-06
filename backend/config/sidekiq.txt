@@ -1,0 +1,6 @@
+Per installare sidekiq:
+sudo apt install redis-server
+
+Per far partire sidekiq:
+bundle exec sidekiq
+poi far partire rails (in un terminale diverso)
