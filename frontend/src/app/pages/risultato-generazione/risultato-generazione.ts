@@ -14,6 +14,7 @@ export class RisultatoGenerazione implements OnInit {
   
   result: any = null;
   generatedText: string = '';
+  generatedImage: string | null = null;
   conversationId: number | null = null;
 
   ngOnInit() {
@@ -26,6 +27,7 @@ export class RisultatoGenerazione implements OnInit {
       
       // Estrai il testo generato (adatta in base alla struttura della response del tuo backend)
       this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
+      this.generatedImage = this.result.image_url || null;
       this.conversationId = this.result.conversation_id || null;
     } else {
       console.warn(' Nessun risultato trovato, reindirizzo...');

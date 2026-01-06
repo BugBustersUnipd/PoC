@@ -4,7 +4,12 @@
     <div class="prompt-box">    
       <h1>Risultato Generazione</h1>
       
-      <div *ngIf="generatedText; else noResult" class="generated-content">
+      <div *ngIf="generatedText || generatedImage; else noResult" class="generated-content">
+
+        <div *ngIf="generatedImage" class="image-container" style="text-align: center; margin-bottom: 20px;">
+          <img [src]="generatedImage" alt="Immagine generata" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        </div>
+        
         <p class="generated-text">{{ generatedText }}</p>
       </div>
       
