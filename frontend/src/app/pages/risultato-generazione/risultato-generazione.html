@@ -23,52 +23,41 @@
   <!-- Button panel (right side) -->
   <div class="button-panel">
     <button class="btn btn-green" (click)="rigenera()">Rigenera</button>
-    <button class="btn btn-white" (click)="loadConversation()">Modifica</button>
-    <button class="btn btn-white" (click)="salvaPost()">Salva Post</button>
-    <button class="btn btn-red" (click)="scarta()">Scarta</button>
-    <button class="btn btn-blue" (click)="pubblica()">Pubblica</button>
-  </div>
-
-
-   <div class="conversation-container">
-    <div class="new-message">
-      <input
-        type="text"
-        [(ngModel)]="newMessage"
-        placeholder="Scrivi qui il tuo messaggio..."
-        (keyup.enter)="addConversation()"
-      />
-      <button (click)="addConversation()">Invia</button>
-    </div>
-
-    @for (msg of conversations.slice().reverse(); track msg.id) {
-        <div class="message" [ngClass]="msg.role">
-          @if (msg.role === 'user') {
-            <strong>Tu:</strong>
-          } @else {
-            <strong>AI:</strong>
-          }
-          {{ msg.content }}
-        </div>
-    }
-    
-  </div>
-
-  
-  <!-- <div class="button-panel">
-    <button class="btn btn-green" (click)="rigenera()">Rigenera</button>
     <button class="btn btn-white" (click)="toggleConversations()">Modifica</button>
     <button class="btn btn-white" (click)="salvaPost()">Salva Post</button>
     <button class="btn btn-red" (click)="scarta()">Scarta</button>
     <button class="btn btn-blue" (click)="pubblica()">Pubblica</button>
   </div>
 
-  <div class="conversations" *ngIf="showConversations">
-    <input
-      type="text"
-      placeholder="Scrivi un messaggio..."
-      [(ngModel)]="newMessage"
-    />
-    <button (click)="addConversation()">Invia</button>
-  </div> -->
+
+   <div class="conversation-container" [ngClass]="hiddenClass">
+    <div class="new-message">
+      <input
+        type="text"
+        [(ngModel)]="newMessage"
+        placeholder="cosa vuoi modificare..."
+        (keyup.enter)="addConversation()"
+      />
+      <button class="btn btn-green" (click)="addConversation()">Invia</button>
+    </div>
+
+    @for (msg of conversations.slice().reverse(); track msg.id) {
+      <div
+        class="message"
+        [ngClass]="msg.role"
+        (click)="msg.role === 'assistant' ? onAiMessageClick(msg) : null"
+      >
+        @if (msg.role === 'user') {
+          <strong>Tu:</strong>
+          {{ msg.content }}
+        } @else {
+          <div class="ai-preview">
+            <strong>AI:</strong>
+            {{ msg.content.split('\n')[0] }}
+          </div>
+        }
+      </div>
+    }
+
+  </div>
 </div>

@@ -22,6 +22,8 @@ export class RisultatoGenerazione implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   
+
+  showConversations: boolean = false;
   conversations: Conversation[] = [];
 
   result: any = null;
@@ -103,6 +105,11 @@ export class RisultatoGenerazione implements OnInit {
       });
   }
 
+  toggleConversations() {
+    this.showConversations = !this.showConversations;
+    console.log('Mostra conversazioni:', this.showConversations);
+  }
+
 
   // Aggiunge un messaggio alla conversazione
 
@@ -127,7 +134,7 @@ export class RisultatoGenerazione implements OnInit {
         this.loadConversation();
         // resetta input
         this.newMessage = '';
-        
+
       },
       error: (err) => {
         console.error('Errore aggiunta messaggio:', err);
@@ -136,5 +143,15 @@ export class RisultatoGenerazione implements OnInit {
     });
   }
 
+  onAiMessageClick(message: any) {
+    console.log('Messaggio AI cliccato:', message);
+  }
 
+  get hiddenClass(){
+    if(this.showConversations){
+      return {};
+    }else{
+      return {'hidden' : true};
+    }
+  }
 }
