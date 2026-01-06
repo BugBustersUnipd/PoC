@@ -1,11 +1,63 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef,Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DocumentsService } from '../../services/document.service';
+import { interval, Subscription, switchMap } from 'rxjs';
+
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-aicopilotanteprimadocumento',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './aicopilotanteprimadocumento.html',
-  styleUrl: './aicopilotanteprimadocumento.css',
+  styleUrl:'./aicopilotanteprimadocumento.css'
 })
-export class Aicopilotanteprimadocumento {
+export class Aicopilotanteprimadocumento implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private documentsService = inject(DocumentsService);
+  private cdr = inject(ChangeDetectorRef);
 
+  document: any;
+  companyId = 1;
+
+  private pollingSub?: Subscription;
+  
+formatLabel(key: string): string {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+
+
+
+  ngOnInit() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.pollingSub = interval(3000)
+      .pipe(
+        switchMap(() =>
+          this.documentsService.getDocument(id, this.companyId)
+        )
+      )
+      .subscribe(doc => {
+        this.document = doc;
+        
+
+        if (doc.status === 'completed' || doc.status === 'failed') {
+          this.pollingSub?.unsubscribe();
+        this.cdr.detectChanges();  
+        }
+      });
+    
+  }
+
+  navigateToAiCoPilot() {
+    // Implement navigation logic here
+  }
+
+  ngOnDestroy() {
+    this.pollingSub?.unsubscribe();
+    
+  }
 }

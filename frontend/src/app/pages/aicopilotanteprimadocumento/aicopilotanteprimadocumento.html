@@ -4,34 +4,17 @@
     <!-- Left side - Form -->
     <div class="form-section">
       <div class="form-group">
-        <h1><label>Anteprima documento</label></h1>
-      </div>
-      
-      <div class="form-group">
-        <label>Destinatario</label>
-      </div>
-      
-      <div class="form-group">
-        <label>Documento originale</label>
-      </div>
-      
-      <div class="form-group">
-        <label>Numero documento</label>
-      </div>
-      
-      <div class="form-group">
-        <label>Tipologia</label>
-      </div>
-      
-      <div class="form-group">
-        <label>% confidenza</label>
-      </div>
-      
-      <div class="button-group">
+  @for (item of document.ai_data | keyvalue; track item.key) {
+    <div class="form-group">
+      <label>
+        {{ (item.key) }}:
+        {{ item.value || 'non trovato' }}
+      </label>
+    </div>
+  }
+</div>
 
-      </div>
-      
-      <button class="btn btn-back">←</button>
+      <button class="btn btn-back" (click)="navigateToAiCoPilot()">←</button>
     </div>
     
     <!-- Right side - Preview -->

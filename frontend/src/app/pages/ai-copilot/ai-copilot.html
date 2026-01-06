@@ -2,7 +2,11 @@
   <!-- Canvas area (left side) -->
   <div class="canvas-area">
     <div class="prompt-box">    
-  <p>Trascina o <button class="btn btn-white">carica</button></p>
+  <input
+    type="file"
+    (change)="onFileSelected($event)"
+    accept=".pdf,image/*"
+  />
 </div>
 </div>
 <!-- Button panel (right side) -->
@@ -11,7 +15,6 @@
     <button class="btn btn-white">M/A competenza</button>
     <button class="btn btn-white">Azienda</button>
     <button class="btn btn-red">Reparto</button>
-    <button class="btn btn-blue" (click)="navigateToConfidenza()">Upload</button>
+    <button class="btn btn-blue" (click)="upload()">Upload</button>
   </div>
 </div>
-   
