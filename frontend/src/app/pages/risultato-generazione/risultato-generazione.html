@@ -42,12 +42,12 @@
         type="text"
         [(ngModel)]="newMessage"
         placeholder="cosa vuoi modificare..."
-        (keyup.enter)="addConversation()"
+        (keyup.enter)="addMessage()"
       />
-      <button class="btn btn-green" (click)="addConversation()">Invia</button>
+      <button class="btn btn-green" (click)="addMessage()">Invia</button>
     </div>
 
-    @for (msg of conversations.slice().reverse(); track msg.id) {
+    @for (msg of conversation.slice().reverse(); track msg.id) {
       <div
         class="message"
         [ngClass]="msg.role"
