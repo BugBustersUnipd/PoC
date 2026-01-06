@@ -44,12 +44,12 @@ export class RisultatoGenerazione implements OnInit {
     // TODO: implementa la rigenerazione
     console.log('Rigenera con lo stesso prompt');
   }
-
+/*
   salvaPost() {
     // TODO: implementa il salvataggio
     console.log('Salva il post');
   }
-
+*/
   scarta() {
     // Torna alla home
     this.router.navigate(['/']);
@@ -58,5 +58,10 @@ export class RisultatoGenerazione implements OnInit {
   pubblica() {
     // TODO: implementa la pubblicazione
     console.log('Pubblica il contenuto');
+  }
+
+  esci() {
+    // Naviga verso la pagina dell'AI Assistant
+    this.router.navigate(['/ai-assistant']);
   }
 }
