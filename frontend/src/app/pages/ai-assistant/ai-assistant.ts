@@ -106,6 +106,40 @@ export class AiAssistant implements OnInit {
       });
   }
   
+
+  generaImmagine() {
+    // 1. Validazione: serve almeno il prompt
+    if (!this.prompt.trim()) {
+      alert('Inserisci un prompt per generare l\'immagine');
+      return;
+    }
+
+    // 2. Prepara i dati (nota: company_id è obbligatorio)
+    const payload = {
+      prompt: this.prompt,
+      company_id: this.filterCompany,
+      conversation_id: null 
+    };
+
+    console.log('Invio richiesta immagine:', payload);
+
+    // 3. Chiamata all'API /genera-immagine
+    this.http.post('http://localhost:3000/genera-immagine', payload)
+      .subscribe({
+        next: (response) => {
+          console.log('Immagine generata:', response);
+          // 4. Vai alla pagina risultati passando la risposta
+          this.router.navigate(['/risultato-generazione'], {
+            state: { result: response }
+          });
+        },
+        error: (err) => {
+          console.error('Errore generazione immagine:', err);
+          alert('Errore durante la generazione dell\'immagine. Controlla la console.');
+        }
+      });
+  }
+
   
   navigateToStoricoPrompt() {
     this.router.navigate(['/storico-prompt']);
