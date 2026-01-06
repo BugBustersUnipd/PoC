@@ -20,18 +20,19 @@ interface PromptRow {
 })
 export class StoricoPrompt implements OnInit {
   private cdr = inject(ChangeDetectorRef);
-
+  
   rows: PromptRow[] = [];
   filteredRows: PromptRow[] = [];
 
   searchTerm = '';
   loading = true;
 
-  companyId = 1; // TODO: dinamico
+  companyId!: number; 
 
   constructor(private conversationsService: ConversationsService) {}
 
-  ngOnInit() {
+   ngOnInit() {
+    this.companyId = history.state?.companyId ?? 1; // fallback sicuro
     this.loadStorico();
   }
 
