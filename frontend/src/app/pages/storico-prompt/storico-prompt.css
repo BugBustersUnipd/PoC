@@ -1,74 +1,90 @@
-.storico-container {
-  display: flex;
-  height: 100%;
-  background-color: #c0c0c0;
+/* Layout base */
+:host {
+  display: block;
+  padding: 24px;
+  background: #f5f6fa;
+  min-height: 100%;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
 }
 
-.canvas-area {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c2c2c;
 }
 
-.prompt-box {
-  background-color: white;
-  padding: 40px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  min-width: 300px;
-  text-align: center;
-}
-
-.prompt-box p {
-  margin: 0;
+/* Loading */
+div[ng-reflect-ng-if] {
+  font-size: 14px;
   color: #666;
-  font-size: 14px;
 }
 
-.button-panel {
-  width: 120px;
-  background-color: #a0a0a0;
-  padding: 20px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.search-bar {
+/* Tabella */
+.storico-table {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Header */
+.storico-table thead {
+  background: #f0f2f5;
+}
+
+.storico-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Righe */
+.storico-table td {
+  padding: 12px 14px;
+  vertical-align: top;
   font-size: 14px;
-  margin-bottom: 12px;
-  box-sizing: border-box;
-}
-
-.search-bar:focus {
-  outline: none;
-  border-color: #4CAF50;
-}
-
-.search-bar::placeholder {
-  color: #999;
-}
-.btn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-white {
-  background-color: white;
   color: #333;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.btn-white:hover {
-  background-color: #f5f5f5;
+.storico-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+/* Prompt e Risultato */
+.prompt,
+.risultato {
+  max-width: 420px;
+  line-height: 1.5;
+  color: #444;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.prompt {
+  font-weight: 500;
+}
+
+.risultato {
+  color: #555;
+}
+
+/* Scroll per testi lunghi */
+.prompt,
+.risultato {
+  max-height: 120px;
+  overflow: auto;
+}
+
+/* Timestamp */
+.storico-table td:nth-child(3) {
+  white-space: nowrap;
+  font-size: 12px;
+  color: #777;
 }
