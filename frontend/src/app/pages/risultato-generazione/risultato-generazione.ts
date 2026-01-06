@@ -86,7 +86,7 @@ export class RisultatoGenerazione implements OnInit {
 
   loadConversation() {
     if (!this.conversationId) {
-      alert('Nessuna conversazione selezionata');
+      console.log('Nessuna conversazione da caricare (ID nullo).');
       return;
     }
 
