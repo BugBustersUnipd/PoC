@@ -45,8 +45,11 @@ export class RisultatoGenerazione implements OnInit {
       
       // Estrai il testo generato (adatta in base alla struttura della response del tuo backend)
       this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
-      this.generatedImage = this.result.image_url || null;
-      this.conversationId = this.result.conversation_id || null;
+      if (this.result.image_url) {
+        this.generatedImage = `http://localhost:3000${this.result.image_url}`;
+      } else {
+        this.generatedImage = null;
+      }      this.conversationId = this.result.conversation_id || null;
     } else {
       console.warn(' Nessun risultato trovato, reindirizzo...');
       // Se non ci sono dati, torna alla home
