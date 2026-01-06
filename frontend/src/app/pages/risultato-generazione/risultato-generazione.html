@@ -17,16 +17,12 @@
         <p class="no-content">Nessun contenuto generato disponibile</p>
       </ng-template>
       
-      <!-- Debug info (rimuovi in produzione) -->
-      <!--<div *ngIf="result" class="debug-info" style="margin-top: 20px; padding: 10px; background: #f0f0f0; font-size: 12px;">
-         <strong>Debug - Risposta completa:</strong>
-        <pre>{{ result | json }}</pre>
-      </div>-->
     </div>
   </div>
   
   <!-- Button panel (right side) -->
   <div class="button-panel">
+    <button class="btn btn-white" (click)="generaImmagine()">Genera Immagine</button>
     <button class="btn btn-green" (click)="rigenera()">Rigenera</button>
     <button class="btn btn-white" (click)="toggleConversations()">Modifica</button>
     <button class="btn btn-red" (click)="scarta()">Scarta</button>
