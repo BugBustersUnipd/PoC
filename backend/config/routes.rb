@@ -17,6 +17,10 @@ Rails.application.routes.draw do
   # Output: { text, conversation_id } oppure errore 4xx/5xx.
   post "genera", to: "generator#create"
 
+  # GET /companies → CompaniesController#index
+  # Output: elenco aziende [{id,name,description}]
+  resources :companies, only: [ :index ]
+
   # GET /toni → GeneratorController#index
   # Input (query): company_id (req).
   # Output: { company: {id,name}, tones: [ {id,name,instructions} ] } o 404 se company mancante.

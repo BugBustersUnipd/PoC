@@ -38,8 +38,8 @@ export class RisultatoGenerazione implements OnInit {
     // Recupera i dati passati dalla navigazione
     const state = history.state;
     if (state && state['result']) {
-
-      // this.result = state['result']; questo per ora non serve ma lascio magari poi serve
+      // questo per ora non serve ma lascio magari poi serve
+      this.result = state['result']; 
       this.companyId = state['company_id'] || null;
       this.tone = state['tone'] || null;
       this.conversationId = state['result'].conversation_id || null;
@@ -53,6 +53,13 @@ export class RisultatoGenerazione implements OnInit {
       
       this.loadConversation();
       
+      // Estrai il testo generato (adatta in base alla struttura della response del tuo backend)
+      this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
+      if (this.result.image_url) {
+        this.generatedImage = `http://localhost:3000${this.result.image_url}`;
+      } else {
+        this.generatedImage = null;
+      }      this.conversationId = this.result.conversation_id || null;
     } else {
       console.warn(' Nessun risultato dalla navigazione, carico ultima conversazione...');
     }
@@ -79,7 +86,9 @@ export class RisultatoGenerazione implements OnInit {
   }
 
   loadConversation() {
-  if (!this.conversationId) return;
+    if (!this.conversationId) {
+      return;
+    }
 
   this.http
     .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {

@@ -1,56 +1,41 @@
-<div class="storico-container">
+<h2>Storico prompt</h2>
 
-  <!-- Canvas area (left side) -->
-  <div class="canvas-area">
+<input
+  type="text"
+  class="search-input"
+  placeholder="Cerca nei prompt o nei risultati..."
+  [(ngModel)]="searchTerm"
+  (input)="applyFilter()"
+/>
 
-    <div class="prompt-box">
-      <h1>Storico</h1>
-      <p>Qui puoi vedere lo storico delle tue generazioni</p>
-    </div>
+@if (loading) {
+  <div>Caricamento...</div>
+} @else {
+  <table class="storico-table">
+    <thead>
+      <tr>
+        <th>Prompt</th>
+        <th>Risultato</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
 
-    <!-- Stato caricamento -->
-    <p *ngIf="loading">Caricamento conversazioni...</p>
+    <tbody>
+      @for (r of filteredRows; track r.conversationId) {
+        <tr>
+          <td class="prompt">{{ r.prompt }}</td>
+          <td class="risultato">{{ r.risultato }}</td>
+          <td>{{ r.timestamp | date:'short' }}</td>
+        </tr>
+      }
 
-    <!-- Lista conversazioni -->
-    <div
-      *ngFor="let convo of filtered"
-      class="conversation-card">
-
-      <h3>{{ convo.title || 'Conversazione senza titolo' }}</h3>
-
-      <p class="summary">
-        {{ convo.summary || 'Nessun riepilogo disponibile' }}
-      </p>
-
-      <small>
-        {{ convo.updated_at | date:'dd/MM/yyyy HH:mm' }}
-      </small>
-
-    </div>
-
-    <p *ngIf="!loading && filtered.length === 0">
-      Nessuna conversazione trovata
-    </p>
-
-  </div>
-
-  <!-- Button panel (right side) -->
-  <div class="button-panel">
-
-    <input
-      type="text"
-      class="search-bar"
-      placeholder="Cerca..."
-      (input)="search($event.target.value)">
-
-    <button class="btn btn-white" disabled>
-      Riutilizza
-    </button>
-
-    <button class="btn btn-white" disabled>
-      Duplica
-    </button>
-
-  </div>
-
-</div>
+      @if (!filteredRows.length) {
+        <tr>
+          <td colspan="3" style="text-align:center; padding:16px;">
+            Nessun risultato trovato
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
