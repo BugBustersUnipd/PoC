@@ -16,7 +16,7 @@ gem "puma", ">= 5.0"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Silence Ruby 4.0 deprecation warning for fiddle
-gem "fiddle"
+# gem "fiddle"
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"

@@ -18,7 +18,11 @@ class Document < ApplicationRecord
   def checksum_uniqueness_for_company
     return unless company_id
 
-    if Document.where(company_id: company_id, checksum: checksum).exists?
+    # Escludi il documento corrente (se sta venendo aggiornato)
+    scope = Document.where(company_id: company_id, checksum: checksum)
+    scope = scope.where.not(id: id) if persisted?
+    
+    if scope.exists?
       errors.add(:base, "Documento già caricato")
     end
   end
