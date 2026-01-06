@@ -82,3 +82,46 @@
 .btn-blue:hover {
   background-color: #1976D2;
 }
+
+.conversation-container {
+  height: 100vh;          /* altezza fissa */
+  margin: auto;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow-y: auto;          /* aggiunge scrollbar verticale */
+  background-color: #f9f9f9;
+}
+
+/* messaggi */
+.message {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.message.user {
+  background-color: #d1e7ff;
+  text-align: right;
+}
+
+.message.assistant {
+  background-color: #f1f1f1;
+  text-align: left;
+}
+
+/* input messaggi sempre in fondo */
+.new-message {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;          /* forza input in fondo al contenitore */
+}
+
+.new-message input {
+  flex: 1;
+  padding: 0.5rem;
+}
