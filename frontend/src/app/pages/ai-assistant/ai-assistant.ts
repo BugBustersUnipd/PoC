@@ -7,12 +7,14 @@ import { CommonModule } from '@angular/common';
 interface Tone {
   id: number;
   name: string;
-  instructions: string;
+  instructions: string; //magari serve in futuro
 }
 
-// interface Company{
-
-// }
+interface Company{
+  id: number;
+  name: string;
+  description: string; //magari serve in futuro
+}
 
 @Component({
   selector: 'app-ai-assistant',
@@ -28,12 +30,7 @@ export class AiAssistant implements OnInit {
 
   prompt = '';
 
-  // Aggiunte aziende di prova
-  companies = [
-    { id: 1, name: 'Azienda Alpha' },
-    { id: 2, name: 'Beta Corp' },
-    { id: 3, name: 'Gamma LLC' }
-  ];
+  companies: Company[] = [];
   tones: Tone[] = [];
   selectedTone = '';
 
@@ -42,10 +39,28 @@ export class AiAssistant implements OnInit {
   filterCompanyChange = new EventEmitter<number>();
 
   ngOnInit() {
-    this.filterCompany = this.companies[0].id;
-    this.loadTones();
+    this.loadCompanies();
   }
-  
+  loadCompanies() {
+    console.log('Inizio caricamento aziende...');
+    this.http
+      .get<Company[]>('http://localhost:3000/companies')
+      .subscribe({
+        next: (res) => {
+          this.companies = res;
+          if (this.companies.length > 0) {
+            this.filterCompany = this.companies[0].id;
+            this.loadTones();
+          }
+          this.cdr.detectChanges();
+          console.log('Aziende caricate:', this.companies);
+        },
+        error: (err) => {
+          console.error('Errore caricamento aziende:', err);
+          alert('Errore nel caricamento delle aziende');
+        }
+      });
+  }
   loadTones() {
     console.log('Inizio caricamento toni...');
     
@@ -148,8 +163,6 @@ export class AiAssistant implements OnInit {
 
   updateCompany(value: any) {
     this.filterCompanyChange.emit(this.filterCompany);
-    // è sufficiente decommentare il codice appena aggiunte altre companies, load carica a seconda di filterCompany
-    // this.loadTones();
-    console.log('Qui devono essere riaggiornati i toni e messi quelli dell\'azienda ', this.filterCompany);
+    this.loadTones();
   }
 }
