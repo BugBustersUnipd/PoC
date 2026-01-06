@@ -136,6 +136,7 @@ export class RisultatoGenerazione implements OnInit {
         this.loadConversation();
         // resetta input
         this.newMessage = '';
+        this.generatedText = res['text'] || '';
 
       },
       error: (err) => {
