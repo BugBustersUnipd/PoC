@@ -139,13 +139,15 @@ export class AiAssistant implements OnInit {
     console.log('Invio richiesta immagine:', payload);
 
     // 3. Chiamata all'API /genera-immagine
-    this.http.post('http://localhost:3000/genera-immagine', payload)
+    this.http.post(  `http://localhost:3000/genera-immagine`, payload)
       .subscribe({
         next: (response) => {
           console.log('Immagine generata:', response);
           // 4. Vai alla pagina risultati passando la risposta
           this.router.navigate(['/risultato-generazione'], {
-            state: { result: response }
+            state: { result: response,
+                      company_id: this.filterCompany, 
+                      tone: this.selectedTone }
           });
         },
         error: (err) => {

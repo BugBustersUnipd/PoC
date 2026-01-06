@@ -59,7 +59,7 @@ export class RisultatoGenerazione implements OnInit {
         this.generatedImage = `http://localhost:3000${this.result.image_url}`;
       } else {
         this.generatedImage = null;
-      }      this.conversationId = this.result.conversation_id || null;
+      }      
     } else {
       console.warn(' Nessun risultato dalla navigazione, carico ultima conversazione...');
     }
@@ -123,24 +123,62 @@ export class RisultatoGenerazione implements OnInit {
     const testo = this.newMessage.trim();
     if (!testo) return;
 
-    this.http.post<any>('http://localhost:3000/genera', {
-      prompt: testo,
-      tone: this.tone,
-      company_id: this.companyId,
-      conversation_id: this.conversationId
-    }).subscribe({
+    // 1. VERIFICA MODALITÀ: Se c'è un'immagine a video, siamo in modalità immagine
+    const isImageMode = !!this.generatedImage;
+
+    // 2. CONFIGURAZIONE CHIAMATA
+    let url = '';
+    let payload: any = {};
+
+    if (isImageMode) {
+      // --- MODALITÀ IMMAGINE ---
+      url = 'http://localhost:3000/genera-immagine';
+      payload = {
+        prompt: testo,                  // La modifica richiesta dall'utente
+        company_id: this.companyId,
+        conversation_id: this.conversationId // Importante per mantenere il filo del discorso
+      };
+    } else {
+      // --- MODALITÀ TESTO ---
+      url = 'http://localhost:3000/genera';
+      payload = {
+        prompt: testo,
+        tone: this.tone,
+        company_id: this.companyId,
+        conversation_id: this.conversationId
+      };
+    }
+
+    // 3. ESECUZIONE DELLA CHIAMATA
+    this.http.post<any>(url, payload).subscribe({
       next: (res) => {
-        // console.log(res['text']);
-        // console.log(res['conversation_id']);
+        console.log('Risposta modifica:', res);
 
-        console.log('Messaggi aggiornati:', this.conversation);
+        // Se è la prima volta che parliamo, il backend ci darà un ID conversazione
+        if (res.conversation_id) {
+          this.conversationId = res.conversation_id;
+        }
+
+        // 4. AGGIORNAMENTO UI
+        if (isImageMode) {
+          // Se il backend ci restituisce una nuova immagine, aggiorniamo la view
+          if (res.image_url) {
+            this.generatedImage = `http://localhost:3000${res.image_url}`;
+          }
+        } else {
+          // Se è testo, aggiorniamo il testo
+          this.generatedText = res.text || '';
+        }
+
+        // Ricarichiamo la chat per vedere il messaggio appena scambiato
         this.loadConversation();
-        this.generatedText = res['text'] || '';
-
+        
+        // Puliamo l'input
+        this.newMessage = '';
       },
       error: (err) => {
-        console.error('Errore aggiunta messaggio:', err);
-        alert('Errore nell\'aggiunta del messaggio');
+        console.error('Errore modifica:', err);
+        alert('Errore durante la modifica.');
       }
     });
   }
@@ -163,4 +201,37 @@ export class RisultatoGenerazione implements OnInit {
     this.router.navigate(['/ai-assistant']);
   }
   
+  generaImmagine() {
+    // 1. Validazione: serve almeno il prompt
+    if (!this.result.content.trim()) {
+      alert('Inserisci un prompt per generare l\'immagine');
+      return;
+    }
+
+    // 2. Prepara i dati (nota: company_id è obbligatorio)
+    const payload = {
+      prompt: this.result.content,
+      company_id: this.companyId,
+      conversation_id: null 
+    };
+
+    console.log('Invio richiesta immagine:', payload);
+
+    // 3. Chiamata all'API /genera-immagine
+    this.http.post(  `http://localhost:3000/genera-immagine/${this.conversationId}`, payload)
+      .subscribe({
+        next: (response) => {
+          console.log('Immagine generata:', response);
+          // 4. Vai alla pagina risultati passando la risposta
+          this.router.navigate(['/risultato-generazione'], {
+            state: { result: response }
+          });
+        },
+        error: (err) => {
+          console.error('Errore generazione immagine:', err);
+          alert('Errore durante la generazione dell\'immagine. Controlla la console.');
+        }
+      });
+  }
+
 }
