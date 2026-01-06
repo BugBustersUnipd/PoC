@@ -13,6 +13,16 @@
 
   <!-- Button panel (right side) -->
   <div class="button-panel">
+    <select class="btn btn-white" name="company-name" [(ngModel)]="filterCompany" (ngModelChange)="updateCompany($event)">
+      <option value="" disabled>Seleziona azienda</option>
+       @for (company of companies; track company.id) {
+        <!-- aggiungo anche l'id nel valore, ma rimane name -->
+        <option [value]="company.id">
+           {{ company.id }} - {{ company.name }}
+        </option>
+      }
+      
+    </select>
     <button class="btn btn-white" (click)="navigateToStoricoPrompt()">Storico</button>
     
     <select class="btn btn-white" [(ngModel)]="selectedTone">

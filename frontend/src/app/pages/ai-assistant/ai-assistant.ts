@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient  } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +9,10 @@ interface Tone {
   name: string;
   instructions: string;
 }
+
+// interface Company{
+
+// }
 
 @Component({
   selector: 'app-ai-assistant',
@@ -23,21 +27,31 @@ export class AiAssistant implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   prompt = '';
+
+  // Aggiunte aziende di prova
+  companies = [
+    { id: 1, name: 'Azienda Alpha' },
+    { id: 2, name: 'Beta Corp' },
+    { id: 3, name: 'Gamma LLC' }
+  ];
   tones: Tone[] = [];
   selectedTone = '';
 
-  companyId = 1; // TODO: dinamico
+  // qui è un buon pattern che siano @Input e @Output ma al momento per il poc non stiamo lavorando molto a moduli, una pagina è un solo ts
+  filterCompany!: number;
+  filterCompanyChange = new EventEmitter<number>();
 
   ngOnInit() {
+    this.filterCompany = this.companies[0].id;
     this.loadTones();
   }
-
-  loadTones() {
-  console.log('Inizio caricamento toni...');
   
+  loadTones() {
+    console.log('Inizio caricamento toni...');
+    
   this.http
     .get<any>('http://localhost:3000/toni', {
-      params: { company_id: this.companyId.toString() }
+      params: { company_id: this.filterCompany.toString() }
     })
     .subscribe({
       next: (res) => {
@@ -55,28 +69,28 @@ export class AiAssistant implements OnInit {
         alert('Errore nel caricamento dei toni');
       }
     });
-}
-
+  }
+  
   genera() {
     if (!this.prompt.trim()) {
       alert('Inserisci un prompt');
       return;
     }
-
+    
     if (!this.selectedTone) {
       alert('Seleziona un tono');
       return;
     }
-
+    
     const payload = {
       prompt: this.prompt,
       tone: this.selectedTone,
-      company_id: this.companyId,
+      company_id: this.filterCompany,
       conversation_id: null
     };
-
+    
     this.http.post('http://localhost:3000/genera', payload)
-      .subscribe({
+    .subscribe({
         next: (response) => {
           this.router.navigate(['/risultato-generazione'], {
             state: { result: response }
@@ -87,8 +101,17 @@ export class AiAssistant implements OnInit {
         }
       });
   }
-
+  
+  
   navigateToStoricoPrompt() {
     this.router.navigate(['/storico-prompt']);
+  }
+
+
+  updateCompany(value: any) {
+    this.filterCompanyChange.emit(this.filterCompany);
+    // è sufficiente decommentare il codice appena aggiunte altre companies, load carica a seconda di filterCompany
+    // this.loadTones();
+    console.log('Qui devono essere riaggiornati i toni e messi quelli dell\'azienda ', this.filterCompany);
   }
 }
