@@ -1,15 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient  } from '@angular/common/http';
-import { ChangeDetectorRef } from '@angular/core';
-interface Message{
+import { HttpClient } from '@angular/common/http';
+
+interface Message {
   id: number;
   role: string;
   content: string;
-  created_at: string; //sevoglio aggiungere la data
+  created_at: string;
 }
+
 @Component({
   selector: 'app-risultato-generazione',
   standalone: true,
@@ -17,129 +18,155 @@ interface Message{
   templateUrl: './risultato-generazione.html',
   styleUrl: './risultato-generazione.css',
 })
-
 export class RisultatoGenerazione implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private http = inject(HttpClient);
-  
 
+  // Variabili di stato interfaccia
   showConversations: boolean = false;
+  showImageInput: boolean = false; // MOSTRA/NASCONDE IL BOX PER IL PROMPT IMMAGINE
+  
   conversation: Message[] = [];
-
   result: any = null;
+  
+  // Dati generazione
   generatedText: string = '';
   generatedImage: string | null = null;
   conversationId: number | null = null;
   companyId: number | null = null;
   tone: string | null = null;
-  newMessage: string = '';
+
+  // Input utente
+  newMessage: string = ''; // Per la chat
+  imagePrompt: string = ''; // NUOVO: Per il prompt specifico dell'immagine
+
   ngOnInit() {
-    // Recupera i dati passati dalla navigazione
     const state = history.state;
+
     if (state && state['result']) {
-      // questo per ora non serve ma lascio magari poi serve
-      this.result = state['result']; 
+      this.result = state['result'];
       this.companyId = state['company_id'] || null;
       this.tone = state['tone'] || null;
-      this.conversationId = state['result'].conversation_id || null;
-      console.log(' Risultato ricevuto:', this.result);
       
+      // RECUPERO ID CONVERSAZIONE: Fondamentale per collegare testo e immagine
+      this.conversationId = this.result.conversation_id || state['conversation_id'] || null;
+      
+      console.log('Stato Iniziale -> ID Conversazione:', this.conversationId);
 
-      //commentato perche non serve più teoricamente
-      // Estrai il testo generato (adatta in base alla struttura della response del tuo backend) 
-      // this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
-      // this.generatedImage = this.result.image_url || null;
-      
-      this.loadConversation();
-      
-      // Estrai il testo generato (adatta in base alla struttura della response del tuo backend)
+      // Imposta testo e immagine se presenti
       this.generatedText = this.result.text || this.result.content || this.result.generated_text || '';
+      
       if (this.result.image_url) {
         this.generatedImage = `http://localhost:3000${this.result.image_url}`;
-      } else {
-        this.generatedImage = null;
-      }      
-    } else {
-      console.warn(' Nessun risultato dalla navigazione, carico ultima conversazione...');
+      }
+
+      // Se c'è già una conversazione (es. arriviamo dal testo), carichiamo lo storico
+      if (this.conversationId) {
+        this.loadConversation();
+      }
     }
   }
 
-  navigateToModificaGenerazione() {
-    this.router.navigate(['/modifica-generazione'], {
-      state: { result: this.result }
-    });
+  // --- GESTIONE IMMAGINE (Nuovo Flusso) ---
+
+  // 1. Apre il box per scrivere il prompt
+  toggleImageInput() {
+    this.showImageInput = !this.showImageInput;
+    if (!this.imagePrompt) {
+       this.imagePrompt = ''; 
+    }
   }
 
-  rigenera() {
-    // TODO: implementa la rigenerazione
-    console.log('Rigenera con lo stesso prompt');
-  }
-  scarta() {
-    // Torna alla home
-    this.router.navigate(['/']);
-  }
-
-  pubblica() {
-    // TODO: implementa la pubblicazione
-    console.log('Pubblica il contenuto');
-  }
-
-  loadConversation() {
-    if (!this.conversationId) {
+  // 2. Chiama il backend per generare l'immagine
+  confermaGenerazioneImmagine() {
+    if (!this.imagePrompt.trim()) {
+      alert('Scrivi un prompt per l\'immagine.');
       return;
     }
 
-  this.http
-    .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {
-      params: { company_id: this.companyId?.toString() || '' }
-    })
-    .subscribe({
-      next: (res) => {
-        this.conversation = res.messages || [];
-        console.log('Conversazione caricata:', this.conversation);
-        // Forza l'aggiornamento della variabile usata nel template
-        // Usiamo la logica del getter ma la salviamo esplicitamente
-        const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
-        if (assistantMessages.length > 0) {
-           const lastContent = assistantMessages[assistantMessages.length - 1].content;
-           this.generatedText = lastContent;
-           this.cdr.detectChanges()
-        }
-      },
-      error: (err) => {
-        console.error('Errore:', err);
-      }
-    });
-}
+    const payload: any = {
+      prompt: this.imagePrompt,
+      company_id: this.companyId
+    };
 
-  toggleConversations() {
-    this.showConversations = !this.showConversations;
-    // console.log('Mostra conversazioni:', this.showConversations);
+    // PUNTO CRUCIALE: Se abbiamo un ID conversazione (del testo), lo usiamo!
+    if (this.conversationId) {
+      payload.conversation_id = this.conversationId;
+    }
+
+    console.log('Generazione Immagine con Prompt dedicato:', payload);
+
+    // Chiamata all'URL corretto (NON aggiungere ID nell'URL)
+    this.http.post('http://localhost:3000/genera-immagine', payload)
+      .subscribe({
+        next: (response: any) => {
+          console.log('Immagine generata:', response);
+
+          // Aggiorna l'ID se il backend ce lo restituisce/aggiorna
+          if (response.conversation_id) {
+            this.conversationId = response.conversation_id;
+          }
+
+          // Mostra l'immagine
+          if (response.image_url) {
+            this.generatedImage = `http://localhost:3000${response.image_url}?t=${Date.now()}`;
+          }
+
+          // Chiudi il box e ricarica la chat
+          this.showImageInput = false;
+          this.loadConversation();
+        },
+        error: (err) => {
+          console.error('Errore generazione immagine:', err);
+          alert('Errore durante la generazione dell\'immagine.');
+        }
+      });
   }
 
+  // --- GESTIONE CHAT E TESTO (Esistente) ---
+
+  loadConversation() {
+    if (!this.conversationId) return;
+
+    this.http
+      .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {
+        params: { company_id: this.companyId?.toString() || '' }
+      })
+      .subscribe({
+        next: (res) => {
+          this.conversation = res.messages || [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error(err)
+      });
+  }
 
   addMessage() {
     const testo = this.newMessage.trim();
     if (!testo) return;
 
-    // 1. VERIFICA MODALITÀ: Se c'è un'immagine a video, siamo in modalità immagine
-    const isImageMode = !!this.generatedImage;
+    // Optimistic update
+    this.conversation.push({
+      id: Date.now(), role: 'user', content: testo, created_at: new Date().toISOString()
+    });
+    this.newMessage = '';
+    this.cdr.detectChanges();
 
-    // 2. CONFIGURAZIONE CHIAMATA
+    const isImageMode = !!this.generatedImage;
+    
+    // Decide l'endpoint in base a cosa stiamo guardando
     let url = '';
     let payload: any = {};
 
     if (isImageMode) {
-      // --- MODALITÀ IMMAGINE ---
       url = 'http://localhost:3000/genera-immagine';
       payload = {
-        prompt: testo,                  // La modifica richiesta dall'utente
+        prompt: testo,
         company_id: this.companyId,
-        conversation_id: this.conversationId // Importante per mantenere il filo del discorso
+        conversation_id: this.conversationId // Mantiene la conversazione
       };
     } else {
-      // --- MODALITÀ TESTO ---
       url = 'http://localhost:3000/genera';
       payload = {
         prompt: testo,
@@ -149,89 +176,35 @@ export class RisultatoGenerazione implements OnInit {
       };
     }
 
-    // 3. ESECUZIONE DELLA CHIAMATA
     this.http.post<any>(url, payload).subscribe({
       next: (res) => {
-        console.log('Risposta modifica:', res);
-
-        // Se è la prima volta che parliamo, il backend ci darà un ID conversazione
-        if (res.conversation_id) {
-          this.conversationId = res.conversation_id;
-        }
-
-        // 4. AGGIORNAMENTO UI
-        if (isImageMode) {
-          // Se il backend ci restituisce una nuova immagine, aggiorniamo la view
-          if (res.image_url) {
-            this.generatedImage = `http://localhost:3000${res.image_url}`;
-          }
-        } else {
-          // Se è testo, aggiorniamo il testo
-          this.generatedText = res.text || '';
-        }
-
-        // Ricarichiamo la chat per vedere il messaggio appena scambiato
-        this.loadConversation();
+        if (res.conversation_id) this.conversationId = res.conversation_id;
         
-        // Puliamo l'input
-        this.newMessage = '';
+        if (isImageMode && res.image_url) {
+           this.generatedImage = `http://localhost:3000${res.image_url}?t=${Date.now()}`;
+        } else if (!isImageMode && res.text) {
+           this.generatedText = res.text;
+        }
+        this.loadConversation();
       },
-      error: (err) => {
-        console.error('Errore modifica:', err);
-        alert('Errore durante la modifica.');
-      }
+      error: (err) => alert('Errore modifica.')
     });
   }
 
-  onAiMessageClick(message: any) {
-    console.log('Messaggio AI cliccato:', message);
-  }
-
-  //per aggiungere la classe hidden (e toglierla) al click del mouse
-  get hiddenClass(){
-    if(this.showConversations){
-      return {};
-    }else{
-      return {'hidden' : true};
-    }
-  }
-
-  esci() {
-    // Naviga verso la pagina dell'AI Assistant
-    this.router.navigate(['/ai-assistant']);
-  }
+  // --- UTILS ---
   
-  generaImmagine() {
-    // 1. Validazione: serve almeno il prompt
-    if (!this.result.content.trim()) {
-      alert('Inserisci un prompt per generare l\'immagine');
-      return;
-    }
-
-    // 2. Prepara i dati (nota: company_id è obbligatorio)
-    const payload = {
-      prompt: this.result.content,
-      company_id: this.companyId,
-      conversation_id: null 
-    };
-
-    console.log('Invio richiesta immagine:', payload);
-
-    // 3. Chiamata all'API /genera-immagine
-    this.http.post(  `http://localhost:3000/genera-immagine/${this.conversationId}`, payload)
-      .subscribe({
-        next: (response) => {
-          console.log('Immagine generata:', response);
-          // 4. Vai alla pagina risultati passando la risposta
-          this.router.navigate(['/risultato-generazione'], {
-            state: { result: response }
-          });
-        },
-        error: (err) => {
-          console.error('Errore generazione immagine:', err);
-          alert('Errore durante la generazione dell\'immagine. Controlla la console.');
-        }
-      });
+  toggleConversations() {
+    this.showConversations = !this.showConversations;
   }
 
+  onAiMessageClick(message: any) {
+    console.log('Msg click:', message);
+  }
+
+  rigenera() { console.log('Todo rigenera'); }
+  pubblica() { console.log('Todo pubblica'); }
+  scarta() { this.router.navigate(['/']); }
+  esci() { this.router.navigate(['/ai-assistant']); }
+  
+  get hiddenClass() { return this.showConversations ? {} : {'hidden' : true}; }
 }
