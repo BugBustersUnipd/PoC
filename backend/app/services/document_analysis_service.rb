@@ -79,7 +79,7 @@ class DocumentAnalysisService
         - categoria: categoria generale (es. Finanziario, HR, Legale, Amministrativo)
         - dipendente: nome completo del dipendente (se applicabile)
         - codice_fiscale: codice fiscale del dipendente (se presente)
-        - azienda_riferimento: nome dell'azienda coinvolta o di riferimento (non quella del mittente)
+        - azienda_riferimento: nome dell'azienda coinvolta o di riferimento (non quella del mittente, non deve esserci sempre)
         - importo_totale: importo totale o valore economico (se presente, come numero)
         - riassunto: breve riassunto del contenuto principale (max 200 caratteri)
         - numero_pagine: numero totale di pagine del documento
