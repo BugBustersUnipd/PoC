@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, inject ,Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ConversationsService } from '../../services/conversation.service';
 
@@ -13,13 +14,17 @@ interface PromptRow {
 @Component({
   selector: 'app-storico-prompt',
   standalone: true,
-  imports: [CommonModule],
+  imports: [FormsModule,CommonModule],
   templateUrl: './storico-prompt.html',
   styleUrl: './storico-prompt.css',
 })
 export class StoricoPrompt implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+
   rows: PromptRow[] = [];
+  filteredRows: PromptRow[] = [];
+
+  searchTerm = '';
   loading = true;
 
   companyId = 1; // TODO: dinamico
@@ -32,10 +37,9 @@ export class StoricoPrompt implements OnInit {
 
   loadStorico() {
     this.loading = true;
-    
+
     this.conversationsService.getConversations(this.companyId).subscribe({
       next: (conversations) => {
-
         const requests = conversations.map(c =>
           this.conversationsService.getConversationDetail(c.id, this.companyId)
         );
@@ -43,11 +47,11 @@ export class StoricoPrompt implements OnInit {
         forkJoin(requests).subscribe({
           next: (details) => {
             this.rows = [];
-            
+
             details.forEach(conv => {
               const userMsg = conv.messages.find((m: any) => m.role === 'user');
               const aiMsg = conv.messages.find((m: any) => m.role === 'assistant');
-              
+
               if (userMsg && aiMsg) {
                 this.rows.push({
                   conversationId: conv.id,
@@ -55,9 +59,10 @@ export class StoricoPrompt implements OnInit {
                   risultato: aiMsg.content,
                   timestamp: aiMsg.created_at
                 });
-                
               }
             });
+
+            this.applyFilter();
             this.loading = false;
             this.cdr.detectChanges();
           },
@@ -67,4 +72,19 @@ export class StoricoPrompt implements OnInit {
       error: () => this.loading = false
     });
   }
+
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    if (!term) {
+      this.filteredRows = this.rows;
+      return;
+    }
+
+    this.filteredRows = this.rows.filter(r =>
+      r.prompt.toLowerCase().includes(term) ||
+      r.risultato.toLowerCase().includes(term)
+    );
+  }
 }
+
