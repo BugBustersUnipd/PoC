@@ -122,9 +122,9 @@ GEM
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
+    ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x64-mingw-ucrt)
     ffi (1.17.2-x86_64-linux-gnu)
-    fiddle (1.1.6)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -188,6 +188,8 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
+    nokogiri (1.18.10-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.18.10-x64-mingw-ucrt)
       racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-gnu)
@@ -197,6 +199,7 @@ GEM
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
+    pg (1.6.2-arm64-darwin)
     pg (1.6.2-x64-mingw-ucrt)
     pg (1.6.2-x86_64-linux)
     pp (0.6.3)
@@ -328,6 +331,7 @@ GEM
     stringio (3.2.0)
     thor (1.4.0)
     thruster (0.1.17)
+    thruster (0.1.17-arm64-darwin)
     thruster (0.1.17-x86_64-linux)
     timeout (0.6.0)
     tsort (0.2.0)
@@ -347,6 +351,7 @@ GEM
     zeitwerk (2.7.4)
 
 PLATFORMS
+  arm64-darwin-25
   x64-mingw-ucrt
   x86_64-linux
 
@@ -358,7 +363,6 @@ DEPENDENCIES
   combine_pdf
   debug
   dotenv-rails
-  fiddle
   image_processing (~> 1.2)
   kamal
   pg (~> 1.1)
