@@ -93,7 +93,11 @@ export class AiAssistant implements OnInit {
     .subscribe({
         next: (response) => {
           this.router.navigate(['/risultato-generazione'], {
-            state: { result: response }
+            state: { 
+              result: response,
+              company_id: this.filterCompany,
+              tone: this.selectedTone
+            }
           });
         },
         error: () => {
