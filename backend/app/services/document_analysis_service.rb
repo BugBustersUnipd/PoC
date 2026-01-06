@@ -67,13 +67,25 @@ class DocumentAnalysisService
     {
       text: <<~PROMPT.strip
         Analizza questo documento/immagine e estrai i seguenti dati in formato JSON valido:
-        - tipo_documento: tipo di documento (es. Cedolino, CUD, Fattura, Ricevuta, ecc.)
+        - tipo_documento: tipo di documento (es. Cedolino, CUD, Fattura, Ricevuta, Bilancio, Lettera HR, Contratto, Verbale, ecc.)
+        - redattore: nome completo del dipendente (se applicabile)
+        - mittente: chi ha inviato il documento
+        - destinatario: a chi è indirizzato il documento
+        - data_emissione: data di emissione del documento
         - data_competenza: data di competenza o emissione
-        - codice_fiscale: codice fiscale del soggetto
-        - dipendente: nome completo del dipendente
+        - numero_documento: numero identificativo del documento (es. numero fattura, protocollo)
+        - versione_documento: versione o revisione del documento (se presente)
+        - oggetto: oggetto o titolo del documento
+        - categoria: categoria generale (es. Finanziario, HR, Legale, Amministrativo)
+        - dipendente: nome completo del dipendente (se applicabile)
+        - codice_fiscale: codice fiscale del dipendente (se presente)
+        - azienda_riferimento: nome dell'azienda coinvolta o di riferimento (non quella del mittente)
+        - importo_totale: importo totale o valore economico (se presente, come numero)
+        - riassunto: breve riassunto del contenuto principale (max 200 caratteri)
+        - numero_pagine: numero totale di pagine del documento
 
         Rispondi SOLO con il JSON, senza testo aggiuntivo.
-        Se un campo non è presente, usa null.
+        Se un campo non è presente o non applicabile, usa null.
       PROMPT
     }
   end
