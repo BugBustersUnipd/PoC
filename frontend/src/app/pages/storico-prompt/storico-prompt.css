@@ -88,3 +88,19 @@ div[ng-reflect-ng-if] {
   font-size: 12px;
   color: #777;
 }
+
+.search-input {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #4c73ff;
+  box-shadow: 0 0 0 2px rgba(76,115,255,0.1);
+}

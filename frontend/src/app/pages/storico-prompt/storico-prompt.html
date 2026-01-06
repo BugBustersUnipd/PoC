@@ -1,5 +1,13 @@
 <h2>Storico prompt</h2>
 
+<input
+  type="text"
+  class="search-input"
+  placeholder="Cerca nei prompt o nei risultati..."
+  [(ngModel)]="searchTerm"
+  (input)="applyFilter()"
+/>
+
 @if (loading) {
   <div>Caricamento...</div>
 } @else {
@@ -13,18 +21,18 @@
     </thead>
 
     <tbody>
-      @for (r of rows; track r.conversationId) {
+      @for (r of filteredRows; track r.conversationId) {
         <tr>
-          <td class="prompt">
-            {{ r.prompt }}
-          </td>
+          <td class="prompt">{{ r.prompt }}</td>
+          <td class="risultato">{{ r.risultato }}</td>
+          <td>{{ r.timestamp | date:'short' }}</td>
+        </tr>
+      }
 
-          <td class="risultato">
-            {{ r.risultato }}
-          </td>
-
-          <td>
-            {{ r.timestamp | date:'short' }}
+      @if (!filteredRows.length) {
+        <tr>
+          <td colspan="3" style="text-align:center; padding:16px;">
+            Nessun risultato trovato
           </td>
         </tr>
       }
