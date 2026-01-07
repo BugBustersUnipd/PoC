@@ -1,25 +1,45 @@
 require "aws-sdk-bedrockruntime"
 require "json"
 
-# AiService
-# - Fornisce un'interfaccia semplice per generare testo con Amazon Bedrock usando l'API "Converse".
-# - Gestisce lo storico conversazionale in modo sicuro (formato richiesto da Bedrock),
-#   seleziona il modello (default: Amazon Nova Lite) e applica un fallback opzionale.
-# - Mantiene le API e la struttura del servizio semplici per l'uso dai controller.
+# AiService: servizio per generare testo con Amazon Bedrock IA
+# 
+# - Fornisce un'interfaccia semplice per generare testo usando l'API "Converse" di Bedrock.
+# - Gestisce lo storico conversazionale in modo sicuro (rispetta i vincoli Bedrock):
+#   * Messaggi alternati user/assistant (no 2 consecutivi dello stesso tipo)
+#   * Contenuti non vuoti (placeholder "." se necessario)
+# - Seleziona il modello (default: Amazon Nova Lite) e applica fallback se modello non disponibile
+# - Mantiene l'API semplice per l'uso da controller
+#
+# FLOW TIPICO:
+#   1. Controller.create(prompt, company_id, tone, conversation_id)
+#   2. AiService.genera() carica dati azienda, tono, storico conversazione
+#   3. build_clean_messages() normalizza storico per Bedrock (evita errori)
+#   4. invoke_bedrock_with_fallback() invia a Bedrock + retry se fallisce
+#   5. Salva user message + assistant response nel DB
+#   6. Ritorna testo generato + conversation_id al controller
 class AiService
-  # Numero massimo di messaggi di contesto da mantenere
+  # CONTEXT_WINDOW: numero massimo di messaggi passati da mantenere in storico
+  # Più messaggi = più context (miglior qualità risposta) ma più token spesi
+  # 10 messaggi = ~5 scambi user/assistant (ragionevole compromesso)
   MAX_CONTEXT_MESSAGES = 10
 
-  # Carica il profilo di configurazione per la generazione testo
+  # Carica il profilo di configurazione dalla costante globale (bedrock.yml via initializer)
+  # Include: region, model_id, max_tokens, temperature
   BEDROCK_CONFIG = ::BEDROCK_CONFIG_GENERATION
 
-  # Default e configurazione
+  # Configurazioni fallback
+  # Se il modello principale non disponibile (AccessDenied), ritenta con questo
   FALLBACK_MODEL_ENV = "BEDROCK_FALLBACK_MODEL_ID"
   REGION_DEFAULT     = "us-east-1"
 
   def initialize
+    # Inizializza il client AWS Bedrock RuntimeClient
     # Regione Bedrock: assicurarsi che i modelli siano abilitati nella stessa regione
     @region = BEDROCK_CONFIG["region"]
+    
+    # Crea client AWS con credenziali da ENV
+    # In prod: usa AWS IAM role (env vars non servono, usa ruolo EC2/Lambda)
+    # In dev: usa credenziali esplicite (AWS_ACCESS_KEY_ID, ecc. da .env)
     @client = Aws::BedrockRuntime::Client.new(
       access_key_id: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
@@ -29,85 +49,141 @@ class AiService
   end
 
   # Genera il testo usando Amazon Bedrock (API Converse)
+  #
   # Parametri:
-  # - testo_utente: Stringa con la richiesta dell'utente
-  # - company_id: ID dell'azienda (per contesto e persistenza conversazione)
-  # - nome_tono: Nome del tono salvato su DB (istruzioni addizionali)
-  # - conversation_id: ID conversazione esistente (opzionale) per mantenere il contesto
-  # Ritorna: Hash con chiavi :text e :conversation_id
+  # - testo_utente (String, required): richiesta dell'utente
+  # - company_id (Integer, required): ID azienda (per contesto, company.tones, etc.)
+  # - nome_tono (String, required): nome del tono da applicare (es: "formale", "casual")
+  # - conversation_id: (Integer, optional) ID conversazione esistente per mantenere contesto
+  #     Se omesso: crea NUOVA conversazione
+  #     Se fornito: usa storico messaggi precedenti (up to MAX_CONTEXT_MESSAGES)
+  #
+  # Ritorna:
+  #   { text: "risposta generata...", conversation_id: 123 }
+  #
+  # Solleva:
+  #   - ActiveRecord::RecordNotFound se company_id/conversation_id non esiste
+  #   - Aws::BedrockRuntime::Errors::* se errore API Bedrock
   def genera(testo_utente, company_id, nome_tono, conversation_id: nil)
+    # Carica company (solleva RecordNotFound se non esiste)
     company      = Company.find(company_id)
+    
+    # Carica conversazione esistente o ne crea una nuova
     conversation = fetch_or_create_conversation(company, conversation_id)
 
+    # Carica tono per questa azienda (find_by ritorna nil se non trovato)
+    # &. = safe navigation operator: chiama .instructions SOLO se tono_db non è nil
+    # .presence = ritorna nil se stringa vuota, altrimenti la stringa
+    # || = fallback: se tono_db è nil o istruzioni vuote, usa default
     tono_db            = company.tones.find_by(name: nome_tono)
     istruzioni_tono    = tono_db&.instructions.presence || "Rispondi in modo professionale."
     descrizione_azienda = company.description.presence || ""
 
+    # Costruisce system prompt con contesto azienda + tono
     system_prompt = build_system_prompt(company.name, descrizione_azienda, istruzioni_tono)
 
-    # Preleva lo storico della conversazione
+    # Carica storico conversazione (ultimi N messaggi, ordinati cronologicamente)
+    # .order(:created_at) = ordina da vecchio a nuovo (importante per flow!)
+    # .last(N) = prendi ultimi N elementi (equivalente a LIMIT N, ORDER BY DESC, reverse)
     context_messages = conversation.messages.order(:created_at).last(MAX_CONTEXT_MESSAGES)
 
-    # Pulisce/normalizza i messaggi per la Converse API
-    # Perché farlo "a mano"?
-    # - Bedrock richiede un array di messaggi con role "user"/"assistant" alternati e contenuti non vuoti.
-    # - Inviare due "user" consecutivi o iniziare con "assistant" può produrre errori di validazione.
-    # - Unire messaggi consecutivi riduce rumore e token sprecati, migliorando costi e qualità output.
+    # Normalizza messaggi per Bedrock API
+    # Perché farlo? Bedrock richiede:
+    #   - Role alternati: "user" → "assistant" → "user" → ...
+    #   - Nessun contenuto vuoto (placeholder "." se necessario)
+    #   - Iniziare sempre con "user"
+    # build_clean_messages() gestisce automaticamente tutti questi vincoli
     messages = build_clean_messages(context_messages, testo_utente)
 
-    # Selezione modello dal profilo text_generation
+    # Seleziona modello da configurazione
+    # Es: "amazon.nova-lite-v1:0" o "amazon.nova-pro-v1:0"
     model_id = BEDROCK_CONFIG["model_id"]
     Rails.logger.debug("Bedrock converse → region=#{@region} model_id=#{model_id}")
 
+    # Invoca Bedrock con fallback se errore
     response = invoke_bedrock_with_fallback(model_id, messages, system_prompt)
 
+    # Estrae testo dalla risposta
+    # response.output.message.content = array di content blocks (testo, immagini, ecc.)
+    # [0].text = primo blocco, accesso al testo
     output_text = response.output.message.content[0].text
 
-    # Persistenza dei messaggi
+    # Salva i messaggi nel DB (storico conversazione)
+    # .create! = crea nuovo record, solleva eccezione se fallisce
     conversation.messages.create!(role: "user", content: testo_utente)
     conversation.messages.create!(role: "assistant", content: output_text)
 
+    # Ritorna risultato con conversation_id per reuse futuri
     { text: output_text, conversation_id: conversation.id }
   end
 
   private
 
-  # Invoca Bedrock e in caso di errori comuni (es. AccessDenied per modelli Marketplace
-  # non abilitati o Throttling) ritenta con un eventuale modello di fallback definito via ENV.
+  # Invoca Bedrock e riprova con fallback se errori comuni (AccessDenied, Throttling)
+  # 
+  # Errori retry-abili:
+  #   - AccessDeniedException: modello non abilitato nella regione (Marketplace models)
+  #   - ThrottlingException: rate limit (API troppo carica temporaneamente)
+  #
+  # Errori non retry-abili: ValidationException, altri ServiceErrors → raise subito
   def invoke_bedrock_with_fallback(model_id, messages, system_prompt)
     converse_with_model(model_id, messages, system_prompt)
   rescue Aws::BedrockRuntime::Errors::AccessDeniedException, Aws::BedrockRuntime::Errors::ThrottlingException => e
     Rails.logger.warn("Bedrock error #{e.class} for model=#{model_id} in region=#{@region}: #{e.message}")
+    
+    # Legge fallback model da ENV (es: BEDROCK_FALLBACK_MODEL_ID=amazon.nova-pro-v1:0)
+    # .presence = ritorna nil se stringa vuota
     fallback = ENV[FALLBACK_MODEL_ENV].presence
+    
+    # Se fallback definito E diverso dal modello principale
     if fallback && fallback != model_id
       Rails.logger.info("Retrying with fallback model=#{fallback}")
+      # Ritenta con modello alternativo
       converse_with_model(fallback, messages, system_prompt)
     else
+      # Nessun fallback, ri-solleva errore originale
       raise
     end
   end
 
-  # Wrapper dell'API "Converse": accetta messaggi normalizzati + prompt di sistema
-  # e imposta una configurazione di inferenza stabile e parsimoniosa.
+  # Wrapper dell'API "Converse": invoca Bedrock con messaggi normalizzati + system prompt
+  # 
+  # Converse API è la scelta migliore per chat multi-turn perché:
+  #   - Gestisce automaticamente storico messaggi (non serve context window manuale)
+  #   - Alternanza role automatica (user/assistant/user...)
+  #   - Supporta system prompt (prompt di sistema per ruolo/personalità)
+  #   - Alternative: invoke_model (too low level), messageInvoker (deprecated)
   def converse_with_model(model_id, messages, system_prompt)
     @client.converse(
       model_id: model_id,
-      messages: messages,
-      system: [ { text: system_prompt } ],
-      inference_config: bedrock_inference_config
+      messages: messages,  # Array: [{ role: "user", content: [...] }, ...]
+      system: [ { text: system_prompt } ],  # System prompt (istruzioni IA)
+      inference_config: bedrock_inference_config  # Temperature, max_tokens
     )
   end
 
-  # Impostazioni di inferenza dal profilo text_generation
-  # - max_tokens: limita la lunghezza dell'output (controllo costi)
-  # - temperature: 0.7 per risposte più creative e naturali
+  # Impostazioni di inferenza (generazione) dal profilo configuration
+  # 
+  # max_tokens: limite lunghezza risposta (riduce costi per token spensi)
+  # temperature: 0.7 = bilanciamento tra determinismo (0) e creatività (1)
+  #   - 0 = risposte sempre uguali, boring ma deterministiche
+  #   - 0.7 = naturale, creativo, ma coerente
+  #   - 1.0 = molto casuale, potrebbe non "raccontare senso"
   def bedrock_inference_config
     {
-      max_tokens: BEDROCK_CONFIG["max_tokens"],
-      temperature: BEDROCK_CONFIG["temperature"]
+      max_tokens: BEDROCK_CONFIG["max_tokens"],  # Es: 500, 1000
+      temperature: BEDROCK_CONFIG["temperature"]  # Es: 0.7
     }
   end
 
+  # Costruisce il system prompt (istruzioni per l'IA)
+  # 
+  # Format: <<~PROMPT / PROMPT = heredoc multiriga (mantenere indentazione, strippare)
+  # Includere:
+  #   - RUOLO: chi è l'IA (rappresentante azienda)
+  #   - CONTESTO: descrizione azienda (per personalità)
+  #   - TONO: stile di comunicazione (formale, casual, ecc.)
+  #   - REGOLE: istruzioni esplicite (es: "senza placeholder")
   def build_system_prompt(nome_azienda, descrizione, istruzioni_tono)
     <<~PROMPT.strip
       RUOLO: Sei l'IA ufficiale di "#{nome_azienda}".
@@ -122,56 +198,70 @@ class AiService
     PROMPT
   end
 
-  # Normalizza lo storico per la Converse API:
-  # - unisce messaggi consecutivi dello stesso ruolo
-  # - garantisce che la conversazione inizi con "user"
-  # - evita contenuti vuoti
+  # Normalizza lo storico messaggi per Bedrock Converse API
+  # 
+  # PROBLEMI DA RISOLVERE:
+  #   1. Due "user" consecutivi → Bedrock rifiuta (formato errato)
+  #   2. Due "assistant" consecutivi → Bedrock rifiuta
+  #   3. Iniziare con "assistant" → Bedrock potrebbe rifiutare
+  #   4. Messaggi vuoti (content = "") → wasta token e confonde l'IA
+  #   5. Storico corrotto o nil → fallback a messaggio singolo
+  #
+  # SOLUZIONE: merge messaggi consecutivi dello stesso ruolo
+  # Es: user1, user2 (stesso ruolo) → unisci con separator "\n\n"
   def build_clean_messages(context_messages, current_user_text)
     messages = []
 
-    # PRIMO CICLO: Processa tutti i messaggi dello storico della conversazione
+    # FASE 1: Processa tutti i messaggi dello storico della conversazione
     context_messages.each do |msg|
-      # Estrae il ruolo del messaggio e lo converte in minuscolo ("user" o "assistant")
-      # Se msg.role è nil, usa una stringa vuota come default
+      # Estrae ruolo e lo normalizza (downcase)
+      # Se msg.role è nil (data corrupt), usa "" come fallback
       role    = (msg.role || "").downcase
-      # Estrae il contenuto del messaggio; se vuoto, usa un punto "." come placeholder
+      
+      # Estrae contenuto, usa placeholder "." se vuoto
+      # .presence = ritorna nil se stringa vuota/nil
       content = msg.content.presence || "."
 
-      # LOGICA DI MERGE: Se l'ultimo messaggio in 'messages' ha lo stesso ruolo
-      # del messaggio corrente, uniscili in un solo messaggio per evitare
-      # messaggi "user" o "assistant" consecutivi che Bedrock non accetta
+      # LOGICA MERGE: Se ultimo messaggio ha STESSO ruolo
+      # unisci il contenuto (evita "user" or "assistant" consecutivi)
       if messages.any? && messages.last[:role] == role
-        # Aggiungi il nuovo contenuto all'ultimo messaggio, separato da due newline
+        # Aggiungi contenuto all'ultimo messaggio, separato da doppio newline
+        # Format Bedrock: { role: "user", content: [{ text: "..." }] }
         messages.last[:content][0][:text] += "\n\n#{content}"
       else
-        # Altrimenti, crea un nuovo messaggio con il formato richiesto da Bedrock
+        # Nuovo ruolo: crea nuovo messaggio nel formato richiesto da Bedrock
         messages << { role: role, content: [ { text: content } ] }
       end
     end
 
-    # SECONDO CICLO: Aggiungi il testo attuale dell'utente
-    # Se l'ultimo messaggio è un "user", unisci il nuovo testo al suo contenuto
-    # (per evitare due "user" consecutivi)
+    # FASE 2: Aggiungi il testo attuale dell'utente
+    # Se ultimo messaggio è "user", unisci il nuovo testo
+    # (evita due "user" consecutivi dopo il merge della fase 1)
     if messages.any? && messages.last[:role] == "user"
       messages.last[:content][0][:text] += "\n\n#{current_user_text}"
     else
-      # Altrimenti, crea un nuovo messaggio "user" con il testo attuale
+      # Altrimenti crea nuovo messaggio "user"
       messages << { role: "user", content: [ { text: current_user_text } ] }
     end
 
-    # PULIZIA: La conversazione DEVE iniziare con un messaggio "user", non "assistant"
-    # Bedrock richiede questa alternanza corretta. Rimuovi messaggi "assistant"
-    # dall'inizio fino al primo "user"
+    # FASE 3: Pulizia - Bedrock richiede che INIZI con "user"
+    # Rimuovi messaggi "assistant" dall'inizio finché non trovi un "user"
+    # messages.shift = rimuove e ritorna primo elemento
+    # while = ripeti finché condizione è vera
     messages.shift while messages.first && messages.first[:role] == "assistant"
 
-    # FALLBACK: Se dopo la pulizia la lista è vuota, crea un messaggio di default
-    # con il testo attuale dell'utente (caso edge: storico corrotto o non valido)
+    # FALLBACK: Se dopo la pulizia la lista è vuota (edge case: storico corrotto)
+    # crea un messaggio singolo con il testo attuale
     messages = [ { role: "user", content: [ { text: current_user_text } ] } ] if messages.empty?
 
-    # Ritorna l'array di messaggi puliti e pronti per la Converse API
+    # Ritorna array di messaggi puliti e pronti per Bedrock
     messages
   end
 
+  # Carica conversazione esistente oppure ne crea una nuova
+  # 
+  # Se conversation_id fornito: carica quella (riusa storico messaggi)
+  # Se conversation_id nil: crea conversazione nuova per questa azienda
   def fetch_or_create_conversation(company, conversation_id)
     return company.conversations.find(conversation_id) if conversation_id.present?
     company.conversations.create!

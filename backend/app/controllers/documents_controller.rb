@@ -1,6 +1,11 @@
 class DocumentsController < ApplicationController
   # Per API-only: non serve CSRF token (usiamo JWT/API key in produzione)
   # In dev, le richieste vengono comunque validate se arrivano da browser
+  #
+  # CONCETTI RAILS PER CHI CONOSCE POCO:
+  #   - ActionController::API disabilita CSRF protection di default
+  #   - CSRF (Cross-Site Request Forgery): prevenzione attacchi web specifico per form/browser
+  #   - Per API con JWT/API key, CSRF è gestito diversamente (o ignorato se RESTful)
 
   # GET /documents?company_id=:id
   def index
