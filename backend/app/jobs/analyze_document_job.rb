@@ -4,7 +4,8 @@ class AnalyzeDocumentJob < ApplicationJob
 
   def perform(document_id)
     doc = Document.find(document_id)
-    doc.update(status: "processing")
+    return unless doc
+    doc.update_column(:status, "processing")
 
     # Usa il service per l'analisi
     analysis_data = DocumentAnalysisService.analyze(doc)
@@ -13,20 +14,18 @@ class AnalyzeDocumentJob < ApplicationJob
     doc.update!(
       status: "completed",
       doc_type: analysis_data["tipo_documento"],
-      ai_data: analysis_data
+      ai_data: analysis_data,
+      updated_at: Time.current
     )
   rescue DocumentAnalysisError => e
-    # Errore di analisi (formato non supportato, Bedrock fallisce, ecc.)
     Rails.logger.error("Document analysis error: #{e.message}")
-    doc.update(status: "failed", ai_data: { error: e.message })
-  rescue ActiveRecord::RecordInvalid => e
-    # Errore di validazione (es. checksum duplicato)
-    Rails.logger.error("Validation error analyzing document #{document_id}: #{e.message}")
-    doc.update(status: "failed", ai_data: { error: e.message })
+    doc&.update_columns(
+      status: "failed",
+      ai_data: { error: e.message },
+      updated_at: Time.current
+    )
   rescue StandardError => e
-    # Errori generici: segna come fallito e lancia di nuovo per attivare il retry
     Rails.logger.error("Unexpected error analyzing document #{document_id}: #{e.message}")
-    doc.update(status: "failed", ai_data: { error: e.message }) rescue nil
     raise
   end
 end

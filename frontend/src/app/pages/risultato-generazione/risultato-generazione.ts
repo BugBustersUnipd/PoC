@@ -1,16 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient  } from '@angular/common/http';
-import { ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 interface Message{
   id: number;
   role: string;
   content: string;
-  created_at: string; //sevoglio aggiungere la data
+  created_at: string;
 }
+
 @Component({
   selector: 'app-risultato-generazione',
   standalone: true,
@@ -18,24 +18,27 @@ interface Message{
   templateUrl: './risultato-generazione.html',
   styleUrl: './risultato-generazione.css',
 })
-
 export class RisultatoGenerazione implements OnInit {
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private http = inject(HttpClient);
-  
 
+  // Variabili di stato interfaccia
   showConversations: boolean = false;
+  showImageInput: boolean = false; // MOSTRA/NASCONDE IL BOX PER IL PROMPT IMMAGINE
+  
   conversation: Message[] = [];
-
   result: any = null;
+  
+  // Dati generazione
   generatedText: string = '';
   generatedImage: string | null = null;
   conversationId: number | null = null;
   companyId: number | null = null;
   tone: string | null = null;
   newMessage: string = '';
+  imagePrompt: string = ''; 
 
 
 ngOnInit() {
@@ -68,24 +71,48 @@ ngOnInit() {
   });
 }
 
-  navigateToModificaGenerazione() {
-    this.router.navigate(['/modifica-generazione'], {
-      state: { result: this.result }
-    });
+
+  toggleImageInput() {
+    this.showImageInput = !this.showImageInput;
+    if (!this.imagePrompt) {
+       this.imagePrompt = ''; 
+    }
   }
 
-  rigenera() {
-    // TODO: implementa la rigenerazione
-    console.log('Rigenera con lo stesso prompt');
-  }
-  scarta() {
-    // Torna alla home
-    this.router.navigate(['/']);
-  }
+  confermaGenerazioneImmagine() {
+    if (!this.imagePrompt.trim()) {
+      alert('Scrivi un prompt per l\'immagine.');
+      return;
+    }
 
-  pubblica() {
-    // TODO: implementa la pubblicazione
-    console.log('Pubblica il contenuto');
+    const payload: any = {
+      prompt: this.imagePrompt,
+      company_id: this.companyId
+    };
+
+    if (this.conversationId) {
+      payload.conversation_id = this.conversationId;
+    }
+
+    console.log('Generazione Immagine con Prompt dedicato:', payload);
+
+    this.http.post('http://localhost:3000/genera-immagine', payload)
+      .subscribe({
+        next: (response: any) => {
+          console.log('Immagine generata:', response);
+
+          if (response.image_url) {
+            this.generatedImage = `http://localhost:3000${response.image_url}?t=${Date.now()}`;
+          }
+
+          this.showImageInput = false;
+          this.loadConversation();
+        },
+        error: (err) => {
+          console.error('Errore generazione immagine:', err);
+          alert('Errore durante la generazione dell\'immagine.');
+        }
+      });
   }
 
   loadConversation() {
@@ -100,9 +127,9 @@ ngOnInit() {
           this.conversation = res.messages || [];
           
           // Se l'immagine è parte della conversazione o del risultato, gestiscila qui
-          if (res.image_url) {
-            this.generatedImage = `http://localhost:3000${res.image_url}`;
-          }
+          // if (res.image_url) {
+          //   this.generatedImage = `http://localhost:3000${res.image_url}`;
+          // }
 
           const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
           if (assistantMessages.length > 0) {
@@ -113,10 +140,7 @@ ngOnInit() {
         error: (err) => console.error('Errore caricamento:', err)
       });
   }
-  toggleConversations() {
-    this.showConversations = !this.showConversations;
-    // console.log('Mostra conversazioni:', this.showConversations);
-  }
+
 
 
   addMessage() {
@@ -145,22 +169,19 @@ ngOnInit() {
     });
   }
 
-  onAiMessageClick(message: any) {
-    console.log('Messaggio AI cliccato:', message);
-  }
-
-  //per aggiungere la classe hidden (e toglierla) al click del mouse
-  get hiddenClass(){
-    if(this.showConversations){
-      return {};
-    }else{
-      return {'hidden' : true};
-    }
-  }
-
-  esci() {
-    // Naviga verso la pagina dell'AI Assistant
-    this.router.navigate(['/ai-assistant']);
-  }
   
+  toggleConversations() {
+    this.showConversations = !this.showConversations;
+  }
+
+  onAiMessageClick(message: any) {
+    console.log('Msg click:', message);
+  }
+
+  rigenera() { console.log('Todo rigenera'); }
+  pubblica() { console.log('Todo pubblica'); }
+  scarta() { this.router.navigate(['/']); }
+  esci() { this.router.navigate(['/ai-assistant']); }
+  
+  get hiddenClass() { return this.showConversations ? {} : {'hidden' : true}; }
 }

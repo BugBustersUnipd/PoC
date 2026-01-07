@@ -151,8 +151,12 @@ export class AiAssistant implements OnInit {
 
   
   navigateToStoricoPrompt() {
-    this.router.navigate(['/storico-prompt']);
-  }
+  this.router.navigate(['/storico-prompt'], {
+    state: {
+      companyId: this.filterCompany
+    }
+  });
+}
 
 
   updateCompany(value: any) {

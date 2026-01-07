@@ -29,11 +29,12 @@ export class StoricoPrompt implements OnInit {
   searchTerm = '';
   loading = true;
 
-  companyId = 1; // TODO: dinamico
+  companyId!: number; 
 
   constructor(private conversationsService: ConversationsService) {}
 
-  ngOnInit() {
+   ngOnInit() {
+    this.companyId = history.state?.companyId ?? 1; // fallback sicuro
     this.loadStorico();
   }
 

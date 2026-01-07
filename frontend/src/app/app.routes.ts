@@ -17,4 +17,5 @@ export const routes: Routes = [
   { path: 'modifica-generazione', component: ModificaGenerazione },
   { path: 'aicopilotconfidenza', component: Aicopilotconfidenza },
   { path: 'aicopilotanteprimadocumento', component: Aicopilotanteprimadocumento },
+  { path: 'aicopilotanteprima/:id', component: Aicopilotanteprimadocumento },
 ];
