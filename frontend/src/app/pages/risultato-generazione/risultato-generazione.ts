@@ -49,7 +49,6 @@ export class RisultatoGenerazione implements OnInit {
       this.companyId = state['company_id'] || null;
       this.tone = state['tone'] || null;
       
-      // RECUPERO ID CONVERSAZIONE: Fondamentale per collegare testo e immagine
       this.conversationId = this.result.conversation_id || state['conversation_id'] || null;
       
       console.log('Stato Iniziale -> ID Conversazione:', this.conversationId);
@@ -68,9 +67,7 @@ export class RisultatoGenerazione implements OnInit {
     }
   }
 
-  // --- GESTIONE IMMAGINE (Nuovo Flusso) ---
 
-  // 1. Apre il box per scrivere il prompt
   toggleImageInput() {
     this.showImageInput = !this.showImageInput;
     if (!this.imagePrompt) {
@@ -78,7 +75,6 @@ export class RisultatoGenerazione implements OnInit {
     }
   }
 
-  // 2. Chiama il backend per generare l'immagine
   confermaGenerazioneImmagine() {
     if (!this.imagePrompt.trim()) {
       alert('Scrivi un prompt per l\'immagine.');
@@ -90,30 +86,21 @@ export class RisultatoGenerazione implements OnInit {
       company_id: this.companyId
     };
 
-    // PUNTO CRUCIALE: Se abbiamo un ID conversazione (del testo), lo usiamo!
     if (this.conversationId) {
       payload.conversation_id = this.conversationId;
     }
 
     console.log('Generazione Immagine con Prompt dedicato:', payload);
 
-    // Chiamata all'URL corretto (NON aggiungere ID nell'URL)
     this.http.post('http://localhost:3000/genera-immagine', payload)
       .subscribe({
         next: (response: any) => {
           console.log('Immagine generata:', response);
 
-          // Aggiorna l'ID se il backend ce lo restituisce/aggiorna
-          if (response.conversation_id) {
-            this.conversationId = response.conversation_id;
-          }
-
-          // Mostra l'immagine
           if (response.image_url) {
             this.generatedImage = `http://localhost:3000${response.image_url}?t=${Date.now()}`;
           }
 
-          // Chiudi il box e ricarica la chat
           this.showImageInput = false;
           this.loadConversation();
         },
@@ -123,8 +110,6 @@ export class RisultatoGenerazione implements OnInit {
         }
       });
   }
-
-  // --- GESTIONE CHAT E TESTO (Esistente) ---
 
   loadConversation() {
     if (!this.conversationId) {
@@ -139,8 +124,6 @@ export class RisultatoGenerazione implements OnInit {
       next: (res) => {
         this.conversation = res.messages || [];
         console.log('Conversazione caricata:', this.conversation);
-        // Forza l'aggiornamento della variabile usata nel template
-        // Usiamo la logica del getter ma la salviamo esplicitamente
         const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
         if (assistantMessages.length > 0) {
            const lastContent = assistantMessages[assistantMessages.length - 1].content;
@@ -181,7 +164,6 @@ export class RisultatoGenerazione implements OnInit {
     });
   }
 
-  // --- UTILS ---
   
   toggleConversations() {
     this.showConversations = !this.showConversations;
