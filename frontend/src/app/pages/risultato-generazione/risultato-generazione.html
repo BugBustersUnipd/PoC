@@ -1,16 +1,29 @@
 <div class="risultato-generazione-container">
-  <!-- Canvas area (left side) -->
   <div class="canvas-area">
     <div class="prompt-box">    
       <h1>Risultato Generazione</h1>
       
-      <div *ngIf="generatedText || generatedImage; else noResult" class="generated-content">
+      <div *ngIf="showImageInput" class="image-prompt-container" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6;">
+        <h3 style="margin-top:0; font-size: 1.1rem;">Descrivi l'immagine da generare:</h3>
+        <textarea 
+          [(ngModel)]="imagePrompt" 
+          placeholder="Es. Un paesaggio futuristico con lo stile del testo generato..."
+          rows="3"
+          style="width: 100%; margin-bottom: 10px; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;"
+        ></textarea>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-green" (click)="confermaGenerazioneImmagine()">Conferma e Genera</button>
+          <button class="btn btn-red" (click)="toggleImageInput()">Annulla</button>
+        </div>
+      </div>
 
+      <div *ngIf="generatedText || generatedImage; else noResult" class="generated-content">
+        
         <div *ngIf="generatedImage" class="image-container" style="text-align: center; margin-bottom: 20px;">
           <img [src]="generatedImage" alt="Immagine generata" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         </div>
         
-        <p class="generated-text">{{ generatedText }}</p>
+        <p *ngIf="generatedText" class="generated-text">{{ generatedText }}</p>
       </div>
       
       <ng-template #noResult>
@@ -20,19 +33,17 @@
     </div>
   </div>
   
-  <!-- Button panel (right side) -->
   <div class="button-panel">
-    <button class="btn btn-white" (click)="generaImmagine()">Genera Immagine</button>
+    <button class="btn btn-white" (click)="toggleImageInput()">Genera Immagine</button>
+    
     <button class="btn btn-green" (click)="rigenera()">Rigenera</button>
     <button class="btn btn-white" (click)="toggleConversations()">Modifica</button>
     <button class="btn btn-red" (click)="scarta()">Scarta</button>
     <button class="btn btn-blue" (click)="pubblica()">Pubblica</button>
-
     <button class="btn btn-red" (click)="esci()">Esci</button>
   </div>
 
-
-   <div class="conversation-container" [ngClass]="hiddenClass">
+  <div class="conversation-container" [ngClass]="hiddenClass">
     <div class="new-message">
       <input
         type="text"
@@ -50,16 +61,18 @@
         (click)="msg.role === 'assistant' ? onAiMessageClick(msg) : null"
       >
         @if (msg.role === 'user') {
-          <strong>Tu:</strong>
-          {{ msg.content }}
+          <strong>Tu:</strong> {{ msg.content }}
         } @else {
           <div class="ai-preview">
             <strong>AI:</strong>
-            {{ msg.content.split('\n')[0] }}
+            @if (msg.content.includes('/rails/') || msg.content.includes('http')) {
+               <div><span>📷 <em>Immagine generata</em></span></div>
+            } @else {
+               {{ msg.content.split('\n')[0] }}
+            }
           </div>
         }
       </div>
     }
-
   </div>
 </div>

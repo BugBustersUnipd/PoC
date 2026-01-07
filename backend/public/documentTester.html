@@ -29,9 +29,68 @@
         <div id="resultContent"></div>
     </div>
 
+    <div id="documentsList" class="box">
+        <h3>Documenti Caricati per l'Azienda</h3>
+        <div id="documentsContent">Caricamento...</div>
+    </div>
+
+    <div id="documentBox" class="box" style="display:none;">
+        <h3>Stato Analisi: <span id="documentText">...</span></h3>
+        <div id="oldContent"></div>
+    </div>
+
     <script>
         // Company ID di default (creato dal seed)
         const COMPANY_ID = 1;
+
+        // Carica la lista dei documenti al caricamento della pagina
+        window.onload = function() {
+            loadDocuments();
+        };
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch(`/documents?company_id=${COMPANY_ID}`);
+                if (!response.ok) throw new Error(`Errore HTTP ${response.status}`);
+                
+                const documents = await response.json();
+                displayDocuments(documents);
+            } catch (error) {
+                document.getElementById('documentsContent').innerHTML = `<p style="color: red;">Errore caricamento documenti: ${error.message}</p>`;
+            }
+        }
+
+        function displayDocuments(documents) {
+            if (!Array.isArray(documents) || documents.length === 0) {
+                document.getElementById('documentsContent').innerHTML = '<p>Nessun documento trovato.</p>';
+                return;
+            }
+
+            let html = '<ul>';
+            documents.forEach(doc => {
+                const statusClass = doc.status === 'completed' ? 'success' : doc.status === 'failed' ? 'error' : 'processing';
+                html += `
+                    <li style="margin-bottom: 10px;">
+                        <strong>ID:</strong> ${doc.id} | 
+                        <strong>Nome:</strong> ${doc.filename || 'N/A'} | 
+                        <strong>Tipo:</strong> ${doc.doc_type || 'N/A'} | 
+                        <strong>Stato:</strong> <span class="${statusClass}">${doc.status}</span><br>
+                        <button onclick="viewDocument(${doc.id})">Visualizza Dettagli</button>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            document.getElementById('documentsContent').innerHTML = html;
+        }
+
+        function viewDocument(docId) {
+            // Riutilizza la logica di polling per mostrare i dettagli
+            document.getElementById('documentBox').style.display = 'block';
+            document.getElementById('documentText').innerText = 'Caricamento dettagli...';
+            document.getElementById('oldContent').innerHTML = '';
+
+            loadOldDocumentResult(docId);
+        }
 
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
@@ -96,6 +155,33 @@
                     document.getElementById('statusText').innerText = 'FALLITO ❌';
                     document.getElementById('statusText').className = 'error';
                     document.getElementById('resultContent').innerHTML = 
+                        `<p>Errore: ${doc.ai_data?.error || 'Sconosciuto'}</p>`;
+                }
+            }, 2000); // Controlla ogni 2 secondi
+        }
+
+        async function loadOldDocumentResult(docId) {
+            document.getElementById('documentText').innerText = 'Recuperando i dati...';
+            
+            const interval = setInterval(async () => {
+                const res = await fetch(`/documents/${docId}?company_id=${COMPANY_ID}`);
+                const doc = await res.json();
+
+                if (doc.status === 'completed') {
+                    clearInterval(interval);
+                    document.getElementById('documentText').innerText = 'COMPLETATO ✅';
+                    document.getElementById('documentText').className = 'success';
+                    
+                    // Mostra il JSON formattato
+                    document.getElementById('oldContent').innerHTML = 
+                        `<p><strong>Tipo Documento:</strong> ${doc.doc_type}</p>
+                         <pre>${JSON.stringify(doc.ai_data, null, 2)}</pre>`;
+                } 
+                else if (doc.status === 'failed') {
+                    clearInterval(interval);
+                    document.getElementById('documentText').innerText = 'FALLITO ❌';
+                    document.getElementById('documentText').className = 'error';
+                    document.getElementById('oldContent').innerHTML = 
                         `<p>Errore: ${doc.ai_data?.error || 'Sconosciuto'}</p>`;
                 }
             }, 2000); // Controlla ogni 2 secondi

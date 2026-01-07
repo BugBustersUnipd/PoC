@@ -7,11 +7,11 @@ class DocumentsController < ApplicationController
     company_id = params[:company_id]
     return render json: { error: "company_id mancante" }, status: :bad_request if company_id.blank?
 
-    company = Company.find_by(id: company_id)
-    return render json: { error: "Azienda non trovata" }, status: :not_found unless company
+    @company = Company.find_by(id: company_id)
+    return render json: { error: "Azienda non trovata" }, status: :not_found unless @company
 
-    documents = company.documents.order(created_at: :desc)
-    render json: documents.map { |doc| document_json(doc) }, status: :ok
+    @documents = @company.documents.order(created_at: :desc)
+    render json: @documents.map { |doc| document_json(doc) }, status: :ok
   end
 
   # POST /documents
@@ -64,7 +64,8 @@ class DocumentsController < ApplicationController
       ai_data: document.ai_data,
       checksum: document.checksum,
       created_at: document.created_at.iso8601,
-      updated_at: document.updated_at.iso8601
+      updated_at: document.updated_at.iso8601,
+      filename: document.original_file.attached? ? document.original_file.filename.to_s : nil
     }
   end
 end
