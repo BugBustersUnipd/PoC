@@ -12,52 +12,52 @@ Rails.application.routes.draw do
   # `as: :rails_health_check` crea l'helper `rails_health_check_path` utile per link o test.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # POST /genera → GeneratorController#create
+  # POST /genera → TextGenerationController#create
   # Input (body JSON): prompt (req), tone (req), company_id (req), conversation_id (opt).
   # Output: { text, conversation_id } oppure errore 4xx/5xx.
-  post "genera", to: "generator#create"
+  post "genera", to: "text_generation#create"
 
   # GET /companies → CompaniesController#index
   # Output: elenco aziende [{id,name,description}]
   resources :companies, only: [ :index ]
 
-  # GET /toni → GeneratorController#index
+  # GET /toni → TonesController#index
   # Input (query): company_id (req).
   # Output: { company: {id,name}, tones: [ {id,name,instructions} ] } o 404 se company mancante.
-  get "toni", to: "generator#index"
+  get "toni", to: "tones#index"
 
-  # GET /conversazioni → GeneratorController#conversations
+  # GET /conversazioni → ConversationsController#index
   # Input (query): company_id (req).
   # Output: lista max 50 conversazioni della company [{id,title,created_at,updated_at,summary}].
-  get "conversazioni", to: "generator#conversations"
+  get "conversazioni", to: "conversations#index"
 
-  # GET /conversazioni/:id → GeneratorController#show_conversation
+  # GET /conversazioni/:id → ConversationsController#show
   # Input: :id (req path), company_id (opt query per verifica ownership).
   # Output: conversazione con metadati e messages ordinati [{id,role,content,created_at}].
-  get "conversazioni/:id", to: "generator#show_conversation"
+  get "conversazioni/:id", to: "conversations#show"
 
-  # GET /conversazioni/ricerca → GeneratorController#search_conversations
+  # GET /conversazioni/ricerca → ConversationsController#search
   # Input (query): q o query (req), company_id (opt filtro).
   # Output: { total, conversations: [{id,title,summary,updated_at}] }.
-  get "conversazioni/ricerca", to: "generator#search_conversations"
+  get "conversazioni/ricerca", to: "conversations#search"
 
-  # POST /genera-immagine → GeneratorController#create_image
+  # POST /genera-immagine → ImageGenerationController#create
   # Genera un'immagine che può essere associata a una conversazione testuale.
   # Input (body JSON): prompt (req), company_id (req), conversation_id (opt), width (opt), height (opt), seed (opt).
   # Output: { image_url, image_id, width, height, model_id, created_at }.
-  post "genera-immagine", to: "generator#create_image"
+  post "genera-immagine", to: "image_generation#create"
 
-  # GET /immagini → GeneratorController#list_images
+  # GET /immagini → ImagesController#index
   # Recupera tutte le immagini generate da una compagnia.
   # Input (query): company_id (req), limit (opt, default 50), offset (opt, default 0), conversation_id (opt).
   # Output: { total, limit, offset, images: [{id,prompt,width,height,model_id,image_url,conversation_id,created_at}] }.
-  get "immagini", to: "generator#list_images"
+  get "immagini", to: "images#index"
 
-  # GET /immagini/:id → GeneratorController#show_image
+  # GET /immagini/:id → ImagesController#show
   # Recupera i dettagli di una singola immagine.
   # Input: id (path req), company_id (query opt per verifica ownership).
   # Output: { id, prompt, width, height, model_id, image_url, company_id, conversation_id, created_at }.
-  get "immagini/:id", to: "generator#show_image"
+  get "immagini/:id", to: "images#show"
 
   resources :documents, only: [ :index, :create, :show ]
 
