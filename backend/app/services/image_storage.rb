@@ -1,7 +1,7 @@
 require "base64"
 
 class ImageStorage
-  def self.save(company, prompt, image_data, width, height, model_id, conversation_id, seed)
+  def save(company, prompt, image_data, width, height, model_id, conversation_id, seed)
     # Elimina immagini precedenti per questa conversazione
     if conversation_id.present?
       GeneratedImage.where(conversation_id: conversation_id).destroy_all

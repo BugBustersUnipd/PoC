@@ -1,5 +1,5 @@
 class PromptBuilder
-  def self.build_system_prompt(company_name, description, tone_instructions)
+  def build_system_prompt(company_name, description, tone_instructions)
     <<~PROMPT.strip
       RUOLO: Sei l'IA ufficiale di "#{company_name}".
       CONTESTO: #{description}
@@ -13,7 +13,7 @@ class PromptBuilder
     PROMPT
   end
 
-  def self.normalize_messages(context_messages, current_user_text)
+  def normalize_messages(context_messages, current_user_text)
     messages = []
 
     # Processa messaggi dello storico

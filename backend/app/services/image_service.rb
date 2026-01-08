@@ -8,8 +8,10 @@ require "base64"
 # - Elimina automaticamente immagini precedenti della stessa conversazione (1 sola immagine per conversazione)
 # - Configurazione caricata da bedrock.yml via BEDROCK_CONFIG_IMAGE_GENERATION
 class ImageService
-  def initialize
-    @generator = ImageGenerator.new
+  def initialize(image_validator:, image_generator:, image_storage:)
+    @image_validator = image_validator
+    @image_generator = image_generator
+    @image_storage = image_storage
   end
 
   # Genera un'immagine usando Nova Canvas
@@ -31,7 +33,7 @@ class ImageService
   #   ActiveRecord::RecordNotFound se company_id non esiste
   def genera(prompt:, company_id:, conversation_id: nil, width: 1024, height: 1024, seed: nil)
     # Valida che le dimensioni siano tra quelle supportate da Nova Canvas
-    ImageValidator.validate_size!(width, height)
+    @image_validator.validate_size!(width, height)
 
     company = Company.find(company_id)
     model_id = ::BEDROCK_CONFIG_IMAGE_GENERATION["model_id"]
@@ -41,10 +43,10 @@ class ImageService
     actual_seed = seed.present? ? seed.to_i : rand(0..2_147_483_647)
 
     # Genera l'immagine
-    image_data = @generator.generate(prompt, width, height, actual_seed)
+    image_data = @image_generator.generate(prompt, width, height, actual_seed)
 
     # Salva nel DB e su disco
-    generated_image = ImageStorage.save(
+    generated_image = @image_storage.save(
       company, prompt, image_data, width, height, model_id, conversation_id, actual_seed
     )
 

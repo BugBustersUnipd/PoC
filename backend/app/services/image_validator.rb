@@ -5,7 +5,7 @@ class ImageValidator
     { w: 720, h: 1280 }   # 9:16 Portrait - Stories Instagram/TikTok, mobile vertical
   ].freeze
 
-  def self.validate_size!(width, height)
+  def validate_size!(width, height)
     is_valid = VALID_SIZES.any? { |s| s[:w] == width && s[:h] == height }
 
     unless is_valid
