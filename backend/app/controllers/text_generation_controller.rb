@@ -1,8 +1,4 @@
 class TextGenerationController < ActionController::API
-  def initialize
-    @ai_service = DIContainer.ai_service
-  end
-
   # POST /genera
   def create
     prompt     = params[:prompt]
@@ -14,7 +10,8 @@ class TextGenerationController < ActionController::API
       return render json: { error: "prompt, tone e company_id sono obbligatori" }, status: :unprocessable_entity
     end
 
-    result = @ai_service.genera(prompt, company_id, tone_name, conversation_id: conversation_id)
+    ai_service = DiContainer.ai_service
+    result = ai_service.genera(prompt, company_id, tone_name, conversation_id: conversation_id)
     render json: result, status: :ok
   rescue ActiveRecord::RecordNotFound => e
     Rails.logger.error "Record non trovato: #{e.message}"

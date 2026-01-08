@@ -1,8 +1,4 @@
 class ImageGenerationController < ActionController::API
-  def initialize
-    @image_service = DIContainer.image_service
-  end
-
   # POST /genera-immagine
   # Genera un'immagine usando Amazon Bedrock Nova Canvas
   #
@@ -60,7 +56,8 @@ class ImageGenerationController < ActionController::API
     #   2. Chiamare Bedrock Nova Canvas con invoke_model API
     #   3. Eliminare immagini precedenti della conversazione (se conversation_id presente)
     #   4. Salvare nel DB (GeneratedImage) + disco (ActiveStorage)
-    result = @image_service.genera(
+    image_service = DiContainer.image_service
+    result = image_service.genera(
       prompt: prompt,
       company_id: company_id,
       conversation_id: conversation_id,

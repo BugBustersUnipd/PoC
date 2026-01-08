@@ -2,7 +2,7 @@
 # Contenitore semplice per gestire le dipendenze dell'applicazione
 # Rispetta DIP fornendo astrazioni invece di implementazioni concrete
 
-class DIContainer
+class DiContainer
   def self.ai_service
     @ai_service ||= AiService.new
   end
