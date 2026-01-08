@@ -47,6 +47,18 @@ Rails.application.routes.draw do
   # Output: { image_url, image_id, width, height, model_id, created_at }.
   post "genera-immagine", to: "generator#create_image"
 
+  # GET /immagini → GeneratorController#list_images
+  # Recupera tutte le immagini generate da una compagnia.
+  # Input (query): company_id (req), limit (opt, default 50), offset (opt, default 0), conversation_id (opt).
+  # Output: { total, limit, offset, images: [{id,prompt,width,height,model_id,image_url,conversation_id,created_at}] }.
+  get "immagini", to: "generator#list_images"
+
+  # GET /immagini/:id → GeneratorController#show_image
+  # Recupera i dettagli di una singola immagine.
+  # Input: id (path req), company_id (query opt per verifica ownership).
+  # Output: { id, prompt, width, height, model_id, image_url, company_id, conversation_id, created_at }.
+  get "immagini/:id", to: "generator#show_image"
+
   resources :documents, only: [ :index, :create, :show ]
 
   require 'sidekiq/web'
