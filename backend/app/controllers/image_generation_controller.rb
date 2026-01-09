@@ -1,4 +1,4 @@
-class ImageGenerationController < ActionController::API
+class ImageGenerationController < ApplicationController
   # POST /genera-immagine
   # Genera un'immagine usando Amazon Bedrock Nova Canvas
   #
@@ -27,44 +27,37 @@ class ImageGenerationController < ActionController::API
   #   - 422 Unprocessable: parametri mancanti, dimensioni non supportate
   #   - 404 Not Found: company_id inesistente
   #   - 500 Internal Server Error: errori Bedrock API, network, bug
-  #
   # Esempi dimensioni valide:
   #   - 1024x1024 (quadrato): icone, avatar, post social
   #   - 1280x720 (16:9 landscape): banner, copertine, video thumbnail
   #   - 720x1280 (9:16 portrait): stories Instagram/TikTok, mobile vertical
   def create
-    # Estrae parametri dalla request
-    prompt = params[:prompt]
-    company_id = params[:company_id]
-    conversation_id = params[:conversation_id] # optional - associa a conversazione testuale
+    # Pattern: validazione tramite value object dedicato (SRP)
+    # ImageGenerationParams normalizza input (defaults) e valida requisiti
+    request_params = ImageGenerationParams.new(
+      prompt: params[:prompt],
+      company_id: params[:company_id],
+      conversation_id: params[:conversation_id],
+      width: params[:width],
+      height: params[:height],
+      seed: params[:seed]
+    )
 
-    # Dimensioni con default 1024x1024 (quadrato standard)
-    width = params[:width].present? ? params[:width].to_i : 1024
-    height = params[:height].present? ? params[:height].to_i : 1024
-
-    # Seed optional: nil = casuale, fornito = riproducibile
-    seed = params[:seed].present? ? params[:seed].to_i : nil
-
-    # Validazione parametri obbligatori
-    if prompt.blank? || company_id.blank?
-      return render json: { error: "prompt e company_id sono obbligatori" }, status: :unprocessable_entity
+    # Guard clause: blocca richiesta se validazione fallisce
+    unless request_params.valid?
+      return render json: { error: request_params.errors.first, errors: request_params.errors }, status: :unprocessable_entity
     end
 
-    # Delega generazione al servizio
-    # ImageService si occupa di:
+    # Delega generazione al servizio orchestratore
+    # ImageService coordina: validazione dimensioni, generazione API, storage
+    # **request_params.to_service_params è "splat operator":
+    # converte Hash {prompt: \"x\", width: 1024, ...} in keyword arguments (prompt: \"x\", width: 1024, ...)
+    # Equivalente a: image_service.genera(prompt: request_params.prompt, width: request_params.width, ...)
     #   1. Validare dimensioni (solo 1024x1024, 1280x720, 720x1280)
     #   2. Chiamare Bedrock Nova Canvas con invoke_model API
     #   3. Eliminare immagini precedenti della conversazione (se conversation_id presente)
     #   4. Salvare nel DB (GeneratedImage) + disco (ActiveStorage)
-    image_service = DiContainer.image_service
-    result = image_service.genera(
-      prompt: prompt,
-      company_id: company_id,
-      conversation_id: conversation_id,
-      width: width,
-      height: height,
-      seed: seed
-    )
+    result = image_service.genera(**request_params.to_service_params)
 
     # Genera URL pubblico per accedere all'immagine
     # rails_blob_path crea URL temporaneo firmato per sicurezza
@@ -73,14 +66,13 @@ class ImageGenerationController < ActionController::API
     image_url = rails_blob_path(generated_image.image, disposition: "inline") if generated_image.image.attached?
 
     # Response JSON con tutti i metadati
-    render json: {
-      image_url: image_url,          # URL visualizzazione (firmato, temporaneo)
-      image_id: generated_image.id,  # ID record DB per future referenze
-      width: result[:width],          # Dimensioni effettive (conferma input)
+    render json: GeneratedImageSerializer.serialize(
+      generated_image: generated_image,
+      image_url: image_url,
+      width: result[:width],
       height: result[:height],
-      model_id: result[:model_id],   # Modello Bedrock usato (es. amazon.nova-canvas-v1:0)
-      created_at: generated_image.created_at.iso8601 # Timestamp ISO8601 standard
-    }, status: :created # 201 Created
+      model_id: result[:model_id]
+    ), status: :created # 201 Created
 
   # Gestione errori strutturata per diversi scenari
   rescue ArgumentError => e
