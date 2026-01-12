@@ -98,9 +98,8 @@ Architettura & Config
   - `AiService` usa profilo `text_generation`
   - `DocumentAnalysisService` usa profilo `document_analysis`
 - Queue/Cache
-  - Dev: `config.active_job.queue_adapter = :async` (andrebbe messo sidekick ma va installato, basta cambiare una riga)
+  - Dev: `config.active_job.queue_adapter = :async`
   - Prod: SolidQueue + SolidCache
-  - Nota: la gem `sidekiq` è presente; per usarla serve configurare `config.active_job.queue_adapter = :sidekiq`
 - Storage
   - Dev/Prod: `config.active_storage.service = :local` (vedi config/storage.yml per alternative)
 

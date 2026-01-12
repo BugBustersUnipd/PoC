@@ -50,7 +50,7 @@ Questo documento riepiloga tutti i commenti aggiunti al codice backend per rende
 - ✅ `generated_image.rb` - ActiveStorage, numericality validations, note dimensioni
 
 ### Jobs (1 file)
-- ✅ `analyze_document_job.rb` - Background job Sidekiq con retry e exception handling
+- ✅ `analyze_document_job.rb` - Background job per analisi documenti con Amazon Bedrock
 
 ## 🎯 Pattern Ruby Spiegati
 

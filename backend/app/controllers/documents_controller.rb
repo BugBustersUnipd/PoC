@@ -1,7 +1,7 @@
 # DocumentsController - Gestisce upload e analisi documenti con OCR/AI
 #
-# I documenti vengono caricati, salvati con ActiveStorage, e analizzati in background
-# tramite job Sidekiq che estrae testo (OCR) e metadati via Amazon Bedrock.
+# I documenti vengono caricati, salvati con ActiveStorage, e analizzati in background 
+# dove viene estratto testo (OCR) e analizzati metadati via Amazon Bedrock.
 #
 # Endpoints:
 # - GET /documents?company_id=:id → lista documenti azienda
@@ -54,7 +54,6 @@ class DocumentsController < ApplicationController
 
     # save ritorna true/false (validation + insert DB)
     if @document.save
-      # perform_later accoda job Sidekiq (async, non blocca la response HTTP)
       # Lo stato di default del documento è "pending"
       # Il job aggiornerà status → "processed" quando completo
       AnalyzeDocumentJob.perform_later(@document.id)

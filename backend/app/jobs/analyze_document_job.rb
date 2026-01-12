@@ -11,44 +11,7 @@
 # - Analisi Bedrock è asincrona (lenta, 10-30 secondi per PDF grandi)
 # - User riceve response immediata, polling per status update
 #
-# Queue: Sidekiq (Redis-backed job queue)
-# - Retry: fino a 3 tentativi automatici per errori transienti
-# - Job eseguito in processo separato (worker)
 class AnalyzeDocumentJob < ApplicationJob
-  # queue_as :default = usa coda "default" Sidekiq
-  # Sidekiq supporta multiple code con priorità diverse:
-  # - :critical = alta priorità (email, notifiche)
-  # - :default = priorità normale (analisi documenti)
-  # - :low = bassa priorità (pulizia, aggregazioni)
-  queue_as :default
-  
-  # sidekiq_options = configurazione Sidekiq-specific
-  # retry: 3 = riprova max 3 volte se job fallisce
-  #
-  # Retry è utile per errori transienti:
-  # - ThrottlingException Bedrock (quota temporanea)
-  # - Network timeout
-  # - Database deadlock
-  #
-  # Backoff esponenziale automatico: 25s, 2m, 10m
-  sidekiq_options retry: 3
-
-  # perform = metodo eseguito dal worker Sidekiq
-  #
-  # Argomenti serializzabili in JSON (Integer, String, Hash, Array)
-  # NON passare ActiveRecord objects (passare ID invece)
-  #
-  # @param document_id [Integer] ID documento da analizzare
-  #
-  # Workflow:
-  # 1. DocumentsController crea Document record (status=pending)
-  # 2. Controller enqueue job: AnalyzeDocumentJob.perform_later(doc.id)
-  # 3. Sidekiq worker esegue perform(doc.id) in background
-  # 4. Frontend polling GET /documents/:id per status update
-  #
-  # Esempio:
-  #   AnalyzeDocumentJob.perform_later(123)
-  #   # Job enqueued in Redis, eseguito appena worker disponibile
   def perform(document_id)
     # Carica documento dal DB
     # .find lancia ActiveRecord::RecordNotFound se ID non esiste
@@ -103,10 +66,6 @@ class AnalyzeDocumentJob < ApplicationJob
     Rails.logger.error("Unexpected error analyzing document #{document_id}: #{e.message}")
     
     # raise = rilancia eccezione
-    # Sidekiq vedrà eccezione e:
-    # 1. Marca job come failed
-    # 2. Schedula retry (se retry < 3)
-    # 3. Muove in DeadSet dopo 3 fallimenti (manuale inspection)
     raise
   end
 end

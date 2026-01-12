@@ -61,9 +61,6 @@ Rails.application.routes.draw do
 
   resources :documents, only: [ :index, :create, :show ]
 
-  require 'sidekiq/web'
-  mount Sidekiq::Web => '/sidekiq'
-
   # Esempio di root (pagina principale) — al momento non usata:
   # root "posts#index"
 end
