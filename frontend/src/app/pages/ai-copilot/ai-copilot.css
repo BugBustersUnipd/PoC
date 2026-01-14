@@ -47,15 +47,6 @@
   transition: all 0.2s;
 }
 
-.btn-white {
-  background-color: white;
-  color: #333;
-}
-
-.btn-white:hover {
-  background-color: #f5f5f5;
-}
-
 .btn-blue {
   background-color: #2196F3;
   color: white;
