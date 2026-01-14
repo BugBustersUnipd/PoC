@@ -19,7 +19,7 @@ interface Company{
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [FormsModule,CommonModule,],
+  imports: [FormsModule,CommonModule],
   templateUrl: './ai-assistant.html',
   styleUrl: './ai-assistant.css',
 })
@@ -41,19 +41,22 @@ export class AiAssistant implements OnInit {
   ngOnInit() {
     this.loadCompanies();
   }
+
   loadCompanies() {
     console.log('Inizio caricamento aziende...');
+
+    //chiamata per il get delle companies
     this.http
       .get<Company[]>('http://localhost:3000/companies')
-      .subscribe({
+      .subscribe({ //subscribe per gestire la risposta asincrona, quando arriva la risposta esegue next o error
         next: (res) => {
-          this.companies = res;
+          this.companies = res; //inserisce il risultato nella variabile companies
           if (this.companies.length > 0) {
-            this.filterCompany = this.companies[0].id;
-            this.loadTones();
+            this.filterCompany = this.companies[0].id; //se ci sono companies, seleziona la prima come default
+            this.loadTones(); //per la company selezionata, carica i toni
           }
-          this.cdr.detectChanges();
-          console.log('Aziende caricate:', this.companies);
+          this.cdr.detectChanges(); //forza il rilevamento dei cambiamenti per aggiornare la UI
+          console.log('Aziende caricate:', this.companies); 
         },
         error: (err) => {
           console.error('Errore caricamento aziende:', err);
@@ -61,20 +64,23 @@ export class AiAssistant implements OnInit {
         }
       });
   }
+
+  /* Carica i toni associati alla company selezionata */
   loadTones() {
     console.log('Inizio caricamento toni...');
     
   this.http
-    .get<any>('http://localhost:3000/toni', {
-      params: { company_id: this.filterCompany.toString() }
-    })
+    .get<any>(`http://localhost:3000/toni?company_id=${this.filterCompany}`)
     .subscribe({
       next: (res) => {
-        console.log('Response completa:', res);
+        console.log('Response completa:', res); //ha id e nome azienda (sotto company) e toni (sotto tones)
         console.log('Toni array:', res.tones);
         console.log('Numero toni:', res.tones?.length);
         
-        this.tones = res.tones || [];
+        this.tones = res.tones || []; //assegna i toni ricevuti alla variabile tones, o un array vuoto se non ci sono toni
+        if (this.tones.length > 0) {
+          this.selectedTone = ""; //ad ogni cambiamento di company, resetta il tono selezionato mettendo il l'option "Seleziona tono"
+        }
         this.cdr.detectChanges();
         
         console.log('this.tones dopo assegnazione:', this.tones);
@@ -98,21 +104,21 @@ export class AiAssistant implements OnInit {
     }
     
     const payload = {
-      prompt: this.prompt,
-      tone: this.selectedTone,
       company_id: this.filterCompany,
-      conversation_id: null
+      conversation_id: null,
+      prompt: this.prompt,
+      tone: this.selectedTone
     };
     this.http.post<any>('http://localhost:3000/genera', payload)
       .subscribe({
         next: (response) => {
+          console.log('Risposta completa dopo post genera text:', response); //ha text e conversation_id
           this.router.navigate(['/risultato-generazione'], {
 
             //passa come parametro conversation_id l'id della conversazione (aggiungo per permettere la visualizzazione della singola conversazione nello storico, con tutti i suoi dettagli)
-            queryParams: { conversation_id: response.conversation_id },
 
             //i dati che ci servono per recuperare tono e la company (entrambe per permettere la modifica, perchè usano GET /genera)
-            state: { company_id: this.filterCompany, tone: this.selectedTone }
+            state: { conversation_id: response.conversation_id ,company_id: this.filterCompany, tone: this.selectedTone }
           });
         },
         error: () => alert('Errore nella generazione')
