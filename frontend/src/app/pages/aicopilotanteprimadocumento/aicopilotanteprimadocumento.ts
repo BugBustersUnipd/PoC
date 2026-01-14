@@ -1,5 +1,5 @@
 import { ChangeDetectorRef,Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 import { DocumentsService } from '../../services/document.service';
 import { interval, Subscription, switchMap } from 'rxjs';
 
@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 })
 export class Aicopilotanteprimadocumento implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private documentsService = inject(DocumentsService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -22,8 +23,8 @@ export class Aicopilotanteprimadocumento implements OnInit, OnDestroy {
 
   private pollingSub?: Subscription;
   
-formatLabel(key: string): string {
-  return key
+formatLabel(key: string | number | symbol): string {
+  return String(key)
     .replace(/_/g, ' ')
     .replace(/\b\w/g, char => char.toUpperCase());
 }
@@ -53,7 +54,7 @@ formatLabel(key: string): string {
   }
 
   navigateToAiCoPilot() {
-    // Implement navigation logic here
+      this.router.navigate(['/ai-copilot']);
   }
 
   ngOnDestroy() {
