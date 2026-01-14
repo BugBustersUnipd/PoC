@@ -24,7 +24,10 @@ default: &defaults
 # - Supporta: PDF, PNG, JPEG, WebP (formati comuni documenti)
 document_analysis: &document_analysis
   <<: *defaults
-  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_ANALYSIS", "amazon.nova-lite-v1:0") %>
+  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_ANALYSIS", "us.amazon.nova-lite-v1:0") %>
+  # document_analysis:
+  #   guardrail_id: <%= ENV.fetch("BEDROCK_GUARDRAIL_ID", "gs9kmq0fkkzj") %>
+  #   guardrail_version: <%= ENV.fetch("BEDROCK_GUARDRAIL_VERSION", "2") %>
   temperature: 0.0
   max_tokens: 1000
   supported_formats:
@@ -41,7 +44,10 @@ document_analysis: &document_analysis
 # - Usa l'API Converse di Bedrock (supporta conversazioni multi-turn)
 text_generation: &text_generation
   <<: *defaults
-  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_GENERATION", "amazon.nova-lite-v1:0") %>
+  model_id: <%= ENV.fetch("BEDROCK_MODEL_ID_GENERATION", "us.amazon.nova-lite-v1:0") %>
+  text_generation:
+    guardrail_id: <%= ENV.fetch("BEDROCK_GUARDRAIL_ID", "gs9kmq0fkkzj") %>
+    guardrail_version: <%= ENV.fetch("BEDROCK_GUARDRAIL_VERSION", "2") %>
   temperature: 0.0
   max_tokens: 1000
 

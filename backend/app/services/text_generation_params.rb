@@ -19,6 +19,32 @@ class TextGenerationParams
   # Vedi ImageGenerationParams per spiegazione completa attr_reader
   attr_reader :prompt, :tone_name, :company_id, :conversation_id, :errors
 
+  BANNED_PATTERNS = [
+  # Ignorare regole / istruzioni
+  /ignora\s+(tutte|le|le\s+precedenti)\s+istruzioni/i,
+  /non\s+seguire\s+le\s+istruzioni/i,
+  /dimentica\s+le\s+regole/i,
+
+  # Prompt / istruzioni interne
+  /prompt\s+di\s+sistema/i,
+  /istruzioni\s+interne/i,
+  /messaggio\s+di\s+sistema/i,
+
+  # Override del ruolo
+  /agisci\s+come/i,
+  /fingi\s+di\s+essere/i,
+  /interpreta\s+il\s+ruolo\s+di/i,
+
+  # Jailbreak classici
+  /fai\s+qualsiasi\s+cosa/i,
+  /senza\s+limitazioni/i,
+  /\bDAN\b/i,
+
+  # Identità del modello / auto-riferimento
+  /(sei|tu\s+sei)\s+(un|una)?\s*(ai|intelligenza\s+artificiale|assistente|modello\s+linguistico)/i
+]
+
+
   # Costruttore: valida e normalizza input HTTP
   #
   # Normalizzazioni applicate:
@@ -88,8 +114,12 @@ class TextGenerationParams
     # .blank? = true se nil/empty/whitespace-only
     # || = OR logico, errore se almeno uno è blank
     # << = append a array
-    errors << "prompt, tone e company_id sono obbligatori" if prompt.blank? || tone_name.blank? || company_id.blank?
-    
+    errors << "Prompt, tone e company_id sono obbligatori" if prompt.blank? || tone_name.blank? || company_id.blank?
+
+    if BANNED_PATTERNS.any? { |pattern| prompt.match?(pattern) }
+      errors << "Il prompt contiene istruzioni non permesse"
+    end
+
     # Validazione passa se errors array vuoto
     errors.empty?
   end

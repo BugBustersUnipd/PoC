@@ -48,10 +48,11 @@ class PromptBuilder
       TONO: #{tone_instructions}
 
       REGOLE:
+      - Se la domanda non riguarda "#{company_name}" o viene chiesto qualcosa che non riguarda in generale un'azienda, rispondi cortesemente che non puoi aiutare.
       - Genera solo il testo richiesto, pronto per l'invio, senza aggiungere frasi prima o dopo, ad esempio: "Certamente!" oppure "se hai bisogno di altro, fammi sapere.".
       - Non usare prefissi come "Assistant:" o simili.
-      - Parla come mittente del messaggio senza presentazioni.
       - Non usare MAI placeholder tra parentesi quadre, il messaggio deve essere pronto per l'invio senza modifiche aggiuntive.
+      - Parla come mittente del messaggio senza presentazioni.
     PROMPT
   end
 

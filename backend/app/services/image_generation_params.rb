@@ -29,6 +29,31 @@ class ImageGenerationParams
   # - attr_accessor genererebbe getter + setter, ma vogliamo oggetto immutabile
   attr_reader :prompt, :company_id, :conversation_id, :width, :height, :seed, :errors
 
+  BANNED_PATTERNS = [
+    # Ignorare regole / istruzioni
+    /ignora\s+(tutte|le|le\s+precedenti)\s+istruzioni/i,
+    /non\s+seguire\s+le\s+istruzioni/i,
+    /dimentica\s+le\s+regole/i,
+
+    # Prompt / istruzioni interne
+    /prompt\s+di\s+sistema/i,
+    /istruzioni\s+interne/i,
+    /messaggio\s+di\s+sistema/i,
+
+    # Override del ruolo
+    /agisci\s+come/i,
+    /fingi\s+di\s+essere/i,
+    /interpreta\s+il\s+ruolo\s+di/i,
+
+    # Jailbreak classici
+    /fai\s+qualsiasi\s+cosa/i,
+    /senza\s+limitazioni/i,
+    /\bDAN\b/i,
+
+    # Identità del modello / auto-riferimento
+    /(sei|tu\s+sei)\s+(un|una)?\s*(ai|intelligenza\s+artificiale|assistente|modello\s+linguistico)/i
+  ]
+
   # Costruttore: valida e normalizza input HTTP
   #
   # Normalizzazioni applicate:
@@ -107,6 +132,10 @@ class ImageGenerationParams
     # << = append a array
     # Modifier if = esegui solo se condizione vera
     errors << "prompt e company_id sono obbligatori" if prompt.blank? || company_id.blank?
+
+    if BANNED_PATTERNS.any? { |pattern| prompt.match?(pattern) }
+      errors << "prompt contiene istruzioni non permesse"
+    end
     
     # .empty? = true se array non ha elementi
     # Validazione passa se errors array vuoto

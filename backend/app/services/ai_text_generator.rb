@@ -177,7 +177,11 @@ class AiTextGenerator
       # [{text: "..."}] = array con un elemento Hash
       system: [{ text: system_prompt }],
       # inference_config = parametri generazione (temperature, tokens, etc.)
-      inference_config: bedrock_inference_config
+      inference_config: bedrock_inference_config,
+      guardrail_config: {
+        guardrail_identifier: "gs9kmq0fkkzj",
+        guardrail_version: "2"
+      }
     )
   end
 

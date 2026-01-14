@@ -109,7 +109,11 @@ class DocumentAnalysisService
       inference_config: {
         temperature: BEDROCK_CONFIG["temperature"],
         max_tokens: BEDROCK_CONFIG["max_tokens"]
-      }
+      }#,
+      # guardrail_config: {
+      #   guardrail_identifier: "gs9kmq0fkkzj",
+      #   guardrail_version: "2"
+      # }
     )
   rescue Aws::BedrockRuntime::Errors::ServiceError => e
     raise DocumentAnalysisError, "Bedrock error: #{e.message}"
