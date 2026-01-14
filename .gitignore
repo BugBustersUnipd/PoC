@@ -50,3 +50,32 @@
 *.swo
 *~
 
+# ----------------------------------------------------------------------
+# ADDITIONAL FRONTEND RULES (Dettagli aggiuntivi)
+# ----------------------------------------------------------------------
+
+# Frontend Compilation & Temp files
+/frontend/tmp
+/frontend/out-tsc
+/frontend/bazel-out
+/frontend/coverage
+
+# Frontend/Node Logs
+npm-debug.log
+yarn-error.log
+/frontend/libpeerconnection.log
+/frontend/testem.log
+
+# Frontend Caches & Misc
+/frontend/.sass-cache/
+/frontend/connect.lock
+/frontend/typings
+/frontend/__screenshots__/
+
+# IDEs specifici (Eclipse, Sublime, ecc - dal gitignore frontend originale)
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace

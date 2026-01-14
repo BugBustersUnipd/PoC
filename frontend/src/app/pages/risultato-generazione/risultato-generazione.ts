@@ -210,7 +210,28 @@ ngOnInit() {
   }
 
   onAiMessageClick(message: any) {
-    console.log('Msg click:', message);
+    const isImage = message.content.includes('/rails/') || message.content.includes('http');
+
+    if (isImage) {
+      // CASO IMMAGINE:
+      // Se il messaggio storico è un'immagine, puliamo il testo e mostriamo l'immagine.
+      this.generatedText = '';
+      
+      // Gestione URL: se manca il dominio (es. path relativo Rails), lo aggiungiamo
+      if (message.content.startsWith('http')) {
+         this.generatedImage = message.content;
+      } else {
+         this.generatedImage = `http://localhost:3000${message.content}`;
+      }
+      
+    } else {
+      // CASO TESTO:
+      // Se il messaggio storico è testo, lo mostriamo e nascondiamo l'immagine.
+      this.generatedText = message.content;
+      this.generatedImage = null; 
+    }
+
+    this.cdr.detectChanges();
   }
 
 
