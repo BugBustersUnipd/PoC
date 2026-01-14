@@ -77,7 +77,10 @@ export class AiAssistant implements OnInit {
         console.log('Toni array:', res.tones);
         console.log('Numero toni:', res.tones?.length);
         
-        this.tones = res.tones || [];
+        this.tones = res.tones || []; //assegna i toni ricevuti alla variabile tones, o un array vuoto se non ci sono toni
+        if (this.tones.length > 0) {
+          this.selectedTone = ""; //se ci sono toni, seleziona il primo come default
+        }
         this.cdr.detectChanges();
         
         console.log('this.tones dopo assegnazione:', this.tones);
