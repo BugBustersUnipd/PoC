@@ -139,7 +139,42 @@ ngOnInit() {
         },
         error: (err) => console.error('Errore caricamento:', err)
       });
+
+    // Carica le immagini associate a questa conversazione
+    this.http
+      .get<any>('http://localhost:3000/immagini', {
+        params: { 
+          company_id: this.companyId?.toString() || '',
+          conversation_id: this.conversationId.toString()
+        }
+      })
+      .subscribe({
+        next: (res) => {
+          // La rotta restituisce { total, limit, offset, images: [...] }
+          // Se ci sono immagini, prendiamo l'ultima generata (o la prima, dipende dall'ordine del DB)
+          if (res.images && res.images.length > 0) {
+            // Prendiamo l'ultima immagine dell'array (assumendo che siano in ordine cronologico o che ti interessi una sola)
+            const lastImage = res.images[res.images.length - 1];
+            
+            // Costruiamo l'URL completo
+            this.generatedImage = `http://localhost:3000${lastImage.image_url}`;
+            
+            // Se vuoi mostrare il prompt usato per l'immagine nel box di input (opzionale)
+            if (lastImage.prompt) {
+               this.imagePrompt = lastImage.prompt;
+            }
+          } else {
+            // Nessuna immagine associata a questa conversazione
+            this.generatedImage = null;
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Errore caricamento immagini associate:', err);
+        }
+      });
   }
+  
 
 
 
