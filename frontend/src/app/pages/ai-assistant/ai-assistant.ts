@@ -116,10 +116,9 @@ export class AiAssistant implements OnInit {
           this.router.navigate(['/risultato-generazione'], {
 
             //passa come parametro conversation_id l'id della conversazione (aggiungo per permettere la visualizzazione della singola conversazione nello storico, con tutti i suoi dettagli)
-            queryParams: { conversation_id: response.conversation_id },
 
             //i dati che ci servono per recuperare tono e la company (entrambe per permettere la modifica, perchè usano GET /genera)
-            state: { company_id: this.filterCompany, tone: this.selectedTone }
+            state: { conversation_id: response.conversation_id ,company_id: this.filterCompany, tone: this.selectedTone }
           });
         },
         error: () => alert('Errore nella generazione')

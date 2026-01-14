@@ -7,5 +7,5 @@ import { RouterOutlet, RouterLink } from '@angular/router';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('ProvaAngular');
+  protected readonly title = signal('POC');
 }

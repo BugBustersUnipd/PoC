@@ -93,8 +93,7 @@ export class StoricoPrompt implements OnInit {
 
   goToConversation(id: number) {
     this.router.navigate(['/risultato-generazione'], { 
-      queryParams: { conversation_id: id},
-      state: { company_id: this.companyId }
+      state: { conversation_id: id, company_id: this.companyId }
     });
   }
 

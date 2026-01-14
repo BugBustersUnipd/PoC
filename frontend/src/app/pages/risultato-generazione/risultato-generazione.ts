@@ -46,8 +46,7 @@ ngOnInit() {
 
   // Sottoscriviamo ai parametri dell'URL
   this.route.queryParams.subscribe(params => {
-    const id_param = params['conversation_id'];
-    const company_id_param = params['company_id'];
+    const id_param = state?.['conversation_id'] || null;
     if (id_param) {
       //se è stato generato un testo (pulsante Genera) allora carica la conversazione
       this.conversationId = +id_param;
