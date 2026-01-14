@@ -19,7 +19,7 @@ interface Company{
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [FormsModule,CommonModule,],
+  imports: [FormsModule,CommonModule],
   templateUrl: './ai-assistant.html',
   styleUrl: './ai-assistant.css',
 })
@@ -41,19 +41,22 @@ export class AiAssistant implements OnInit {
   ngOnInit() {
     this.loadCompanies();
   }
+
   loadCompanies() {
     console.log('Inizio caricamento aziende...');
+
+    //chiamata per il get delle companies
     this.http
       .get<Company[]>('http://localhost:3000/companies')
-      .subscribe({
+      .subscribe({ //subscribe per gestire la risposta asincrona, quando arriva la risposta esegue next o error
         next: (res) => {
-          this.companies = res;
+          this.companies = res; //inserisce il risultato nella variabile companies
           if (this.companies.length > 0) {
-            this.filterCompany = this.companies[0].id;
-            this.loadTones();
+            this.filterCompany = this.companies[0].id; //se ci sono companies, seleziona la prima come default
+            this.loadTones(); //per la company selezionata, carica i toni
           }
-          this.cdr.detectChanges();
-          console.log('Aziende caricate:', this.companies);
+          this.cdr.detectChanges(); //forza il rilevamento dei cambiamenti per aggiornare la UI
+          console.log('Aziende caricate:', this.companies); 
         },
         error: (err) => {
           console.error('Errore caricamento aziende:', err);
@@ -61,13 +64,13 @@ export class AiAssistant implements OnInit {
         }
       });
   }
+
+  /* Carica i toni associati alla company selezionata */
   loadTones() {
     console.log('Inizio caricamento toni...');
     
   this.http
-    .get<any>('http://localhost:3000/toni', {
-      params: { company_id: this.filterCompany.toString() }
-    })
+    .get<any>(`http://localhost:3000/toni?company_id=${this.filterCompany}`)
     .subscribe({
       next: (res) => {
         console.log('Response completa:', res);
