@@ -2,24 +2,21 @@
   <div class="content-box">
   <div class="split-layout">
     <!-- Left side - Form -->
+     <h2 class="section-title">{{document.filename}}</h2>
     <div class="form-section">
       <div class="form-group">
   @for (item of document.ai_data | keyvalue; track item.key) {
     <div class="form-group">
-      <label>
-        {{ (item.key) }}:
+      <span class="label">
+        {{ formatLabel(item.key) }}:
+      </span>
+      <span class="value" [class.missing]="!item.value">
         {{ item.value || 'non trovato' }}
-      </label>
+      </span>
     </div>
   }
-</div>
-
-      <button class="btn btn-back" (click)="navigateToAiCoPilot()">←</button>
-    </div>
-    
-    <!-- Right side - Preview -->
-    <div class="preview-section">
-      <div class="preview-box"></div>
+    </div>  
     </div>
   </div>
+  <button class="btn btn-back" (click)="navigateToAiCoPilot()">←</button>
   </div>
