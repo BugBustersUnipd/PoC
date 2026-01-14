@@ -178,9 +178,7 @@ ngOnInit() {
     console.log('Msg click:', message);
   }
 
-  rigenera() { console.log('Todo rigenera'); }
-  pubblica() { console.log('Todo pubblica'); }
-  scarta() { this.router.navigate(['/']); }
+
   esci() { this.router.navigate(['/ai-assistant']); }
   
   get hiddenClass() { return this.showConversations ? {} : {'hidden' : true}; }
