@@ -11,7 +11,7 @@ import { Aicopilotanteprimadocumento } from './pages/aicopilotanteprimadocumento
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, Analytics, AiAssistant, AiCopilot, StoricoPrompt, RisultatoGenerazione, ModificaGenerazione, Aicopilotconfidenza, Aicopilotanteprimadocumento],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
