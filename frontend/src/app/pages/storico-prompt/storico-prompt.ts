@@ -30,6 +30,7 @@ export class StoricoPrompt implements OnInit {
   loading = true;
 
   companyId!: number; 
+  tone!: string; 
 
   constructor(private conversationsService: ConversationsService) {}
 
@@ -92,7 +93,8 @@ export class StoricoPrompt implements OnInit {
 
   goToConversation(id: number) {
     this.router.navigate(['/risultato-generazione'], { 
-      queryParams: { conversation_id: id } 
+      queryParams: { conversation_id: id},
+      state: { company_id: this.companyId }
     });
   }
 

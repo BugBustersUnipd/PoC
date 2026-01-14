@@ -47,11 +47,11 @@ ngOnInit() {
   // Sottoscriviamo ai parametri dell'URL
   this.route.queryParams.subscribe(params => {
     const id_param = params['conversation_id'];
-
+    const company_id_param = params['company_id'];
     if (id_param) {
       //se è stato generato un testo (pulsante Genera) allora carica la conversazione
       this.conversationId = +id_param;
-      this.companyId = state?.['company_id'] || null;
+      this.companyId = state?.['company_id']|| null;
       this.tone = state?.['tone'] || null;
       this.loadConversation();
     } //se è stata generata un'immagien (quindi non associata ad una conversazione) allora vengono passati i dati 
@@ -148,10 +148,10 @@ ngOnInit() {
     if (!testo) return;
 
     this.http.post<any>('http://localhost:3000/genera', {
-      prompt: testo,
-      tone: this.tone,
       company_id: this.companyId,
-      conversation_id: this.conversationId
+      conversation_id: this.conversationId,
+      prompt: testo,
+      tone: this.tone
     }).subscribe({
       next: (res) => {
         // console.log(res['text']);
@@ -163,6 +163,10 @@ ngOnInit() {
 
       },
       error: (err) => {
+        console.log('conversation_id:', this.conversationId);
+        console.log('company_id:', this.companyId);
+        console.log('prompt:', testo);
+        console.log('tone:', this.tone);
         console.error('Errore aggiunta messaggio:', err);
         alert('Errore nell\'aggiunta del messaggio');
       }

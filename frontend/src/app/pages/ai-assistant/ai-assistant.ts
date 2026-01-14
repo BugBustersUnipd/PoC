@@ -73,13 +73,13 @@ export class AiAssistant implements OnInit {
     .get<any>(`http://localhost:3000/toni?company_id=${this.filterCompany}`)
     .subscribe({
       next: (res) => {
-        console.log('Response completa:', res);
+        console.log('Response completa:', res); //ha id e nome azienda (sotto company) e toni (sotto tones)
         console.log('Toni array:', res.tones);
         console.log('Numero toni:', res.tones?.length);
         
         this.tones = res.tones || []; //assegna i toni ricevuti alla variabile tones, o un array vuoto se non ci sono toni
         if (this.tones.length > 0) {
-          this.selectedTone = ""; //se ci sono toni, seleziona il primo come default
+          this.selectedTone = ""; //ad ogni cambiamento di company, resetta il tono selezionato mettendo il l'option "Seleziona tono"
         }
         this.cdr.detectChanges();
         
@@ -104,14 +104,15 @@ export class AiAssistant implements OnInit {
     }
     
     const payload = {
-      prompt: this.prompt,
-      tone: this.selectedTone,
       company_id: this.filterCompany,
-      conversation_id: null
+      conversation_id: null,
+      prompt: this.prompt,
+      tone: this.selectedTone
     };
     this.http.post<any>('http://localhost:3000/genera', payload)
       .subscribe({
         next: (response) => {
+          console.log('Risposta completa dopo post genera text:', response); //ha text e conversation_id
           this.router.navigate(['/risultato-generazione'], {
 
             //passa come parametro conversation_id l'id della conversazione (aggiungo per permettere la visualizzazione della singola conversazione nello storico, con tutti i suoi dettagli)
