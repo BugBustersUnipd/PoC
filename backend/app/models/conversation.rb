@@ -9,8 +9,6 @@
 #
 # Colonne database:
 # - company_id (integer, foreign key, required)
-# - title (string, optional): titolo conversazione per UI
-# - summary (text, optional): sommario conversazione
 # - created_at, updated_at (timestamp, auto)
 #
 # Uso:
@@ -35,7 +33,4 @@ class Conversation < ApplicationRecord
   # presence: true su belongs_to verifica che foreign key sia presente
   # Ridondante con Rails 5+ (belongs_to è required di default), ma esplicito è meglio
   validates :company, presence: true
-  
-  # Nota: title e summary optional, possono essere nil
-  # Frontend/Service possono aggiungere titolo dopo prima risposta IA
 end

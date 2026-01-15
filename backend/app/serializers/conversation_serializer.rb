@@ -21,8 +21,6 @@ class ConversationSerializer
   #   {
   #     id: 123,
   #     company_id: 1,
-  #     title: \"Email marketing\",
-  #     summary: \"Campagna email per clienti...\",
   #     created_at: \"2024-01-15T10:00:00Z\",
   #     updated_at: \"2024-01-15T11:30:00Z\",
   #     messages: [
@@ -37,8 +35,6 @@ class ConversationSerializer
     {
       id: conversation.id,
       company_id: conversation.company_id,
-      title: conversation.title,
-      summary: conversation.summary,
       created_at: conversation.created_at.iso8601,
       updated_at: conversation.updated_at.iso8601,
       
