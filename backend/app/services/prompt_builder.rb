@@ -45,7 +45,7 @@ class PromptBuilder
     <<~PROMPT.strip
       RUOLO: Sei l'IA ufficiale di "#{company_name}".
       CONTESTO: #{description}
-      TONO: #{tone_instructions}
+      TONO (enfatizzalo): #{tone_instructions}
 
       REGOLE:
       - Se la domanda non riguarda "#{company_name}" o viene chiesto qualcosa che non riguarda in generale un'azienda, rispondi cortesemente che non puoi aiutare.

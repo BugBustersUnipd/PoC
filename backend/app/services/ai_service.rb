@@ -30,39 +30,65 @@ class AiService
 
   # Genera testo AI personalizzato per azienda con contesto conversazionale
   #
+  # Logica tono:
+  # - Se conversation_id ASSENTE (nuova chat): nome_tono è OBBLIGATORIO
+  #   → Crea conversazione con quel tono e lo salva nel DB
+  # - Se conversation_id PRESENTE (continua chat): nome_tono è IGNORATO
+  #   → Usa il tono già salvato nella conversazione precedente
+  #
   # @param testo_utente [String] richiesta dell'utente (es. "Scrivi email di benvenuto")
   # @param company_id [Integer] ID azienda per contesto e ownership
-  # @param nome_tono [String] nome tono salvato su DB (es. "formale", "amichevole")
+  # @param nome_tono [String, nil] nome tono salvato su DB (es. "formale", "amichevole")
+  #   - OBBLIGATORIO se conversation_id è nil
+  #   - IGNORATO se conversation_id è presente
   # @param conversation_id [Integer, nil] ID conversazione esistente (nil = nuova conversazione)
   #
   # @return [Hash] { text: "risposta AI", conversation_id: 123 }
   #
   # @raise [ActiveRecord::RecordNotFound] se company_id non esiste
+  # @raise [ActiveRecord::RecordNotFound] se conversation_id non esiste
   #
-  # Esempio:
+  # Esempio - Nuova conversazione:
   #   result = ai_service.genera(
   #     "Scrivi email di benvenuto",
   #     company_id: 1,
   #     nome_tono: "formale",
-  #     conversation_id: 42  # Continua conversazione esistente
+  #     conversation_id: nil  # Nuova chat
   #   )
-  #   puts result[:text]  # "Gentile Cliente, siamo lieti di darLe il benvenuto..."
+  #   # => conversation creata con tone salvato
+  #
+  # Esempio - Continua conversazione:
+  #   result = ai_service.genera(
+  #     "Modifica il tono",
+  #     company_id: 1,
+  #     nome_tono: nil,  # Ignorato!
+  #     conversation_id: 42  # Usa tono dalla chat precedente
+  #   )
+  #   # => usa conversation.tone (quello originale)
   def genera(testo_utente, company_id, nome_tono, conversation_id: nil)
     # find lancia eccezione se non trova (vs find_by che ritorna nil)
     # Questo blocca immediatamente richieste con company_id invalido
     company = Company.find(company_id)
     
-    # Recupera conversazione esistente o ne crea una nuova
-    # Le conversazioni mantengono contesto tra multiple richieste
-    conversation = @conversation_manager.fetch_or_create_conversation(company, conversation_id)
-
     # Carica tono comunicativo dal DB (es. "formale", "amichevole")
+    # Questo viene fatto PRIMA di fetch_or_create per passarlo al manager
     # find_by ritorna nil se non trova, quindi usiamo safe navigation (&.)
-    tono_db = company.tones.find_by(name: nome_tono)
-    # &.instructions accede a instructions solo se tono_db non è nil (evita NoMethodError)
+    tono_db = company.tones.find_by(name: nome_tono) if nome_tono.present?
+    
+    # Recupera conversazione esistente o ne crea una nuova con il tono
+    # Se conversation_id presente: ignora tono_db (usa quello salvo nella chat)
+    # Se conversation_id nil: salva tono_db nella nuova conversazione
+    conversation = @conversation_manager.fetch_or_create_conversation(company, conversation_id, tono_db)
+
+    # Determina quale tono usare:
+    # - Se conversazione ha tono: usalo (conversation.tone precedente oppure appena salvato)
+    # - Se conversazione non ha tono: fallback a istruzioni generiche
+    tono_da_usare = conversation.tone
+    
+    # &.instructions accede a instructions solo se tono_da_usare non è nil (evita NoMethodError)
     # .presence ritorna il valore se non blank, altrimenti nil
-    # || "..." fornisce default se tono non trovato o istruzioni vuote
-    istruzioni_tono = tono_db&.instructions.presence || "Rispondi in modo professionale."
+    # || "..." fornisce default se tono manca
+    istruzioni_tono = tono_da_usare&.instructions.presence || "Rispondi in modo professionale."
     descrizione_azienda = company.description.presence || ""
 
     # Costruisce system prompt personalizzato con contesto aziendale
