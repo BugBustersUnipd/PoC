@@ -46,4 +46,8 @@ export class AiCopilot {
       }
     });
   }
+    NavigateToStoricoDocumenti() {
+  this.router.navigate(['/storico-documenti']);
 }
+}
+

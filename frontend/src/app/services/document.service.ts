@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentsService {
@@ -7,7 +8,7 @@ export class DocumentsService {
 
   constructor(private http: HttpClient) {}
 
-  uploadDocument(file: File, companyId: number) {
+  uploadDocument(file: File, companyId: number): Observable<any> {
     const formData = new FormData();
     formData.append('document[original_file]', file);
 
@@ -17,9 +18,15 @@ export class DocumentsService {
     );
   }
 
-  getDocument(id: number, companyId: number) {
+  getDocument(id: number, companyId: number): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/documents/${id}?company_id=${companyId}`
+    );
+  }
+
+  getDocuments(companyId: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/documents?company_id=${companyId}`
     );
   }
 }
