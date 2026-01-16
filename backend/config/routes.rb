@@ -59,6 +59,18 @@ Rails.application.routes.draw do
   # Output: { id, prompt, width, height, model_id, image_url, company_id, conversation_id, created_at }.
   get "immagini/:id", to: "images#show"
 
+  # GET /documenti → DocumentsController#index
+  # Recupera tutti i documenti caricati da una compagnia.
+  # Input (query): company_id (req), limit (opt, default 50), offset (opt, default 0).
+  # Output: { total, limit, offset, documents: [{id,title,content_type,file_url,created_at}] }.
+  get "documenti", to: "documents#index"
+
+  # GET /documenti/:id → DocumentsController#show
+  # Recupera i dettagli di un singolo documento.
+  # Input: :id (req path), company_id.
+  # Output: { id, title, content_type, file_url, status, analysis_results, created_at }.
+  get "documenti/:id", to: "documents#show"
+
   resources :documents, only: [ :index, :create, :show ]
 
   # Esempio di root (pagina principale) — al momento non usata:
