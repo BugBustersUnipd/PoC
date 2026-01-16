@@ -2,10 +2,10 @@
   <div class="content-box">
   <div class="split-layout">
     <!-- Left side - Form -->
-     <h2 class="section-title">{{document.filename}}</h2>
+     <h2 class="section-title">{{document?.filename}}</h2>
     <div class="form-section">
       <div class="form-group">
-  @for (item of document.ai_data | keyvalue; track item.key) {
+  @for (item of document?.ai_data | keyvalue; track item.key) {
     <div class="form-group">
       <span class="label">
         {{ formatLabel(item.key) }}:

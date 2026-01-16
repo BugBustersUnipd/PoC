@@ -1,0 +1,79 @@
+<div class="storico-container">
+  <div class="header">
+    <h1>Storico Documenti</h1>
+    <button class="btn btn-primary" (click)="navigateToUpload()">
+      + Nuovo Upload
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading">
+      <p>Caricamento documenti...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  }
+
+  @if (!isLoading && !error && documents.length === 0) {
+    <div class="empty-state">
+      <p>Nessun documento trovato</p>
+      <button class="btn btn-primary" (click)="navigateToUpload()">
+        Carica il primo documento
+      </button>
+    </div>
+  }
+
+  @if (!isLoading && documents.length > 0) {
+    <div class="documents-grid">
+      @for (doc of documents; track doc.id) {
+        <div class="document-card" (click)="viewDocument(doc.id)">
+          <div class="card-header">
+            <h3>{{ doc.filename }}</h3>
+            <span class="status" [class]="doc.status">
+              {{ getStatusLabel(doc.status) }}
+            </span>
+          </div>
+          
+          <div class="card-body">
+            @if (doc.ai_data) {
+              <div class="preview-data">
+                @if (doc.ai_data.tipo_documento) {
+                  <div class="data-row">
+                    <span class="label">Tipo:</span>
+                    <span class="value">{{ doc.ai_data.tipo_documento }}</span>
+                  </div>
+                }
+                @if (doc.ai_data.data_competenza) {
+                  <div class="data-row">
+                    <span class="label">Data:</span>
+                    <span class="value">{{ doc.ai_data.data_competenza }}</span>
+                  </div>
+                }
+                @if (doc.ai_data.dipendente) {
+                  <div class="data-row">
+                    <span class="label">Dipendente:</span>
+                    <span class="value">{{ doc.ai_data.dipendente }}</span>
+                  </div>
+                }
+                @if (doc.ai_data.riassunto) {
+                  <div class="data-row">
+                    <span class="label">Riassunto:</span>
+                    <span class="value">{{ doc.ai_data.riassunto }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          
+          <div class="card-footer">
+            <span class="date">{{ formatDate(doc.created_at) }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
