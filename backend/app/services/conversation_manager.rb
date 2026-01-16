@@ -16,11 +16,11 @@ class ConversationManager
   # (ogni messaggio ~500-1000 token in media)
   MAX_CONTEXT_MESSAGES = 10
 
-  # Recupera conversazione esistente o ne crea una nuova
+  # Recupera conversazione esistente o ne crea una nuova con tono associato
   #
   # Logica:
-  # - Se conversation_id fornito: cerca nella collezione company.conversations
-  # - Se nil/assente: crea nuova conversazione per l'azienda
+  # - Se conversation_id fornito: cerca nella collezione company.conversations (ignora tone)
+  # - Se nil/assente: crea nuova conversazione e assegna il tone fornito (OBBLIGATORIO)
   #
   # company.conversations = associazione ActiveRecord (has_many in Company model)
   # .find(id) lancia ActiveRecord::RecordNotFound se ID non esiste
@@ -28,27 +28,32 @@ class ConversationManager
   #
   # @param company [Company] record Company ActiveRecord
   # @param conversation_id [Integer, nil] ID conversazione esistente (optional)
+  # @param tone [Tone] record Tone da assegnare a nuova conversazione (OBBLIGATORIO se conversation_id assente)
   #
   # @return [Conversation] record conversazione (esistente o appena creato)
   #
   # @raise [ActiveRecord::RecordNotFound] se conversation_id non trovato
+  # @raise [ActiveRecord::RecordInvalid] se tone è nil e conversation_id assente (tone obbligatorio)
   #
   # Esempio:
-  #   # Nuova conversazione
-  #   conv = manager.fetch_or_create_conversation(company, nil)
-  #   # => #<Conversation id: 123, company_id: 1, created_at: ...>
+  #   # Nuova conversazione con tono (obbligatorio)
+  #   tone = company.tones.find_by(name: "formale")
+  #   conv = manager.fetch_or_create_conversation(company, nil, tone)
+  #   # => #<Conversation id: 123, company_id: 1, tone_id: 5, created_at: ...>
   #
-  #   # Conversazione esistente
-  #   conv = manager.fetch_or_create_conversation(company, 123)
-  #   # => #<Conversation id: 123, ...>
-  def fetch_or_create_conversation(company, conversation_id)
+  #   # Conversazione esistente (tone ignorato)
+  #   conv = manager.fetch_or_create_conversation(company, 123, tone)
+  #   # => #<Conversation id: 123, tone_id: 2, ...>  # tone_id originale, non cambia
+  def fetch_or_create_conversation(company, conversation_id, tone)
     # .present? = opposto di .blank?, ritorna true se valore non è nil/empty
     # return = uscita early dalla funzione (guard clause pattern)
     return company.conversations.find(conversation_id) if conversation_id.present?
     
     # Se arriviamo qui, conversation_id era nil/blank
     # create! crea nuovo record nel DB immediatamente
-    company.conversations.create!
+    # tone: OBBLIGATORIO, non può essere nil
+    # Se tone è nil, lancia ActiveRecord::RecordInvalid
+    company.conversations.create!(tone: tone)
   end
 
   # Salva coppia di messaggi user/assistant nel DB

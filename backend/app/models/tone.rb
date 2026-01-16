@@ -31,6 +31,11 @@ class Tone < ApplicationRecord
   #   Tone.where(company_id: nil)  # Tutti toni globali
   #   company.tones                # Toni specifici azienda
   belongs_to :company, optional: true
+  
+  # has_many :conversations = conversazioni che usano questo tono
+  # dependent: :nullify = quando tono viene eliminato, imposta tone_id = nil nelle conversazioni
+  # (vs destroy: eliminerebbe anche le conversazioni, che non vogliamo)
+  has_many :conversations, dependent: :nullify
 
   # Validazioni: name e instructions obbligatori
   # presence: true = non può essere nil/empty/blank

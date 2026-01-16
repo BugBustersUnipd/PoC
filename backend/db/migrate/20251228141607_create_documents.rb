@@ -10,7 +10,7 @@ class CreateDocuments < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :documents, :checksum, unique: true
+    add_index :documents, :checksum
     add_index :documents, [:company_id, :created_at]
   end
 end

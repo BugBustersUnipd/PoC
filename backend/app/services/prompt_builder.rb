@@ -45,7 +45,7 @@ class PromptBuilder
     <<~PROMPT.strip
       RUOLO: Sei l'IA ufficiale di "#{company_name}".
       CONTESTO: #{description}
-      TONO: #{tone_instructions}
+      TONO (enfatizzalo): #{tone_instructions}
 
       REGOLE FONDAMENTALI:
       - NON MAI usare placeholder come [nome], [data], [azienda], [dettagli], ecc.

@@ -1,8 +1,6 @@
 # ConversationSearchService - Ricerca full-text su conversazioni e messaggi
 #
 # Permette ricerca su:
-# - conversations.title (titolo conversazione)
-# - conversations.summary (sommario generato)
 # - messages.content (testo messaggi user/assistant)
 #
 # Supporta:
@@ -23,9 +21,7 @@ class ConversationSearchService
   #   FROM conversations
   #   LEFT OUTER JOIN messages ON messages.conversation_id = conversations.id
   #   WHERE conversations.company_id = ?
-  #     AND (conversations.title ILIKE '%term%'
-  #       OR conversations.summary ILIKE '%term%'
-  #       OR messages.content ILIKE '%term%')
+  #     AND messages.content ILIKE '%term%'
   #   ORDER BY conversations.updated_at DESC
   #   LIMIT 50
   #
@@ -53,7 +49,7 @@ class ConversationSearchService
     # - Vogliamo trovare conversazioni anche se non hanno messaggi ancora
     # - Ricerca su title/summary funziona anche per conv vuote
     conversations = Conversation.left_outer_joins(:messages)
-    
+
     # Filtra per company_id se presente
     # .present? = true se valore non è nil/empty/blank
     # Modifier if = condizionale su singola linea (Ruby idiomatico)
@@ -73,13 +69,13 @@ class ConversationSearchService
       #   "EMAIL" LIKE "%email%" = false (case-sensitive)
       #
       # :term = placeholder SQL (bind parameter per sicurezza SQL injection)
-      # OR = qualsiasi condizione vera match (title OR summary OR content)
+      # OR = qualsiasi condizione vera match (content)
       #
       # Sintassi Ruby:
       #   Multi-line string spezza query lunga per leggibilità
       #   term: like = named argument Hash {term: like}
       conversations = conversations.where(
-        "conversations.title ILIKE :term OR conversations.summary ILIKE :term OR messages.content ILIKE :term",
+        "messages.content ILIKE :term",
         term: like
       )
     end

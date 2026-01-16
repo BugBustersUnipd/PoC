@@ -9,8 +9,7 @@
 #
 # Colonne database:
 # - company_id (integer, foreign key, required)
-# - title (string, optional): titolo conversazione per UI
-# - summary (text, optional): sommario conversazione
+# - tone_id (integer, foreign key, required) - tono comunicativo per questa conversazione
 # - created_at, updated_at (timestamp, auto)
 #
 # Uso:
@@ -26,16 +25,18 @@ class Conversation < ApplicationRecord
   # Query: Conversation.find(1).company esegue SELECT * FROM companies WHERE id = ?
   belongs_to :company
   
+  # belongs_to :tone (required di default in Rails 5+)
+  # Ogni conversazione DEVE avere un tono comunicativo associato
+  # Rails genera: conversation.tone, conversation.tone=, conversation.build_tone
+  belongs_to :tone
+  
   # has_many :messages = collezione messaggi associati
   # dependent: :destroy = elimina messaggi quando conversazione eliminata
   # Rails genera: conversation.messages, conversation.messages.create!, etc.
   has_many :messages, dependent: :destroy
 
-  # Validazione: company deve esistere (company_id non può essere nil)
+  # Validazioni: company e tone devono esistere
   # presence: true su belongs_to verifica che foreign key sia presente
-  # Ridondante con Rails 5+ (belongs_to è required di default), ma esplicito è meglio
   validates :company, presence: true
-  
-  # Nota: title e summary optional, possono essere nil
-  # Frontend/Service possono aggiungere titolo dopo prima risposta IA
+  validates :tone, presence: true
 end
