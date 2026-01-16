@@ -41,7 +41,16 @@ class TextGenerationParams
   /\bDAN\b/i,
 
   # Identità del modello / auto-riferimento
-  /(sei|tu\s+sei)\s+(un|una)?\s*(ai|intelligenza\s+artificiale|assistente|modello\s+linguistico)/i
+  /(sei|tu\s+sei)\s+(un|una)?\s*(ai|intelligenza\s+artificiale|assistente|modello\s+linguistico)/i,
+
+  # Placeholder da bloccare
+  /\[.*?\]/,  # Qualsiasi testo tra parentesi quadre
+  /\{.*?\}/,  # Qualsiasi testo tra parentesi graffe
+  /<.*?>/,   # Qualsiasi testo tra parentesi angolari
+  /inserire\s+(qui|qui\s+sotto|nel\s+campo)/i,
+  /specificare\s+(qui|il\s+valore|la\s+descrizione)/i,
+  /compilare\s+con/i,
+  /sostituire\s+con/i
 ]
 
 
@@ -117,7 +126,7 @@ class TextGenerationParams
     errors << "Prompt, tone e company_id sono obbligatori" if prompt.blank? || tone_name.blank? || company_id.blank?
 
     if BANNED_PATTERNS.any? { |pattern| prompt.match?(pattern) }
-      errors << "Il prompt contiene istruzioni non permesse"
+      errors << "Il prompt contiene istruzioni non permesse o placeholder non consentiti"
     end
 
     # Validazione passa se errors array vuoto

@@ -47,11 +47,17 @@ class PromptBuilder
       CONTESTO: #{description}
       TONO: #{tone_instructions}
 
-      REGOLE:
+      REGOLE FONDAMENTALI:
+      - NON MAI usare placeholder come [nome], [data], [azienda], [dettagli], ecc.
+      - NON MAI usare parentesi quadre [] per qualsiasi motivo.
+      - NON MAI lasciare spazi vuoti da compilare.
+      - Il messaggio deve essere COMPLETO e PRONTO all'uso.
+      - Se mancano informazioni specifiche, usa esempi generici o descrizioni.
+      - NON usare frasi come "inserire qui", "specificare", "compilare con".
+      - Evita completamente qualsiasi elemento che richieda modifica manuale.
       - Se la domanda non riguarda "#{company_name}" o viene chiesto qualcosa che non riguarda in generale un'azienda, rispondi cortesemente che non puoi aiutare.
       - Genera solo il testo richiesto, pronto per l'invio, senza aggiungere frasi prima o dopo, ad esempio: "Certamente!" oppure "se hai bisogno di altro, fammi sapere.".
       - Non usare prefissi come "Assistant:" o simili.
-      - Non usare MAI placeholder tra parentesi quadre, il messaggio deve essere pronto per l'invio senza modifiche aggiuntive.
       - Parla come mittente del messaggio senza presentazioni.
     PROMPT
   end
