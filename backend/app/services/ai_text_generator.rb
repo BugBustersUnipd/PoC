@@ -100,6 +100,7 @@ class AiTextGenerator
   # Gestisce due scenari comuni:
   # 1. AccessDeniedException: modello non disponibile in regione (es. Nova non in eu-west-1)
   # 2. ThrottlingException: quota superata per il modello (troppi requests)
+  # 3. GuardrailException: contenuto bloccato dai guardrail
   #
   # Soluzione: riprova con fallback model da ENV (es. Claude invece di Nova)
   #
@@ -140,6 +141,11 @@ class AiTextGenerator
       # Chiamante può gestire errore (es. controller render 503)
       raise
     end
+  rescue Aws::BedrockRuntime::Errors::ValidationException => e
+    # Errore validazione Bedrock (incluso guardrail che blocca contenuto)
+    Rails.logger.error("Bedrock validation error (guardrail): #{e.message}")
+    # Solleva eccezione personalizzata per gestire nel controller
+    raise StandardError.new("Contenuto bloccato dai filtri di sicurezza: #{e.message}")
   end
 
   # Invoca Bedrock Converse API per un model_id specifico
