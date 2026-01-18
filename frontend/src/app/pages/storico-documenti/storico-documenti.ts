@@ -50,6 +50,7 @@ export class StoricoDocumenti implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
+      'processing': 'In elaborazione',
       'pending': 'In elaborazione',
       'completed': 'Completato',
       'failed': 'Errore'
