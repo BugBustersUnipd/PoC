@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../services/document.service';
 import { CommonModule } from '@angular/common';
+import { interval, Subscription, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-storico-documenti',
@@ -10,11 +11,11 @@ import { CommonModule } from '@angular/common';
   templateUrl: './storico-documenti.html',
   styleUrl: './storico-documenti.css',
 })
-export class StoricoDocumenti implements OnInit {
+export class StoricoDocumenti implements OnInit, OnDestroy {
   private router = inject(Router);
   private documentsService = inject(DocumentsService);
   private cdr = inject(ChangeDetectorRef);
-
+  private pollingSub?: Subscription;
   documents: any[] = [];
   companyId = 1; // TODO: dinamico
   isLoading = true;
@@ -24,6 +25,10 @@ export class StoricoDocumenti implements OnInit {
     this.loadDocuments();
   }
 
+  ngOnDestroy() {
+    this.pollingSub?.unsubscribe();
+  }
+
   loadDocuments() {
     this.isLoading = true;
     this.documentsService.getDocuments(this.companyId).subscribe({
@@ -31,6 +36,9 @@ export class StoricoDocumenti implements OnInit {
         this.documents = docs;
         this.isLoading = false;
         this.cdr.detectChanges();
+        
+        // Avvia polling se ci sono documenti in elaborazione
+        this.checkAndStartPolling();
       },
       error: (err) => {
         console.error('Errore caricamento documenti:', err);
@@ -38,6 +46,44 @@ export class StoricoDocumenti implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  private checkAndStartPolling() {
+    // Verifica se ci sono documenti in elaborazione
+    const hasProcessingDocs = this.documents.some(
+      doc => doc.status === 'processing' || doc.status === 'pending'
+    );
+
+    if (hasProcessingDocs) {
+      this.startPolling();
+    } else {
+      // Se non ci sono più documenti in elaborazione, ferma il polling
+      this.pollingSub?.unsubscribe();
+    }
+  }
+
+  private startPolling() {
+    // Evita polling multipli
+    if (this.pollingSub && !this.pollingSub.closed) {
+      return;
+    }
+
+    this.pollingSub = interval(2000)
+      .pipe(
+        switchMap(() => this.documentsService.getDocuments(this.companyId))
+      )
+      .subscribe({
+        next: (docs) => {
+          this.documents = docs;
+          this.cdr.detectChanges();
+          
+          // Controlla se deve continuare il polling
+          this.checkAndStartPolling();
+        },
+        error: (err) => {
+          console.error('Errore polling documenti:', err);
+        }
+      });
   }
 
   viewDocument(docId: number) {
