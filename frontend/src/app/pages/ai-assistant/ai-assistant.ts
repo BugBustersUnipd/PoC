@@ -115,10 +115,7 @@ export class AiAssistant implements OnInit {
           console.log('Risposta completa dopo post genera text:', response); //ha text e conversation_id
           this.router.navigate(['/risultato-generazione'], {
 
-            //passa come parametro conversation_id l'id della conversazione (aggiungo per permettere la visualizzazione della singola conversazione nello storico, con tutti i suoi dettagli)
-
-            //i dati che ci servono per recuperare tono e la company (entrambe per permettere la modifica, perchè usano GET /genera)
-            state: { conversation_id: response.conversation_id ,company_id: this.filterCompany, tone: this.selectedTone }
+            state: { conversation_id: response.conversation_id ,company_id: this.filterCompany}
           });
         },
         error: () => alert('Errore nella generazione')

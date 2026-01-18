@@ -36,7 +36,6 @@ export class RisultatoGenerazione implements OnInit {
   generatedImage: string | null = null;
   conversationId: number | null = null;
   companyId: number | null = null;
-  tone: string | null = null;
   newMessage: string = '';
   imagePrompt: string = ''; 
 
@@ -51,7 +50,6 @@ ngOnInit() {
       //se è stato generato un testo (pulsante Genera) allora carica la conversazione
       this.conversationId = +id_param;
       this.companyId = state?.['company_id']|| null;
-      this.tone = state?.['tone'] || null;
       this.loadConversation();
     } //se è stata generata un'immagien (quindi non associata ad una conversazione) allora vengono passati i dati 
     else if (state && state.result) {
@@ -199,7 +197,6 @@ ngOnInit() {
         console.log('conversation_id:', this.conversationId);
         console.log('company_id:', this.companyId);
         console.log('prompt:', testo);
-        console.log('tone:', this.tone);
         console.error('Errore aggiunta messaggio:', err);
         alert('Errore nell\'aggiunta del messaggio');
       }
