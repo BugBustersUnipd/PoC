@@ -184,8 +184,7 @@ ngOnInit() {
     this.http.post<any>('http://localhost:3000/genera', {
       company_id: this.companyId,
       conversation_id: this.conversationId,
-      prompt: testo,
-      tone: this.tone
+      prompt: testo
     }).subscribe({
       next: (res) => {
         // console.log(res['text']);
