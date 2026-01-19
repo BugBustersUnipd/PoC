@@ -67,7 +67,10 @@ class TextGenerationController < ApplicationController
   rescue Aws::BedrockRuntime::Errors::GuardrailException => e
     # Gestione specifica per eccezioni di guardrail Bedrock
     Rails.logger.error "GuardrailException: #{e.message}"
-    render json: { error: "Richiesta bloccata dai guardrail di sicurezza" }, status: :forbidden
+    render json: {
+      status: "error",
+      code: "SECURITY_GUARDRAIL_VIOLATION",
+      message: "Il contenuto inserito non è conforme alle linee guida di sicurezza e non può essere elaborato"}, status: :forbidden
   rescue => e
     # rescue senza classe cattura tutte le eccezioni (fallback generico)
     # Utile per errori imprevisti: API down, network timeout, bug

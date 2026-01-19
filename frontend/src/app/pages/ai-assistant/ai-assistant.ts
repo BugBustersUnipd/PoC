@@ -118,7 +118,20 @@ export class AiAssistant implements OnInit {
             state: { conversation_id: response.conversation_id ,company_id: this.filterCompany}
           });
         },
-        error: () => alert('Errore nella generazione')
+        error: (err) => {
+          const errorData = err.error;
+          const errorCode = errorData?.code || "UNKNOWN_ERROR";
+          
+          // per debug
+          // console.error(`[${errorCode}]`, errorData?.details || err.message);
+
+          if (errorCode === "SECURITY_GUARDRAIL_VIOLATION") {
+            const safetyMsg = errorData?.message || "La richiesta è stata bloccata dalle policy di sicurezza.";
+            alert(safetyMsg);
+          } else {
+            alert("Si è verificato un problema tecnico. Riprova più tardi.");
+          }
+        }
       });
   }
   
