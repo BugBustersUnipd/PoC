@@ -56,18 +56,14 @@ class TextGenerationController < ApplicationController
     # Lanciato da Company.find o Tone.find quando ID non esiste
     Rails.logger.error "Record non trovato: #{e.message}"
     render json: { error: "Azienda, tono o conversazione non trovati" }, status: :not_found
-  rescue Aws::BedrockRuntime::Errors::ThrottlingException => e
-    # Errore quota superata Bedrock
-    Rails.logger.error "Bedrock throttling: #{e.message}"
-    render json: { error: "Troppe richieste simultanee. Riprova tra qualche secondo." }, status: :too_many_requests
-  rescue Aws::BedrockRuntime::Errors::AccessDeniedException => e
-    # Errore accesso Bedrock (modello non disponibile, permessi)
-    Rails.logger.error "Bedrock access denied: #{e.message}"
-    render json: { error: "Servizio temporaneamente non disponibile. Riprova più tardi." }, status: :service_unavailable
+  rescue Aws::BedrockRuntime::Errors::GuardrailException => e
+    # Gestione specifica per eccezioni di guardrail Bedrock
+    Rails.logger.error "GuardrailException: #{e.message}"
+    render json: { error: "Richiesta bloccata dai guardrail di sicurezza" }, status: :forbidden
   rescue => e
     # rescue senza classe cattura tutte le eccezioni (fallback generico)
     # Utile per errori imprevisti: API down, network timeout, bug
     Rails.logger.error "Errore interno: #{e.class} - #{e.message}\n#{e.backtrace.join("\n")}"
     render json: { error: "Errore interno: #{e.message}" }, status: :internal_server_error
-  end
+  end  
 end

@@ -85,6 +85,12 @@ class AiTextGenerator
     
     # Invoca Bedrock con fallback automatico per errori quota/regione
     response = invoke_bedrock_with_fallback(model_id, messages, system_prompt)
+
+    Rails.logger.info response.inspect
+
+    if response.stop_reason == "guardrail_intervened"
+      raise Aws::BedrockRuntime::Errors::GuardrailException.new(nil, "Contenuto bloccato dai guardrails")
+    end
     
     # Estrae testo da risposta Bedrock
     # response.output.message.content = array di content blocks
@@ -141,11 +147,6 @@ class AiTextGenerator
       # Chiamante può gestire errore (es. controller render 503)
       raise
     end
-  rescue Aws::BedrockRuntime::Errors::ValidationException => e
-    # Errore validazione Bedrock (incluso guardrail che blocca contenuto)
-    Rails.logger.error("Bedrock validation error (guardrail): #{e.message}")
-    # Solleva eccezione personalizzata per gestire nel controller
-    raise StandardError.new("Contenuto bloccato dai filtri di sicurezza: #{e.message}")
   end
 
   # Invoca Bedrock Converse API per un model_id specifico
