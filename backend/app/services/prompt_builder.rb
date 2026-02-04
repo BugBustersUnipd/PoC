@@ -9,7 +9,7 @@
 # 2. Non ci possono essere due messaggi consecutivi dello stesso ruolo
 # 3. Content deve essere array di Hash con chiave :text
 #
-# Responsabilità: normalizzazione formato, non business logic
+# Cosa fa: normalizzazione formato, non business logic
 class PromptBuilder
   # Costruisce il system prompt con ruolo azienda, contesto, tono comunicativo
   #
@@ -20,7 +20,7 @@ class PromptBuilder
   # - Regole: no placeholder, no prefissi "Assistant:", testo pronto per invio
   #
   # Sintassi Ruby utilizzata:
-  #   <<~PROMPT...PROMPT = heredoc con indentation stripping
+  #   <<~PROMPT...PROMPT = heredoc con indentation stripping (modo per scrivere stringhe su più righe all'interno del codice)
   #   - <<~ rimuove automaticamente indentazione comune (whitespace leading)
   #   - .strip rimuove spazi/newline all'inizio e fine stringa
   #   - #{variable} = string interpolation (inserisce valore variabile)

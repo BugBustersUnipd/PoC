@@ -12,7 +12,7 @@ require "base64"
 # 5. Elimina eventuali immagini precedenti della stessa conversazione (1 img per conv)
 # 6. Salva immagine nel DB (GeneratedImage) + storage (ActiveStorage)
 #
-# Pattern utilizzato: Service Orchestrator
+# Service Orchestrator
 # - Delega validazione, generazione, storage a componenti specializzati
 # - Ogni componente ha una singola ragione per cambiare (SRP)
 #

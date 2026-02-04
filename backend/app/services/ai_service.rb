@@ -33,14 +33,14 @@ class AiService
   # Logica tono:
   # - Se conversation_id ASSENTE (nuova chat): nome_tono è OBBLIGATORIO
   #   → Crea conversazione con quel tono e lo salva nel DB
-  # - Se conversation_id PRESENTE (continua chat): nome_tono è IGNORATO
+  # - Se conversation_id PRESENTE (continua chat): nome_tono non va messo, da errore se fornito
   #   → Usa il tono già salvato nella conversazione precedente
   #
   # @param testo_utente [String] richiesta dell'utente (es. "Scrivi email di benvenuto")
   # @param company_id [Integer] ID azienda per contesto e ownership
   # @param nome_tono [String, nil] nome tono salvato su DB (es. "formale", "amichevole")
   #   - OBBLIGATORIO se conversation_id è nil
-  #   - IGNORATO se conversation_id è presente
+  #   - ERRORE se conversation_id è presente e nome_tono è fornito
   # @param conversation_id [Integer, nil] ID conversazione esistente (nil = nuova conversazione)
   #
   # @return [Hash] { text: "risposta AI", conversation_id: 123 }
@@ -72,7 +72,6 @@ class AiService
     
     # Carica tono comunicativo dal DB (es. "formale", "amichevole")
     # Questo viene fatto PRIMA di fetch_or_create per passarlo al manager
-    # find_by ritorna nil se non trova, quindi usiamo safe navigation (&.)
     tono_db = company.tones.find_by(name: nome_tono) if nome_tono.present?
     
     # Recupera conversazione esistente o ne crea una nuova con il tono

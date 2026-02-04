@@ -27,10 +27,7 @@ class ImageGenerationController < ApplicationController
   #   - 422 Unprocessable: parametri mancanti, dimensioni non supportate
   #   - 404 Not Found: company_id inesistente
   #   - 500 Internal Server Error: errori Bedrock API, network, bug
-  # Esempi dimensioni valide:
-  #   - 1024x1024 (quadrato): icone, avatar, post social
-  #   - 1280x720 (16:9 landscape): banner, copertine, video thumbnail
-  #   - 720x1280 (9:16 portrait): stories Instagram/TikTok, mobile vertical
+  
   def create
     # Pattern: validazione tramite value object dedicato (SRP)
     # ImageGenerationParams normalizza input (defaults) e valida requisiti

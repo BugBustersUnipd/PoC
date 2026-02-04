@@ -2,10 +2,7 @@
 #
 # Serializza company + toni associati in struttura nested.
 # Usato per GET /companies/:id/tones
-#
-# Pattern: Serializer con nested resources
-# - Company parent + tones children in singola risposta
-# - Frontend riceve context completo in una chiamata
+
 class ToneSerializer
   # Serializza company + array di toni
   #

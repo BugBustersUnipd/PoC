@@ -5,7 +5,6 @@
 #
 # Fornisce:
 # - Accesso centralizzato ai servizi tramite helper methods
-# - Facilita il testing (i test possono sovrascrivere questi metodi)
 # - Punto di estensione per funzionalità comuni (es. autenticazione, logging)
 class ApplicationController < ActionController::API
 	private
@@ -14,7 +13,7 @@ class ApplicationController < ActionController::API
 	#
 	# Pattern Ruby:
 	# - @ai_service è una variabile d'istanza (persiste per tutta la richiesta HTTP)
-	# - ||= è "memoization": assegna solo se nil, evita chiamate multiple a DiContainer
+	# - ||= è "memoization": assegna solo se nil, evita chiamate multiple a DiContainer, fa lazy loading insomma
 	# - DiContainer.ai_service restituisce un singleton configurato con tutte le dipendenze
 	#
 	# @return [AiService] istanza del servizio di generazione testo

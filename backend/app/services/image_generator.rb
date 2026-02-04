@@ -14,7 +14,6 @@ require "json"
 # - Response: JSON con immagine base64 vs text strutturato
 # - Configurazione: dimensioni fisse (1024x1024, etc.) vs token budget
 #
-# Pattern: Adapter per AWS SDK Nova Canvas
 # - Isola complessità payload JSON specifico Nova
 # - Gestisce parsing risposta con chiavi multiple possibili ("images", "image", etc.)
 # - Fornisce interfaccia semplice generate(prompt, width, height, seed)

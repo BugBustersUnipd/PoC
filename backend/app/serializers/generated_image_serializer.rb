@@ -2,27 +2,13 @@
 #
 # Trasforma dati interni (GeneratedImage model + metadati) in formato JSON
 # consistente per frontend.
-#
-# Responsabilità:
-# - Seleziona solo campi necessari al frontend (information hiding)
-# - Formatta timestamp in ISO8601 (standard internazionale)
-# - Aggiunge URL firmato immagine (non presente nel model)
-#
-# Pattern: Serializer (Presentation Layer)
-# - Decoupling: model può cambiare senza rompere API
-# - Versioning: multipli serializer per API v1, v2, etc.
+
 class GeneratedImageSerializer
   # Serializza risposta generazione immagine
   #
   # Metodo di classe (self.method_name):
   # - self. = metodo chiamato su classe, non su istanza
   # - Chiamata: GeneratedImageSerializer.serialize(...)
-  # - Alternativa: istanziare serializer per ogni record (più verboso)
-  #
-  # Perché metodi di classe?
-  # - Serializer è stateless (niente @instance_variables)
-  # - Niente bisogno di new + serialize, basta ClassName.serialize
-  # - Performance: evita allocazione oggetto serializer
   #
   # @param generated_image [GeneratedImage] record DB salvato
   # @param image_url [String] URL firmato ActiveStorage (rails_blob_path)
@@ -49,8 +35,6 @@ class GeneratedImageSerializer
   #   #   created_at: "2024-01-15T10:30:00Z"
   #   # }
   def self.serialize(generated_image:, image_url:, width:, height:, model_id:)
-    # Hash con Symbol keys (più performante di String keys)
-    # Rails render json: converte automaticamente Symbol → String keys
     {
       image_url: image_url,  # URL pubblico firmato per browser
       image_id: generated_image.id,  # ID record per tracking/eliminazione
