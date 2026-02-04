@@ -6,11 +6,6 @@
 # - Valida presenza campi obbligatori (prompt, company_id)
 # - Fornisce metodo to_service_params per passare a ImageService
 #
-# Pattern: Request Object (Form Object)
-# - Separa validazione input da business logic
-# - Controller delega validazione a questo oggetto
-# - Service riceve parametri già validati e normalizzati
-#
 # Vantaggi:
 # - Testabile separatamente da controller
 # - Riusabile in API, background jobs, console
@@ -145,8 +140,6 @@ class ImageGenerationParams
   # Converte parametri in Hash per passare a ImageService
   #
   # Service si aspetta Hash con chiavi Symbol.
-  # Questo metodo crea contract esplicito tra Request Object e Service.
-  #
   # @return [Hash] parametri normalizzati pronti per service
   #
   # Esempio:

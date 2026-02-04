@@ -3,7 +3,6 @@
 # Servizio semplice per operazioni database su Conversation e Message.
 # Non contiene business logic complessa, solo operazioni ActiveRecord.
 #
-# Pattern: Repository-like Service
 # - Isola logica persistence dal resto dell'applicazione
 # - Fornisce API chiara per gestione conversazioni
 #
@@ -46,7 +45,7 @@ class ConversationManager
   #   # => #<Conversation id: 123, tone_id: 2, ...>  # tone_id originale, non cambia
   def fetch_or_create_conversation(company, conversation_id, tone)
     # .present? = opposto di .blank?, ritorna true se valore non è nil/empty
-    # return = uscita early dalla funzione (guard clause pattern)
+    # return = uscita early dalla funzione
     return company.conversations.find(conversation_id) if conversation_id.present?
     
     # Se arriviamo qui, conversation_id era nil/blank

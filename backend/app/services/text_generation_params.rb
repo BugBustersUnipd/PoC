@@ -10,7 +10,6 @@
 #   * tone_name e conversation_id: MUTUAMENTE ESCLUSIVI (non puoi specificare entrambi)
 # - Fornisce metodo to_service_params per passare a AiService
 #
-# Pattern: Request Object (Form Object)
 # - Separa validazione input da business logic
 # - Controller delega validazione a questo oggetto
 # - Service riceve parametri già validati e normalizzati

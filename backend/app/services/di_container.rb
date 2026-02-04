@@ -1,19 +1,20 @@
 # DiContainer - Dependency Injection Container
 #
 # Punto centralizzato per costruire e configurare tutte le dipendenze dell'applicazione.
-# Implementa pattern Service Locator con supporto per provider personalizzati.
 #
 # Vantaggi:
 # - Separa costruzione oggetti dall'uso (Dependency Inversion Principle)
 # - Facilita testing: puoi sostituire implementazioni con mock
 # - Configurazione centralizzata delle dipendenze
 #
-# Pattern Ruby utilizzati:
+# Standard/costrutti classici di Ruby utilizzati:
 # - class << self: apre singleton class per definire metodi di classe
-# - attr_writer: genera setter per variabili di classe (@ai_text_generator_provider=)
+# - attr_writer: genera setter per variabili di classe (@ai_text_generator_provider=), in questo caso non usato,
+#   ma visto che sono cose per noi nuove volevamo provare a impostarle e dunque capire se possono essere utili o meno, in caso come farle funzionare.
 # - ||=: memoization, crea istanza solo alla prima chiamata
 # - &.: safe navigation operator, chiama .call solo se provider non è nil
 #
+# Anche se per il PoC non é richiesto, per fare palestra e dunque provare e speriementare ipotizziamo:
 # Uso in produzione:
 #   service = DiContainer.ai_service  # Restituisce singleton configurato
 #
@@ -59,7 +60,6 @@ class DiContainer
   # Component per chiamate API Amazon Bedrock Converse
   # @return [AiTextGenerator] istanza che esegue chiamate HTTP a Bedrock
   def self.ai_text_generator
-    # Pattern: (@provider&.call || Default.new)
     # - Usa provider custom se definito, altrimenti istanza default
     # - &. evita errore se @provider è nil
     @ai_text_generator ||= (@ai_text_generator_provider&.call || AiTextGenerator.new)

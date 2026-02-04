@@ -9,7 +9,6 @@
 # - Limit 50 risultati (performance)
 # - Ordinamento per updated_at desc (più recenti prima)
 #
-# Pattern: Query Service
 # - Centralizza logica query complesse
 # - Isola SQL da controller
 # - Riusabile in API e background jobs
@@ -40,11 +39,6 @@ class ConversationSearchService
   def search(company_id:, term:)
     # Costruisce query incrementalmente (ActiveRecord::Relation è lazy)
     # left_outer_joins(:messages) = LEFT OUTER JOIN con tabella messages
-    #
-    # LEFT OUTER JOIN vs INNER JOIN:
-    # - INNER JOIN: ritorna solo conversazioni con almeno 1 messaggio
-    # - LEFT OUTER JOIN: ritorna anche conversazioni senza messaggi (messages.* = NULL)
-    #
     # Perché LEFT OUTER JOIN?
     # - Vogliamo trovare conversazioni anche se non hanno messaggi ancora
     # - Ricerca su title/summary funziona anche per conv vuote

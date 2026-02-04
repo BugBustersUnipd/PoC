@@ -13,9 +13,8 @@ class CompaniesController < ApplicationController
   # GET /companies
   # Lista tutte le aziende configurate nel sistema
   #
-  # select(:id, :name, :description) è ottimizzazione SQL:
+  # specifico select(:id, :name, :description) per ottimizzazione SQL:
   # Recupera solo colonne necessarie invece di SELECT * FROM companies
-  # Riduce traffico DB e dimensione response
   def index
     # order(:id) garantisce ordinamento consistente (utile per pagination futura)
     companies = Company.order(:id).select(:id, :name, :description)

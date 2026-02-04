@@ -1,11 +1,11 @@
 # ConversationSerializer - Formattazione JSON per risposte API conversazioni
 #
-# Tre metodi con granularit\u00e0 differenti:
+# Tre metodi con granularitá differenti:
 # 1. serialize: singola conversazione con messaggi completi (dettaglio)
 # 2. serialize_list: array conversazioni senza messaggi (lista)
 # 3. serialize_search_results: risultati ricerca con total count
 #
-# Pattern: Serializer con granularit\u00e0 multipla
+# Pattern: Serializer con granularitá multipla
 # - Lista: meno dati (performance), solo metadati conversazione
 # - Dettaglio: dati completi inclusi messaggi nested
 # - Search: metadati + total per paginazione
@@ -66,7 +66,7 @@ class ConversationSerializer
   #   ]
   #
   # Frontend usa questa lista per:
-  # - Mostrare sidebar con conversazioni recenti
+  # - Mostrare lista con conversazioni recenti
   # - Click su conversazione → GET /conversations/:id per dettagli
   def self.serialize_list(conversations)
     # .map trasforma ogni Conversation in Hash

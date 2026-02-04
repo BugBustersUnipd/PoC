@@ -8,7 +8,7 @@
 # Altre dimensioni (es. 800x600, 512x512) verrebbero rifiutate da Bedrock
 # con ValidationException.
 #
-# Pattern: Validator Service
+# Validator Service
 # - Singola responsabilità: validare input prima di chiamate costose
 # - Fail-fast: solleva eccezione subito se dimensioni invalide
 # - Migliora UX: errore chiaro con dimensioni supportate

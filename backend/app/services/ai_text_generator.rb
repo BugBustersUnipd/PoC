@@ -8,11 +8,6 @@ require "aws-sdk-bedrockruntime"
 # - Gestisce errori AccessDenied/Throttling con fallback model
 # - Estrae testo generato dalla risposta
 #
-# Pattern: Adapter per AWS SDK
-# - Isola dipendenza esterna (aws-sdk-bedrockruntime)
-# - Fornisce interfaccia semplice generate_text al resto dell'app
-# - Facilita testing (iniettando client mock)
-#
 # Configurazione:
 # - Credenziali: ENV["AWS_ACCESS_KEY_ID"], ["AWS_SECRET_ACCESS_KEY"], ["AWS_SESSION_TOKEN"]
 # - Model ID: bedrock.yml BEDROCK_CONFIG_GENERATION["model_id"]

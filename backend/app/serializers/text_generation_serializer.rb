@@ -3,13 +3,12 @@
 # Serializer minimale per endpoint text_generation.
 # Ritorna solo testo generato + ID conversazione per context continuity.
 #
-# Pattern: Serializer con responsabilità singola
 # - Solo 2 campi: massima semplicità
 # - Frontend può usare conversation_id per prossima richiesta
 class TextGenerationSerializer
   # Serializza risposta generazione testo
   #
-  # Metodo di classe (vedi GeneratedImageSerializer per spiegazione self.)
+  # Metodo di classe (self.method_name):
   #
   # @param text [String] testo generato da Bedrock
   # @param conversation_id [Integer] ID conversazione per context
