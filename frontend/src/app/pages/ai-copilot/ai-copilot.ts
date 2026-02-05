@@ -17,8 +17,8 @@ export class AiCopilot {
   companyId = 1; // TODO: dinamico
 
   onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
+    const input = event.target;
+    if (input && input instanceof HTMLInputElement && input.files?.length) {
       this.selectedFile = input.files[0];
     }
   }

@@ -29,7 +29,7 @@ formatLabel(key: string | number | symbol): string {
 }
 
 ngOnInit() {
-  const id = Number(this.route.snapshot.paramMap.get('id'));
+  const id = Number(this.route.snapshot.paramMap.get('id')); // prende l'id del documento e lo rende un number
  // Prima volta carico immediatamente
  this.documentsService.getDocument(id, this.companyId).subscribe(doc => {
     this.document = doc;
@@ -45,7 +45,7 @@ ngOnInit() {
       switchMap(() =>
         this.documentsService.getDocument(id, this.companyId)
       )
-    )
+    ) //ogni due secondi si chiama this.documentsService.getDocument(id, this.companyId), se per caso getDocument non risponde entro due secondi si ignora il vecchio Observable HTTP e si considera quello nuovo.
     .subscribe(doc => {
       this.document = doc;
       if (doc.status === 'completed' || doc.status === 'failed') {
