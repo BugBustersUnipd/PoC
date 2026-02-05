@@ -8,7 +8,6 @@ interface Message{
   id: number;
   role: string;
   content: string;
-  created_at: string;
 }
 
 @Component({
@@ -19,53 +18,53 @@ interface Message{
   styleUrl: './risultato-generazione.css',
 })
 export class RisultatoGenerazione implements OnInit {
-  private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private http = inject(HttpClient);
 
   // Variabili di stato interfaccia
-  showConversations: boolean = false;
+  showConversations: boolean = false; //mostra /nasconde la sidebar delle conversazioni
   showImageInput: boolean = false; // MOSTRA/NASCONDE IL BOX PER IL PROMPT IMMAGINE
   
-  conversation: Message[] = [];
-  result: any = null;
+  conversation: Message[] = []; // tutti i messaggi della conversazione corrente
+
+  //TODO forse questo non serve effettivamente a nulla?
+  result: any = null; //il risultato della generazione passato dalla pagina precedente ha text e conversation_id
   
   // Dati generazione
   generatedText: string = '';
-  generatedImage: string | null = null;
-  conversationId: number | null = null;
+  generatedImage: string | null = null; //può essere null se non c'è immagine
+  conversationId: number | null = null; //può essere null se viene generata solo un'immagine  
   companyId: number | null = null;
   newMessage: string = '';
   imagePrompt: string = ''; 
 
-
+/** ngOnInit ha funzione di inizializzare i dati della pagina all'apertura della pagina */
 ngOnInit() {
-  const state = history.state;
+  const state = history.state; //prende i dati passati con il router.navigate
 
   // Sottoscriviamo ai parametri dell'URL
-  this.route.queryParams.subscribe(params => {
-    const id_param = state?.['conversation_id'] || null;
-    if (id_param) {
-      //se è stato generato un testo (pulsante Genera) allora carica la conversazione
-      this.conversationId = +id_param; //TODO
-      this.companyId = state?.['company_id']|| null;
-      this.loadConversation();
-    } //se è stata generata un'immagine (quindi non associata ad una conversazione) allora vengono passati i dati 
-    else if (state && state.result) {
-      this.result = state.result;
-      
-      if (state.result.image_url) {
-        this.generatedImage = `http://localhost:3000${state.result.image_url}`;
-        this.generatedText = '';
-      } 
+  
+  const id_param = state?.['conversation_id'] || null;
+  if (id_param) {
+    //se è stato generato un testo (pulsante Genera) allora carica la conversazione
+    this.conversationId = +id_param; //TODO
+    this.companyId = state?.['company_id']|| null;
+    this.loadConversation();
+  } //se è stata generata un'immagine (quindi non associata ad una conversazione) allora vengono passati i dati 
+  else if (state && state.result) {
+    this.result = state.result;
+    if (state.result.image_url) {
+      this.generatedImage = `http://localhost:3000${state.result.image_url}`;
+      this.generatedText = '';
+    } 
 
-      this.cdr.detectChanges();
-    }
-    else {
-      console.warn('Nessun dato disponibile');
-    }
-  });
+    this.cdr.detectChanges();
+  }
+  else {
+    console.warn('Nessun dato disponibile');
+  }
+
 }
 
 
@@ -122,15 +121,9 @@ ngOnInit() {
       .subscribe({
         next: (res) => {
           this.conversation = res.messages || [];
-          
-          // Se l'immagine è parte della conversazione o del risultato, gestiscila qui
-          // if (res.image_url) {
-          //   this.generatedImage = `http://localhost:3000${res.image_url}`;
-          // }
-
           const assistantMessages = this.conversation.filter(m => m.role === 'assistant');
           if (assistantMessages.length > 0) {
-             this.generatedText = assistantMessages[assistantMessages.length - 1].content;
+             this.generatedText = assistantMessages[assistantMessages.length - 1].content; //prende l'ultimo messaggio dell'assistente per visualizzarlo
              this.cdr.detectChanges();
           }
         },
@@ -176,21 +169,19 @@ ngOnInit() {
 
 
   addMessage() {
-    const testo = this.newMessage.trim();
+    const testo = this.newMessage.trim(); // rimuove gli spazi iniziali, finali e doppie spaziature
     if (!testo) return;
 
     this.http.post<any>('http://localhost:3000/genera', {
       company_id: this.companyId,
       conversation_id: this.conversationId,
       prompt: testo
+      //non chiede più il tono
     }).subscribe({
       next: (res) => {
-        // console.log(res['text']);
-        // console.log(res['conversation_id']);
-
         console.log('Messaggi aggiornati:', this.conversation);
         this.loadConversation();
-        this.generatedText = res['text'] || '';
+        this.generatedText = res['text'] || ''; //TODO
 
       },
       error: (err) => {
