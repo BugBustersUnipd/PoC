@@ -38,11 +38,6 @@ Write-Host "URL disponibili:" -ForegroundColor Cyan
 Write-Host "  Backend Rails:  http://localhost:3000" -ForegroundColor Yellow
 Write-Host "  Frontend Angular: http://localhost:4200" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Pagine di test HTML:" -ForegroundColor Cyan
-Write-Host "  - http://localhost:3000/tester.html" -ForegroundColor White
-Write-Host "  - http://localhost:3000/documentTester.html" -ForegroundColor White
-Write-Host "  - http://localhost:3000/test-generator.html" -ForegroundColor White
-Write-Host ""
 Write-Host "Per arrestare i servizi, chiudi le finestre aperte" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Premi un tasto per chiudere questo messaggio..." -ForegroundColor Gray

@@ -79,3 +79,20 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+# LaTeX generated files
+*.aux
+*.log
+*.toc
+*.out
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.bbl
+*.blg
+*.dvi
+*.ps
+*.eps
+*.auxlock
+*.figlist
+*.makefile
+build/
