@@ -351,7 +351,7 @@ DB_NAME_TEST=nexum_poc_test
 # Avviare PostgreSQL, alternativamente ad aprire pgAdmin
 Start-Service postgresql-x64-18 
 
-# Nel folder backend, eseguire
+# Dalla root del progetto, eseguire
 cd backend
 bundle exec rails db:create db:migrate db:seed
 \end{lstlisting}
@@ -433,6 +433,11 @@ Il progetto include diversi script PowerShell utili:
 \section{Troubleshooting}
 \label{sec:troubleshooting}
 
+\subsection{Errore: "Problemi di permessi in fase di configurazione"}
+\label{subsec:errore-permessi}
+\begin{itemize}
+    \item Esegui PowerShell/cmd come amministratore o usa \texttt{sudo} su Linux/macOS.
+\end{itemize}
 
 \subsection{Errore: "Database non inizializzato"}
 \label{subsec:errore-database}
