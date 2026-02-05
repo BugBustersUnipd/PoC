@@ -35,7 +35,6 @@ Write-Host "  - Finestra 1: Backend Rails (porta 3000)" -ForegroundColor White
 Write-Host "  - Finestra 2: Frontend Angular (porta 4200)" -ForegroundColor White
 Write-Host ""
 Write-Host "URL disponibili:" -ForegroundColor Cyan
-Write-Host "  Backend Rails:  http://localhost:3000" -ForegroundColor Yellow
 Write-Host "  Frontend Angular: http://localhost:4200" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Per arrestare i servizi, chiudi le finestre aperte" -ForegroundColor Yellow
