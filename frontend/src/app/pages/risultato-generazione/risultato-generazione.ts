@@ -48,10 +48,10 @@ ngOnInit() {
     const id_param = state?.['conversation_id'] || null;
     if (id_param) {
       //se è stato generato un testo (pulsante Genera) allora carica la conversazione
-      this.conversationId = +id_param;
+      this.conversationId = +id_param; //TODO
       this.companyId = state?.['company_id']|| null;
       this.loadConversation();
-    } //se è stata generata un'immagien (quindi non associata ad una conversazione) allora vengono passati i dati 
+    } //se è stata generata un'immagine (quindi non associata ad una conversazione) allora vengono passati i dati 
     else if (state && state.result) {
       this.result = state.result;
       

@@ -97,7 +97,7 @@ export class StoricoDocumenti implements OnInit, OnDestroy {
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
       'processing': 'In elaborazione',
-      'pending': 'In elaborazione',
+      'pending': 'In attesa',
       'completed': 'Completato',
       'failed': 'Errore'
     };

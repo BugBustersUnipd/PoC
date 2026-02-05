@@ -33,7 +33,6 @@ ngOnInit() {
  // Prima volta carico immediatamente
  this.documentsService.getDocument(id, this.companyId).subscribe(doc => {
     this.document = doc;
-    console.log("caricato direttamente senza polling")
     this.cdr.detectChanges();  
     if(doc.status === 'processing' || doc.status === 'pending'){
       this.startPolling(id);

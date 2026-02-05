@@ -4,8 +4,6 @@ import { Observable } from 'rxjs';
 
 export interface Conversation {
   id: number;
-  title?: string;
-  summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -24,7 +22,7 @@ export class ConversationsService {
     );
   }
 
-  getConversationDetail(id: number, companyId: number) {
+  getConversationDetail(id: number, companyId: number): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/conversazioni/${id}`,
       { params: { company_id: companyId } }

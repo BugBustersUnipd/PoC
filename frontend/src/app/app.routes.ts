@@ -12,6 +12,5 @@ export const routes: Routes = [
   { path: 'storico-prompt', component: StoricoPrompt },
   { path: 'storico-documenti', component: StoricoDocumenti },
   { path: 'risultato-generazione', component: RisultatoGenerazione },
-  { path: 'aicopilotanteprimadocumento', component: Aicopilotanteprimadocumento },
   { path: 'aicopilotanteprima/:id', component: Aicopilotanteprimadocumento },
 ];
