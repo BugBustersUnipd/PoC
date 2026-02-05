@@ -142,7 +142,7 @@
 \hline
 0.0.2 & 31/12/2025 & Migliorie alla guida & Alberto Autiero & - & - \\
 \hline
-0.0.1 & 29/12/2025 & Prima stesura della guida all'utilizzo del POC del documento & Alberto Autiero & - & - \\
+0.0.1 & 29/12/2025 & Prima stesura della guida all'utilizzo del POC Nexum & Alberto Autiero & - & - \\
 \hline
 \end{tabularx}
 }
@@ -158,226 +158,243 @@
 \label{sec:introduzione}
 Questa guida spiega in dettaglio come configurare, avviare e utilizzare il Proof of Concept (POC) Nexum. Seguire attentamente le istruzioni per garantire il corretto funzionamento di tutti i componenti.
 
-% Sezione 2: Prerequisiti
-\section{Prerequisiti}
-\label{sec:prerequisiti}
-Prima di iniziare, assicurarsi di avere installato:
+% Sezione 3: Installazione - Windows
+\section{Installazione - Windows}
+\label{sec:installazione-windows}
 
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Ruby}
-    \item \textbf{PostgreSQL}
-    \item \textbf{Node.js} (per il frontend Angular)
-    \item \textbf{Credenziali AWS} con accesso a Bedrock
-    \item \textbf{PowerShell} (già incluso in Windows)
-\end{itemize}
+\subsection{Ruby}
+\label{subsec:win-ruby}
 
-% Sezione 3: Installazione
-\section{Installazione}
-\label{sec:installazione}
-
-\subsubsection{Scaricare Ruby}
-\label{subsubsec:download-ruby}
 \begin{enumerate}
     \item Visitare \url{https://rubyinstaller.org/downloads/}
-    \item Scaricare Ruby+Devkit
-    \item Scegliere la versione x64 (64-bit)
-\end{enumerate}
-
-\subsubsection{Installare Ruby}
-\label{subsubsec:install-ruby-steps}
-\begin{enumerate}
-    \item Eseguire il file di installazione scaricato
+    \item Scaricare \textbf{Ruby+Devkit} versione x64 (64-bit)
+    \item Eseguire il file di installazione
     \item Durante l'installazione, selezionare tutte le opzioni predefinite
-    \item \textbf{Importante}: Selezionare l'opzione per installare MSYS2 e le componenti di sviluppo (DevKit)
-    \item Al termine dell'installazione, verificare l'installazione aprendo PowerShell e digitando:
-    \begin{lstlisting}[language=bash, caption=Verifica installazione Ruby]
+    \item \textbf{Importante}: Installare MSYS2 e le componenti di sviluppo (DevKit)
+    \item Verificare l'installazione:
+    \begin{lstlisting}[language=bash, caption=Verifica Ruby]
 ruby --version
     \end{lstlisting}
-    \item Dovrebbe essere visualizzata la versione installata)
-\end{enumerate}
-
-\subsubsection{Installare Bundler}
-\label{subsubsec:install-bundler}
-Bundler è necessario per gestire le gem Ruby del progetto.
-
-\begin{lstlisting}[language=bash, caption=Installazione Bundler]
+    \item Installare Bundler:
+    \begin{lstlisting}[language=bash, caption=Installazione Bundler]
 gem install bundler
     \end{lstlisting}
-
-\subsection{Installare PostgreSQL}
-
-\subsubsection{Scaricare PostgreSQL}
-\label{subsubsec:download-postgresql}
-\begin{enumerate}
-    \item Visitare \url{https://www.postgresql.org/download/windows/}
-    \item Scaricare il PostgreSQL Installer per Windows
 \end{enumerate}
 
-\subsubsection{Installare PostgreSQL}
-\label{subsubsec:install-postgresql-steps}
+\subsection{PostgreSQL}
+\label{subsec:win-postgresql}
+
 \begin{enumerate}
+    \item Visitare \url{https://www.postgresql.org/download/windows/}
+    \item Scaricare PostgreSQL Installer per Windows
     \item Eseguire il file di installazione
     \item Durante l'installazione:
     \begin{itemize}
-        \item Scegliere tutte le componenti predefinite
-        \item \textbf{Importante}: Impostare una password per l'utente \texttt{postgres} (ricordarla, servirà per la configurazione)
+        \item Scegliere le componenti predefinite
+        \item \textbf{Importante}: Impostare una password per l'utente \texttt{postgres} (non dimenticarla!)
         \item Lasciare la porta predefinita (5432)
     \end{itemize}
-    \item Al termine dell'installazione, verificare che il servizio PostgreSQL sia in esecuzione
-\end{enumerate}
-
-\subsubsection{Configurare l'avvio automatico di PostgreSQL}
-\label{subsubsec:postgresql-autostart}
-Per evitare di dover avviare manualmente PostgreSQL ogni volta, è possibile configurarlo per l'avvio automatico:
-
-\begin{lstlisting}[language=bash, caption=Configurazione avvio automatico PostgreSQL]
+    \item Configurare l'avvio automatico (opzionale):
+    \begin{lstlisting}[language=bash, caption=Avvio automatico PostgreSQL su Windows]
 Set-Service postgresql-x64-18 -StartupType Automatic
     \end{lstlisting}
+    \textbf{Nota}: Sostituire il numero di versione se diverso.
+\end{enumerate}
 
-\textbf{Nota}: Sostituire \texttt{postgresql-x64-18} con il nome corretto del servizio PostgreSQL installato. Per trovare il nome esatto del servizio:
+\subsection{Node.js}
+\label{subsec:win-nodejs}
 
-\begin{lstlisting}[language=bash, caption=Trovare il nome del servizio PostgreSQL]
-Get-Service | Where-Object {$_.Name -like "*postgresql*"}
-    \end{lstlisting}
-
-\subsection{Installare Node.js}
-\label{subsec:install-nodejs}
-Node.js è necessario per il frontend Angular.
-
-\subsubsection{Installare Node.js con winget}
-\label{subsubsec:install-nodejs-winget}
 \begin{enumerate}
     \item Aprire PowerShell e eseguire:
     \begin{lstlisting}[language=bash, caption=Installazione Node.js con winget]
 winget install OpenJS.NodeJS.LTS
     \end{lstlisting}
-    \item Verificare l'installazione con:
-    \begin{lstlisting}[language=bash, caption=Verifica installazione Node.js]
+    \item Verificare l'installazione:
+    \begin{lstlisting}[language=bash, caption=Verifica Node.js]
 node --version
 npm --version
     \end{lstlisting}
-    \item Dovrebbero essere visualizzate le versioni installate
-\end{enumerate}
-
-\subsubsection{Installare le dipendenze del progetto}
-\label{subsubsec:install-dipendenze-nodejs}
-Dopo aver clonato o scaricato il progetto, è necessario installare le dipendenze Node.js per il frontend:
-
-\begin{enumerate}
-    \item Aprire CMD nella cartella del progetto
-    \item Spostarsi nella cartella frontend:
-    \begin{lstlisting}[language=bash, caption=Spostarsi nella cartella frontend]
+    \item Installare le dipendenze del progetto (nella cartella frontend):
+    \begin{lstlisting}[language=bash, caption=Dipendenze frontend su Windows]
 cd frontend
-    \end{lstlisting}
-    \item Installare le dipendenze usando \texttt{cmd} (necessario su Windows per evitare problemi con PowerShell):
-    \begin{lstlisting}[language=bash, caption=Installazione dipendenze Node.js]
 cmd /c "npm install"
     \end{lstlisting}
-    \item Attendere il completamento dell'installazione
 \end{enumerate}
 
-\textbf{Nota}: L'uso di \texttt{cmd /c} è necessario perché PowerShell su Windows può avere problemi nell'eseguire direttamente i comandi npm.
-
 \subsection{Configurare PowerShell}
-\label{subsec:config-powershell}
-Per eseguire gli script PowerShell del progetto, è necessario modificare la policy di esecuzione.
+\label{subsec:win-powershell}
 
-\subsubsection{Cambiare la policy di esecuzione}
-\label{subsubsec:execution-policy}
-Esegui il seguente comando:
-
-\begin{lstlisting}[language=bash, caption=Cambiare policy di esecuzione PowerShell]
+\begin{lstlisting}[language=bash, caption=Policy di esecuzione PowerShell]
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-    \end{lstlisting}
+\end{lstlisting}
 
-\textbf{Nota}: Potrebbe essere richiesto di confermare con \texttt{T}.
+\textbf{Nota}: Confermare con \texttt{Y} o \texttt{S}.
+
+% Sezione 3b: Installazione - Linux e macOS
+\section{Installazione - Linux e macOS}
+\label{sec:installazione-linux-macos}
+
+\subsection{Ruby}
+\label{subsec:lm-ruby}
+
+\begin{itemize}
+    \item \textbf{macOS}: \texttt{brew install ruby}
+    \item \textbf{Linux (Ubuntu/Debian)}: \texttt{sudo apt-get install ruby-full build-essential}
+    \item \textbf{Linux (Fedora/RHEL)}: \texttt{sudo dnf install ruby ruby-devel}
+\end{itemize}
+
+Dopo l'installazione:
+\begin{lstlisting}[language=bash, caption=Verificare e completare Ruby]
+ruby --version
+gem install bundler
+\end{lstlisting}
+
+\subsection{PostgreSQL}
+\label{subsec:lm-postgresql}
+
+\textbf{macOS}:
+\begin{lstlisting}[language=bash, caption=PostgreSQL su macOS]
+brew install postgresql@18
+brew services start postgresql@18
+\end{lstlisting}
+
+\textbf{Linux (Ubuntu/Debian)}:
+\begin{lstlisting}[language=bash, caption=PostgreSQL su Ubuntu/Debian]
+sudo apt-get install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+\end{lstlisting}
+
+\textbf{Linux (Fedora/RHEL)}:
+\begin{lstlisting}[language=bash, caption=PostgreSQL su Fedora/RHEL]
+sudo dnf install postgresql postgresql-server
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+\end{lstlisting}
+
+\subsection{Node.js}
+\label{subsec:lm-nodejs}
+
+\textbf{macOS}:
+\begin{lstlisting}[language=bash, caption=Node.js su macOS]
+brew install node
+\end{lstlisting}
+
+\textbf{Linux}: Seguire \url{https://nodejs.org/en/download/package-manager}
+
+Installare le dipendenze del progetto:
+\begin{lstlisting}[language=bash, caption=Dipendenze frontend su Linux/macOS]
+cd frontend
+npm install
+\end{lstlisting}
 
 % Sezione 4: Configurazione Iniziale
 \section{Configurazione Iniziale}
 \label{sec:configurazione}
 
-\subsection{Configurare PostgreSQL}
-\label{subsec:postgresql}
-Il POC richiede PostgreSQL in esecuzione con le credenziali corrette.
+\subsection{Configurare le Variabili d'Ambiente}
+\label{subsec:env-config}
 
-\subsubsection{Modificare la password nel file di configurazione}
-\label{subsubsec:password-config}
-Aprire il file \texttt{backend/config/database.yml} e modificare la password PostgreSQL in tutte le sezioni (development, test, production):
-
-\begin{lstlisting}[caption=Configurazione database.yml]
-development:
-  <<: *default
-  database: nexum_poc_development
-  username: postgres
-  password: "TUA_PASSWORD_QUI"  # <-- Modifica questa riga
-  host: 127.0.0.1
-  port: 5432
-\end{lstlisting}
-
-\textbf{Nota}: Sostituire \texttt{"TUA\_PASSWORD\_QUI"} con la password dell'utente PostgreSQL.
-
-\subsubsection{Verificare che PostgreSQL sia in esecuzione}
-\label{subsubsec:verifica-postgres}
-Avviare il servizio PostgreSQL con il seguente comando:
-
-\begin{lstlisting}[language=bash, caption=Avviare servizio PostgreSQL]
-Start-Service postgresql-x64-18
-\end{lstlisting}
-
-\textbf{Nota}: Sostituire \texttt{postgresql-x64-18} con il nome corretto del servizio PostgreSQL installato.
-
-\subsection{Configurare le Credenziali AWS}
-\label{subsec:aws}
-Il POC necessita delle credenziali AWS per accedere a Bedrock. Creare un file \texttt{.env} nella cartella \texttt{backend}.
+La configurazione del progetto avviene tramite il file \texttt{backend/.env}. Una copia di esempio è fornita in \texttt{backend/.env.example}.
 
 \subsubsection{Creare il file .env}
-\label{subsubsec:crea-env}
-Creare un file chiamato \texttt{.env} nella cartella \texttt{backend/} con il seguente contenuto:
+\label{subsubsec:create-env}
 
-\begin{lstlisting}[caption=File .env di esempio]
+Copiare \texttt{.env.example} e rinominarlo in \texttt{.env}:
+
+\textbf{Windows (PowerShell)}:
+\begin{lstlisting}[language=bash, caption=Creare .env su Windows]
+cd backend
+Copy-Item .env.example .env
+\end{lstlisting}
+
+\textbf{Linux/macOS}:
+\begin{lstlisting}[language=bash, caption=Creare .env su Linux/macOS]
+cd backend
+cp .env.example .env
+\end{lstlisting}
+
+\subsubsection{Completare le Credenziali AWS}
+\label{subsubsec:aws-credentials}
+
+Aprire il file \texttt{backend/.env} e compilare le credenziali AWS:
+
+\begin{lstlisting}[caption=Sezione AWS in .env]
 AWS_ACCESS_KEY_ID=la_tua_access_key
 AWS_SECRET_ACCESS_KEY=la_tua_secret_key
 AWS_SESSION_TOKEN=la_tua_session_token
-AWS_REGION=us-east-1
-DATABASE_PASSWORD=la_tua_password_postgresql
 \end{lstlisting}
 
-\textbf{Dove trovare le credenziali AWS:}
+\textbf{Dove trovarle}: Accedere a \url{https://eggon.awsapps.com/start/}, selezionare il ruolo ``Bedrock-Bugbuster'' e copiare le credenziali temporanee.
 
-\begin{enumerate}
-    \item Accedere al portale AWS Eggon (\url{https://eggon.awsapps.com/start/})
-    \item Selezionare il ruolo "Bedrock-Bugbuster"
-    \item Copiare le credenziali temporanee (Access Key ID, Secret Access Key, Session Token)
-    \item Incollare i valori nel file \texttt{.env}
-\end{enumerate}
+\subsubsection{Configurare il Database}
+\label{subsubsec:db-password}
 
-\textbf{Importante:}
-\begin{itemize}
-    \item Il file \texttt{.env} è già ignorato da git (non verrà committato)
-    \item Le credenziali AWS scadono dopo alcune ore
-    \item Quando le credenziali scadono, crearne di nuove dal portale AWS
-\end{itemize}
+Nel file \texttt{backend/.env}, impostare la password PostgreSQL:
+
+\begin{lstlisting}[caption=Database in .env]
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=la_tua_password_postgresql
+DB_NAME_DEVELOPMENT=nexum_poc_development
+DB_NAME_TEST=nexum_poc_test
+\end{lstlisting}
+
+\textbf{Nota}: \texttt{DB\_PASSWORD} deve essere la password dell'utente \texttt{postgres} impostata durante l'installazione di PostgreSQL.
+
+\subsection{Inizializzare il Database}
+\label{subsec:init-db}
+
+\textbf{Windows}:
+\begin{lstlisting}[language=bash, caption=Inizializzare DB su Windows]
+# Avviare PostgreSQL, alternativamente ad aprire pgAdmin
+Start-Service postgresql-x64-18 
+
+# Dalla root del progetto, eseguire
+cd backend
+bundle exec rails db:create db:migrate db:seed
+\end{lstlisting}
+
+\textbf{Linux/macOS}:
+\begin{lstlisting}[language=bash, caption=Inizializzare DB su Linux/macOS]
+cd backend
+bundle exec rails db:create db:migrate db:seed
+\end{lstlisting}
 
 % Sezione 5: Avvio del POC
 \section{Avvio del POC}
 \label{sec:avvio}
 
-\subsection{Script PowerShell avvia-poc.ps1}
-\label{subsec:script-avvio}
-Il modo più semplice per avviare il POC:
+\subsection{Windows - Con Script PowerShell}
+\label{subsec:avvio-windows}
 
-\begin{lstlisting}[language=bash, caption=Script combinato]
+Eseguire il comando nella root del progetto:
+
+\begin{lstlisting}[language=bash, caption=Avviare il POC su Windows]
 .\avvia-poc.ps1
 \end{lstlisting}
 
-Questo script:
-\begin{itemize}
-    \item Apre una nuova finestra PowerShell per il Backend
-    \item Apre una nuova finestra PowerShell per il Frontend
-    \item Mostra un messaggio con tutti gli URL disponibili
-\end{itemize}
+Questo script apre due finestre PowerShell: una per il Backend e una per il Frontend.
 
-\textbf{Per fermare i servizi}: Premere CTRL+C
+\subsection{Linux/macOS - Manuale}
+\label{subsec:avvio-linux}
+
+\subsubsection{Terminale 1: Backend}
+\label{subsubsec:avvio-backend}
+
+\begin{lstlisting}[language=bash, caption=Backend su Linux/macOS]
+cd backend
+bundle exec rails server
+\end{lstlisting}
+
+\subsubsection{Terminale 2: Frontend}
+\label{subsubsec:avvio-frontend}
+
+\begin{lstlisting}[language=bash, caption=Frontend su Linux/macOS]
+cd frontend
+npm start
+\end{lstlisting}
 
 % Sezione 6: URL Disponibili
 \section{URL Disponibili}
@@ -391,66 +408,7 @@ Una volta avviati i servizi, avrai accesso a:
     \item \textbf{Backend Rails API}: \url{http://localhost:3000}
 \end{itemize}
 
-\subsection{Pagine di Test HTML}
-\label{subsec:pagine-test}
-\begin{itemize}
-    \item \textbf{Generazione Testo}: \url{http://localhost:3000/tester.html}
-    \item \textbf{Analisi Documenti}: \url{http://localhost:3000/documentTester.html}
-    \item \textbf{Generatore Immagini}: \url{http://localhost:3000/test-generator.html}
-\end{itemize}
-
-% Sezione 7: Come Testare il POC
-\section{Come Testare il POC}
-\label{sec:test}
-
-\subsection{Test 1: Analisi Documenti}
-\label{subsec:test-analisi}
-\begin{enumerate}
-    \item Aprire \url{http://localhost:3000/documentTester.html}
-    \item Cliccare su "Scegli file" e selezionare un documento dalla cartella \texttt{documenti-test-ocr} (sia pdf che immagini)
-    \item Cliccare su "Carica e Analizza"
-    \item Attendere che l'AI analizzi il documento
-    \item Visualizzare i risultati estratti
-\end{enumerate}
-
-\textbf{Creare documenti di test:}
-Per generare documenti di test più realistici, puoi eseguire:
-
-\begin{lstlisting}[language=bash, caption=Generare documenti realistici]
-python genera-immagini-test.py
-\end{lstlisting}
-
-Questo script crea vari tipi di documenti (cedolini, fatture, CUD, ricevute) sia come immagini che PDF.
-
-\textbf{Alternativa:}
-Se preferisci creare un PDF semplice, puoi ancora usare:
-
-\begin{lstlisting}[language=bash]
-ruby crea-pdf-test.rb
-\end{lstlisting}
-
-\subsection{Test 2: Generazione Testo con Conversazioni}
-\label{subsec:test-generazione}
-\begin{enumerate}
-    \item Aprire \url{http://localhost:3000/tester.html}
-    \item I toni verranno caricato in automatico all'apertura
-    \item Selezionare un tono dal menu a tendina
-    \item Scrivere un prompt (es: "Scrivi un'email di presentazione")
-    \item Cliccare su "Genera"
-    \item Visualizzare la risposta dell'AI
-\end{enumerate}
-
-\subsection{Test 3: Generazione Immagini}
-\label{subsec:test-immagini}
-\begin{enumerate}
-    \item Aprire \url{http://localhost:3000/test-generator.html}
-    \item Scrivere un prompt ed attendere la risposta
-    \item Spostarsi ora nella sezione genera immagine e compilare i campi richiesti (prompt, dimensioni).
-    \item Cliccare su "Genera"
-    \item Attendere che l'immagine venga creata
-\end{enumerate}
-
-% Sezione 8: Script PowerShell Disponibili
+% Sezione 7: Script PowerShell Disponibili
 \section{Script PowerShell Disponibili}
 \label{sec:script}
 Il progetto include diversi script PowerShell utili:
@@ -465,22 +423,20 @@ Il progetto include diversi script PowerShell utili:
 \texttt{avvia-backend.ps1} & Avvia solo il Backend \\
 \texttt{avvia-frontend.ps1} & Avvia solo il Frontend \\
 \texttt{verifica-postgres.ps1} & Verifica la connessione a PostgreSQL (chiede password) \\
-\texttt{crea-pdf-test.rb} & Crea un PDF di test per l'API di analisi \\
 \bottomrule
 \end{tabularx}
 \caption{Script disponibili nel progetto}
 \label{tab:script}
 \end{table}
 
-% Sezione 9: Troubleshooting
+% Sezione 8: Troubleshooting
 \section{Troubleshooting}
 \label{sec:troubleshooting}
 
-\subsection{Errore: "company\_id mancante"}
-\label{subsec:errore-company}
+\subsection{Errore: "Problemi di permessi in fase di configurazione"}
+\label{subsec:errore-permessi}
 \begin{itemize}
-    \item Assicurati di includere \texttt{company\_id=1} nella query string o nel form
-    \item Le pagine HTML di test ora includono un campo per il Company ID
+    \item Esegui PowerShell/cmd come amministratore o usa \texttt{sudo} su Linux/macOS.
 \end{itemize}
 
 \subsection{Errore: "Database non inizializzato"}
@@ -492,8 +448,8 @@ Il progetto include diversi script PowerShell utili:
 \subsection{Errore: "Password PostgreSQL errata"}
 \label{subsec:errore-password}
 \begin{itemize}
-    \item Verifica che la password in \texttt{backend/config/database.yml} corrisponda alla password del tuo utente PostgreSQL
-    \item Usa lo script \texttt{verifica-postgres.ps1} per testare la connessione
+    \item Verifica che la password in \texttt{backend/.env} corrisponda alla password dell'utente \texttt{postgres} impostata durante l'installazione
+    \item Usa lo script \texttt{verifica-postgres.ps1} (su Windows) per testare la connessione
 \end{itemize}
 
 \subsection{Errore: "AWS credentials expired"}
@@ -547,7 +503,7 @@ Questo comando permette l'esecuzione di script locali e richiede la firma solo p
 
 \textbf{Nota}: Potrebbe essere richiesto di confermare con \texttt{S} o \texttt{Y}.
 
-% Sezione 10: Note Importanti
+% Sezione 9: Note Importanti
 \section{Note Importanti}
 \label{sec:note}
 \begin{itemize}
@@ -562,19 +518,19 @@ Questo comando permette l'esecuzione di script locali e richiede la firma solo p
     \end{itemize}
 \end{itemize}
 
-% Sezione 11: Riavvio Dopo Modifiche
+% Sezione 10: Riavvio Dopo Modifiche
 \section{Riavvio Dopo Modifiche}
 \label{sec:riavvio}
 Dopo aver modificato:
 
 \begin{itemize}
     \item \textbf{File Ruby (modelli, controller, ecc.)}: Rails si ricarica automaticamente
-    \item \textbf{File di configurazione Rails}: Riavviare il POC (Ctrl+C e rieseguire \texttt{.\textbackslash avvia-poc.ps1})
+    \item \textbf{File di configurazione Rails}: Riavviare il POC (Ctrl+C e rieseguire lo script di avvio)
     \item \textbf{File Angular}: Angular si ricompila automaticamente
-    \item \textbf{File .env}: Riavviare il POC (Ctrl+C e rieseguire \texttt{.\textbackslash avvia-poc.ps1)}
+    \item \textbf{File .env}: Riavviare il POC (Ctrl+C e rieseguire lo script di avvio)
 \end{itemize}
 
-% Sezione 12: Risorse Aggiuntive
+% Sezione 11: Risorse Aggiuntive
 \section{Risorse Aggiuntive}
 \label{sec:risorse}
 \begin{itemize}
