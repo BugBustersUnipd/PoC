@@ -18,7 +18,7 @@ export class AiCopilot {
 
   onFileSelected(event: Event) {
     const input = event.target;
-    if (input && input instanceof HTMLInputElement && input.files?.length) {
+    if (input && input instanceof HTMLInputElement && input.files?.length) { //Bisogna sincerarsi che l'input sia di tipo HTMLInputElement poichè HTMLInputElement è l'interfaccia che serve per manipolare gli elementi di input nel DOM e fornisce l'accesso alla proprietà files.
       this.selectedFile = input.files[0];
     }
   }
@@ -34,7 +34,7 @@ export class AiCopilot {
         // Upload riuscito, naviga alla pagina di anteprima
         this.router.navigate(['/aicopilotanteprima', doc.id]);
       },
-      error: (err: any) => {
+      error: (err: HttpErrorResponse) => {
         // Se l'API restituisce un array di errori, mostra tutti
         if (err.error?.errors?.length) {
           alert(err.error.errors.join('\n'));
