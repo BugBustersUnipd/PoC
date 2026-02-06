@@ -78,13 +78,17 @@ ngOnInit() {
 
     const payload: any = {
       prompt: this.imagePrompt,
-      company_id: this.companyId
     };
 
     if (this.conversationId) {
       payload.conversation_id = this.conversationId;
     }
-
+    if(this.companyId) {
+      payload.company_id = this.companyId;
+    }else{
+      payload.company_id = 1; //TODO qui ho messo un fallback perchè è richiesta che la company id sia presente ma nel caso della generazione dell'immagine senza conversazione non è associata alcuna company WOPS
+    }
+    console.log()
     console.log('Generazione Immagine con Prompt dedicato:', payload);
 
     this.http.post('http://localhost:3000/genera-immagine', payload)
