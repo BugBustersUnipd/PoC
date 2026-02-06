@@ -5,8 +5,8 @@ import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    provideHttpClient(withFetch()),
+    provideBrowserGlobalErrorListeners(), //serve a configurare l'ascolto di eventi errore, fa tutto angular sotto il cofano
+    provideRouter(routes), //per il routing (app.routes.ts)
+    provideHttpClient(withFetch()), //per le chiamate http
   ],
 };

@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient  } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
 interface Message{
   id: number;
   role: string;
@@ -27,9 +26,6 @@ export class RisultatoGenerazione implements OnInit {
   showImageInput: boolean = false; // MOSTRA/NASCONDE IL BOX PER IL PROMPT IMMAGINE
   
   conversation: Message[] = []; // tutti i messaggi della conversazione corrente
-
-  //TODO forse questo non serve effettivamente a nulla?
-  result: any = null; //il risultato della generazione passato dalla pagina precedente ha text e conversation_id
   
   // Dati generazione
   generatedText: string = '';
@@ -53,7 +49,6 @@ ngOnInit() {
     this.loadConversation();
   } //se è stata generata un'immagine (quindi non associata ad una conversazione) allora vengono passati i dati 
   else if (state && state.result) {
-    this.result = state.result;
     if (state.result.image_url) {
       this.generatedImage = `http://localhost:3000${state.result.image_url}`;
       this.generatedText = '';
@@ -116,7 +111,6 @@ ngOnInit() {
 
     this.http
       .get<any>(`http://localhost:3000/conversazioni/${this.conversationId}`, {
-        params: { company_id: this.companyId?.toString() || '' }
       })
       .subscribe({
         next: (res) => {

@@ -22,6 +22,7 @@ interface PromptRow {
 export class StoricoPrompt implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private conversationsService = inject(ConversationsService);
 
   rows: PromptRow[] = [];
   filteredRows: PromptRow[] = [];
@@ -31,9 +32,7 @@ export class StoricoPrompt implements OnInit {
 
   companyId!: number; 
   tone!: string; 
-
-  constructor(private conversationsService: ConversationsService) {}
-
+  
    ngOnInit() {
     this.companyId = history.state?.companyId ?? 1; // fallback sicuro
     this.loadStorico();

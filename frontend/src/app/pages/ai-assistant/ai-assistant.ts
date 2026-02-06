@@ -114,7 +114,7 @@ export class AiAssistant implements OnInit {
         next: (response) => {
           console.log('Risposta completa dopo post genera text:', response); //ha text e conversation_id
           this.router.navigate(['/risultato-generazione'], {
-
+            //passo conversation_id e company_id per caricare la conversazione nella pagina di risultato
             state: { conversation_id: response.conversation_id ,company_id: this.filterCompany}
           });
         },

@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface Conversation {
+export interface Conversation { //queste sono tipo le struct di c
   id: number;
   created_at: string;
   updated_at: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'root' }) //fa DI in tutte le componenti, non serve aggiungerla nei providers di ogni componente
 export class ConversationsService {
 
   private baseUrl = 'http://localhost:3000';
