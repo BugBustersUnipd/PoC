@@ -14,23 +14,17 @@ class TonesController < ApplicationController
   # I toni definiscono come l'AI deve scrivere (formale, amichevole, tecnico, etc.)
   def index
     company_id = params[:company_id]
-    
-    # Guard clause: valida parametro obbligatorio
-    # .blank? è un Rails helper: true se nil, "", "   ", [], {}
-    # Modifier if (condizione dopo statement) è Ruby idiom per one-liner
     return render json: { error: "company_id mancante" }, status: :bad_request if company_id.blank?
 
     # find_by restituisce nil se non trova (vs find che lancia eccezione)
-    # Preferito quando il "non trovato" è uno scenario normale, non eccezionale
     company = Company.find_by(id: company_id)
     return render json: { error: "Azienda non trovata" }, status: :not_found unless company
 
     # company.tones è associazione ActiveRecord (has_many)
-    # Lazy-load: query SQL eseguita solo quando accedi alla collezione
     tones = company.tones
     
     # Serializer centralizza la formattazione JSON
-    # Evita duplicazione: se cambia il formato, modifichi solo il serializer
+    # Evita duplicazione: se cambia il formato, si modifica solo il serializer
     render json: ToneSerializer.serialize_collection(company, tones), status: :ok
   end
 end

@@ -19,7 +19,6 @@ class TextGenerationController < ApplicationController
   # 3. Serializza output JSON
   # 4. Gestisce errori con codici HTTP appropriati
   def create
-    # Pattern Ruby: named parameters (prompt:, tone_name:, etc.)
     # params[] accede ai parametri HTTP (Rails li converte automaticamente da JSON/form-data)
     request_params = TextGenerationParams.new(
       prompt: params[:prompt],
@@ -28,8 +27,7 @@ class TextGenerationController < ApplicationController
       conversation_id: params[:conversation_id]
     )
 
-    # Validazione early return: blocca richiesta se parametri invalidi
-    # unless X equivale a if !X (Ruby idiom per negazione leggibile)
+    # unless X equivale a if !X
     unless request_params.valid?
       return render json: { error: request_params.errors.first, errors: request_params.errors }, status: :unprocessable_entity
     end

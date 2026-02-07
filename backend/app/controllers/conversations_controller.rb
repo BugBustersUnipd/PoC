@@ -12,14 +12,12 @@
 # - Delega ricerca testuale a ConversationSearchService
 class ConversationsController < ApplicationController
   # GET /conversazioni?company_id=:id
-  # Lista le conversazioni recenti di un'azienda (max 50, ordinate per aggiornamento)
+  # Lista conversazioni per azienda (più recenti prima)
   def index
     company_id = params[:company_id]
     return render json: { error: "company_id mancante" }, status: :bad_request if company_id.blank?
 
     # where ritorna ActiveRecord::Relation (lazy query)
-    # order/limit sono chainabili: query SQL eseguita solo al render
-    # Pattern: Conversation.where(...).order(...).limit(...) → SELECT * FROM conversations WHERE ... ORDER BY ... LIMIT ...
     conversations = Conversation.where(company_id: company_id).order(updated_at: :desc).limit(50)
     
     # serialize_list formatta solo campi essenziali (senza messaggi completi)
@@ -35,7 +33,6 @@ class ConversationsController < ApplicationController
     conversation = Conversation.includes(:messages).find(params[:id])
 
     # Controllo autorizzazione base: verifica che l'azienda richiesta coincida
-    # .present? è opposto di .blank?: true se ha valore non-vuoto
     if params[:company_id].present? && conversation.company_id.to_s != params[:company_id].to_s
       return render json: { error: "Non hai accesso a questa conversazione" }, status: :forbidden
     end

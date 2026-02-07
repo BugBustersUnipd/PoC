@@ -29,7 +29,6 @@ class ImageGenerationController < ApplicationController
   #   - 500 Internal Server Error: errori Bedrock API, network, bug
   
   def create
-    # Pattern: validazione tramite value object dedicato (SRP)
     # ImageGenerationParams normalizza input (defaults) e valida requisiti
     request_params = ImageGenerationParams.new(
       prompt: params[:prompt],
@@ -40,7 +39,7 @@ class ImageGenerationController < ApplicationController
       seed: params[:seed]
     )
 
-    # Guard clause: blocca richiesta se validazione fallisce
+    # Guard clause: blocca richiesta se validazione fallisce)
     unless request_params.valid?
       return render json: { error: request_params.errors.first, errors: request_params.errors }, status: :unprocessable_entity
     end

@@ -36,7 +36,7 @@ class DocumentsController < ApplicationController
   # POST /documents
   # Carica un nuovo documento e avvia analisi AI in background
   #
-  # Flow:
+  # In ordine:
   # 1. Valida company_id
   # 2. Crea record Document con file allegato (ActiveStorage)
   # 3. Lancia job async per OCR + analisi Bedrock

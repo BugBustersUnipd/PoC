@@ -6,7 +6,7 @@
 # 3. Aggiorna status e ai_data
 # 4. Gestisce errori con retry automatico
 #
-# Pattern: Background Job (Asynchronous Processing)
+# Background Job (Asynchronous Processing)
 # - Upload file è sincrono (veloce)
 # - Analisi Bedrock è asincrona (lenta, 10-30 secondi per PDF grandi)
 # - User riceve response immediata, polling per status update
@@ -35,7 +35,7 @@ class AnalyzeDocumentJob < ApplicationJob
     # Salva risultati analisi nel DB
     # update! = UPDATE con validazioni, solleva eccezione se fallisce
     doc.update!(
-      status: "completed",                      # Analisi completata con successo
+      status: "completed",                       # Analisi completata con successo
       doc_type: analysis_data["tipo_documento"], # Es. "pdf", "docx", "txt"
       ai_data: analysis_data,                    # JSON con tutti dati estratti
       updated_at: Time.current                   # Timestamp aggiornamento
@@ -59,12 +59,9 @@ class AnalyzeDocumentJob < ApplicationJob
     )
     
   # rescue StandardError = cattura tutti altri errori Ruby
-  # StandardError è superclass di RuntimeError, ArgumentError, IOError, etc.
-  # NON cattura Exception (interrupt, system exit, syntax error)
   rescue StandardError => e
     # Log errore inaspettato
     Rails.logger.error("Unexpected error analyzing document #{document_id}: #{e.message}")
-    
     # raise = rilancia eccezione
     raise
   end

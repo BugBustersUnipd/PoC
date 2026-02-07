@@ -24,9 +24,6 @@ class ApplicationController < ActionController::API
 	# Helper per accedere al servizio di generazione immagini
 	#
 	# Stesso pattern di ai_service ma per le immagini.
-	# Separato per rispettare Interface Segregation Principle:
-	# i controller che non usano immagini non vedono questo metodo.
-	#
 	# @return [ImageService] istanza del servizio di generazione immagini
 	def image_service
 		@image_service ||= DiContainer.image_service
