@@ -154,7 +154,8 @@ export class AiAssistant implements OnInit {
           this.router.navigate(['/risultato-generazione'], {
             state: { 
               result: response, //ci serve per avere l'effetiva immagine
-              isImage: true //permette di capoire che è un'immagine, altrimenti risultato-generazione non sa se usare renderizzare un testo o un'immagine
+              isImage: true, //permette di capoire che è un'immagine, altrimenti risultato-generazione non sa se usare renderizzare un testo o un'immagine
+              isImageOnly: true // flag per nascondere i pulsanti Genera Immagine e Modifica
             }
           });
         },

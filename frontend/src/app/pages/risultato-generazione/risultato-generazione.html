@@ -34,8 +34,8 @@
   </div>
   
   <div class="button-panel">
-    <button class="btn btn-white" (click)="toggleImageInput()">Genera Immagine</button>
-    <button class="btn btn-white" (click)="toggleConversations()">Modifica</button>
+    <button *ngIf="!isImageOnly" class="btn btn-white" (click)="toggleImageInput()">Genera Immagine</button>
+    <button *ngIf="!isImageOnly" class="btn btn-white" (click)="toggleConversations()">Modifica</button>
     <button class="btn btn-red" (click)="esci()">Esci</button>
   </div>
 

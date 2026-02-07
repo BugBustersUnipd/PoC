@@ -24,6 +24,7 @@ export class RisultatoGenerazione implements OnInit {
   // Variabili di stato interfaccia
   showConversations: boolean = false; //mostra /nasconde la sidebar delle conversazioni
   showImageInput: boolean = false; // MOSTRA/NASCONDE IL BOX PER IL PROMPT IMMAGINE
+  isImageOnly: boolean = false; // nasconde i pulsanti quando si arriva da generazione immagine senza conversazione
   
   conversation: Message[] = []; // tutti i messaggi della conversazione corrente
   
@@ -53,6 +54,9 @@ ngOnInit() {
       this.generatedImage = `http://localhost:3000${state.result.image_url}`;
       this.generatedText = '';
     } 
+    
+    // Se è una generazione di sola immagine, nascondi i pulsanti
+    this.isImageOnly = state.isImageOnly || false;
 
     this.cdr.detectChanges();
   }
