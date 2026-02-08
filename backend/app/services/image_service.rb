@@ -11,15 +11,7 @@ require "base64"
 # 4. Chiama API Bedrock Nova Canvas per generare immagine
 # 5. Elimina eventuali immagini precedenti della stessa conversazione (1 img per conv)
 # 6. Salva immagine nel DB (GeneratedImage) + storage (ActiveStorage)
-#
-# Service Orchestrator
-# - Delega validazione, generazione, storage a componenti specializzati
-# - Ogni componente ha una singola ragione per cambiare (SRP)
-#
-# Dipendenze iniettate:
-# @param image_validator [ImageValidator] valida dimensioni supportate
-# @param image_generator [ImageGenerator] chiamate HTTP a Bedrock
-# @param image_storage [ImageStorage] persistenza DB + ActiveStorage
+
 class ImageService
   def initialize(image_validator:, image_generator:, image_storage:)
     @image_validator = image_validator
@@ -49,15 +41,7 @@ class ImageService
   #
   # @raise [ArgumentError] se dimensioni non supportate (es. 800x600)
   # @raise [ActiveRecord::RecordNotFound] se company_id non esiste
-  #
-  # Esempio:
-  #   result = image_service.genera(
-  #     prompt: "Logo minimalista per startup tech",
-  #     company_id: 1,
-  #     width: 1024,
-  #     height: 1024,
-  #     seed: 42  # Stesso seed = stessa immagine
-  #   )
+
   def genera(prompt:, company_id:, conversation_id: nil, width: 1024, height: 1024, seed: nil)
     # Valida dimensioni PRIMA di chiamare API (fail-fast)
     # Solleva ArgumentError se combinazione width/height non supportata

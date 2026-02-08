@@ -63,11 +63,6 @@ class TextGenerationParams
   # - tone_name: strip whitespace
   # - company_id: converte a Integer
   # - conversation_id: converte a Integer se presente
-  #
-  # @param prompt [String, nil] testo/richiesta per IA
-  # @param tone_name [String, nil] nome tono comunicativo (vietato se conversation_id presente)
-  # @param company_id [String, Integer, nil] ID azienda
-  # @param conversation_id [String, Integer, nil] ID conversazione per context (optional)
   def initialize(prompt:, tone_name:, company_id:, conversation_id: nil)
     @prompt = prompt.to_s.strip if prompt
     @tone_name = tone_name.to_s.strip if tone_name

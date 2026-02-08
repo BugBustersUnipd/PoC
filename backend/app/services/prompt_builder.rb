@@ -24,20 +24,7 @@ class PromptBuilder
   #   - <<~ rimuove automaticamente indentazione comune (whitespace leading)
   #   - .strip rimuove spazi/newline all'inizio e fine stringa
   #   - #{variable} = string interpolation (inserisce valore variabile)
-  #
-  # @param company_name [String] nome azienda (es. "Acme Corp")
-  # @param description [String] descrizione/contesto azienda
-  # @param tone_instructions [String] istruzioni tono (es. "Professionale e cordiale")
-  #
-  # @return [String] system prompt formattato pronto per Bedrock
-  #
-  # Esempio:
-  #   builder.build_system_prompt(
-  #     "TechStartup",
-  #     "Vendiamo software CRM",
-  #     "Tono tecnico ma accessibile"
-  #   )
-  #   # => "RUOLO: Sei l'IA ufficiale di TechStartup.\nCONTESTO: Vendiamo..."
+
   def build_system_prompt(company_name, description, tone_instructions)
     # <<~PROMPT è heredoc delimiter: tutto fino a PROMPT diventa stringa
     # ~ dopo << significa "rimuovi indentazione comune" (unindent)
@@ -71,21 +58,6 @@ class PromptBuilder
   # - Messaggi consecutivi stesso ruolo: combina content con \n\n
   # - Storia inizia con "assistant": rimuove messaggi assistant iniziali
   # - Storia vuota: crea array con solo messaggio corrente
-  #
-  # @param context_messages [Array<Message>] messaggi storico dalla conversazione (max 10)
-  # @param current_user_text [String] nuovo testo utente da aggiungere
-  #
-  # @return [Array<Hash>] messages array pronto per invoke_model Bedrock
-  #
-  # Esempio:
-  #   # Storico: [{role: "user", content: "Ciao"}, {role: "assistant", content: "Salve"}]
-  #   # Nuovo: "Come stai?"
-  #   builder.normalize_messages(storico, "Come stai?")
-  #   # => [
-  #   #   {role: "user", content: [{text: "Ciao"}]},
-  #   #   {role: "assistant", content: [{text: "Salve"}]},
-  #   #   {role: "user", content: [{text: "Come stai?"}]}
-  #   # ]
   def normalize_messages(context_messages, current_user_text)
     # Array vuoto, lo popoleremo con messaggi formattati
     messages = []

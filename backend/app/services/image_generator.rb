@@ -19,19 +19,8 @@ require "json"
 # - Fornisce interfaccia semplice generate(prompt, width, height, seed)
 class ImageGenerator
   # Costruttore con dependency injection
-  #
-  # @param client [Aws::BedrockRuntime::Client, nil] client AWS SDK (nil = crea nuovo)
-  # @param region [String] regione AWS (default da bedrock.yml)
-  #
   # Comportamento identico ad AiTextGenerator, client iniettabile per testing.
-  #
-  # Esempio:
-  #   # Produzione
-  #   generator = ImageGenerator.new
-  #
-  #   # Test
-  #   mock = double("client", invoke_model: mock_response)
-  #   generator = ImageGenerator.new(client: mock)
+
   def initialize(client: nil, region: ::BEDROCK_CONFIG_IMAGE_GENERATION["region"])
     @region = region
     @client = client || Aws::BedrockRuntime::Client.new(
@@ -47,23 +36,6 @@ class ImageGenerator
   # Nova Canvas = modello Amazon per text-to-image
   # Supporta dimensioni: 1024x1024, 1280x720, 720x1280
   # Non supporta: dimensioni arbitrarie, upscaling, inpainting
-  #
-  # @param prompt [String] descrizione immagine (es. "Logo aziendale moderno")
-  # @param width [Integer] larghezza pixel (1024, 1280, 720)
-  # @param height [Integer] altezza pixel (1024, 720, 1280)
-  # @param seed [Integer] seed 0-2147483647 per riproducibilità
-  #
-  # @return [String] immagine PNG codificata base64
-  #
-  # @raise [ArgumentError] se dimensioni non supportate
-  # @raise [Aws::BedrockRuntime::Errors::ServiceError] errori AWS
-  #
-  # Esempio:
-  #   base64_img = generator.generate(
-  #     "Logo startup tech minimale",
-  #     1024, 1024, 42
-  #   )
-  #   # => "iVBORw0KGgoAAAANSUhEUgAA..." (base64 string)
   def generate(prompt, width, height, seed)
     model_id = ::BEDROCK_CONFIG_IMAGE_GENERATION["model_id"]
     
@@ -99,14 +71,6 @@ class ImageGenerator
   #     seed: 12345
   #   }
   # }
-  #
-  # @param prompt [String] descrizione immagine
-  # @param width [Integer] larghezza
-  # @param height [Integer] altezza
-  # @param seed [Integer] seed riproducibilità
-  #
-  # @return [String] JSON string pronto per HTTP body
-  #
   # Sintassi Ruby:
   #   {key: value} = Hash con Symbol keys (più veloce di String keys)
   #   .to_json = converte Hash Ruby in stringa JSON (metodo da json gem)

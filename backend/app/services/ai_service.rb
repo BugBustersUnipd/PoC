@@ -15,7 +15,6 @@ require "json"
 # Pattern utilizzato: Service Orchestrator
 # - Non contiene logica di basso livello (API, DB, formattazione)
 # - Delega a specialist objects (text_generator, conversation_manager, prompt_builder)
-# - Facilita testing: puoi moccare ogni dipendenza
 #
 # Dipendenze iniettate:
 # @param text_generator [AiTextGenerator] chiamate HTTP a Bedrock
@@ -70,7 +69,6 @@ class AiService
     # Questo blocca immediatamente richieste con company_id invalido
     company = Company.find(company_id)
     
-    # Carica tono comunicativo dal DB (es. "formale", "amichevole")
     # Questo viene fatto PRIMA di fetch_or_create per passarlo al manager
     tono_db = company.tones.find_by(name: nome_tono) if nome_tono.present?
     
@@ -91,11 +89,9 @@ class AiService
     descrizione_azienda = company.description.presence || ""
 
     # Costruisce system prompt personalizzato con contesto aziendale
-    # Il system prompt dice all'AI "chi sei" e "come devi comportarti"
     system_prompt = @prompt_builder.build_system_prompt(company.name, descrizione_azienda, istruzioni_tono)
 
     # Recupera ultimi N messaggi della conversazione per contesto
-    # Limita a MAX_CONTEXT_MESSAGES per evitare token limit Bedrock
     context_messages = @conversation_manager.get_context_messages(conversation)
 
     # Normalizza messaggi in formato richiesto da Bedrock Converse API

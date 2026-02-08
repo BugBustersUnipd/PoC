@@ -20,27 +20,6 @@ class AiTextGenerator
   # Region default AWS se bedrock.yml non specifica (us-east-1 ha tutti i modelli)
   REGION_DEFAULT = "us-east-1"
 
-  # Costruttore con dependency injection
-  #
-  # @param client [Aws::BedrockRuntime::Client, nil] client AWS SDK (nil = crea nuovo)
-  # @param region [String] regione AWS (default da bedrock.yml)
-  #
-  # Client injection permette:
-  # - Test con mock client (niente chiamate HTTP reali)
-  # - Riuso client esistente (evita overhead inizializzazione)
-  #
-  # Sintassi Ruby:
-  #   client: nil = named parameter con default value
-  #   region: ::CONST = :: accede a costante top-level namespace
-  #   @variable = instance variable (visibile in tutti i metodi della classe)
-  #
-  # Esempio:
-  #   # Produzione: usa credenziali ENV
-  #   generator = AiTextGenerator.new
-  #
-  #   # Test: inietta mock
-  #   mock_client = double("client", converse: mock_response)
-  #   generator = AiTextGenerator.new(client: mock_client)
   def initialize(client: nil, region: ::BEDROCK_CONFIG_GENERATION["region"])
     @region = region
     
@@ -59,21 +38,6 @@ class AiTextGenerator
   #
   # Converse API = interfaccia unificata Bedrock per modelli conversazionali
   # Supporta: Claude (Anthropic), Nova (Amazon), Llama (Meta), Mistral, etc.
-  #
-  # @param messages [Array<Hash>] messaggi formato Bedrock
-  #   [{role: "user", content: [{text: "..."}]}, ...]
-  # @param system_prompt [String] istruzioni sistema per l'IA
-  #
-  # @return [String] testo generato dal modello
-  #
-  # @raise [Aws::BedrockRuntime::Errors::ServiceError] errori AWS non gestiti
-  #
-  # Esempio:
-  #   text = generator.generate_text(
-  #     [{role: "user", content: [{text: "Scrivi email"}]}],
-  #     "Sei assistente email professionale"
-  #   )
-  #   # => "Gentile cliente, benvenuto..."
   def generate_text(messages, system_prompt)
     # :: accede a costante globale caricata da bedrock.yml
     model_id = ::BEDROCK_CONFIG_GENERATION["model_id"]
@@ -101,17 +65,7 @@ class AiTextGenerator
   # Gestisce due scenari comuni:
   # 1. AccessDeniedException: modello non disponibile in regione (es. Nova non in eu-west-1)
   # 2. ThrottlingException: quota superata per il modello (troppi requests)
-  # 3. GuardrailException: contenuto bloccato dai guardrail
   #
-  # Soluzione: riprova con fallback model da ENV (es. Claude invece di Nova)
-  #
-  # @param model_id [String] model ID primario (es. "amazon.nova-pro-v1:0")
-  # @param messages [Array<Hash>] messaggi conversazione
-  # @param system_prompt [String] prompt sistema
-  #
-  # @return [Aws::BedrockRuntime::Types::ConverseResponse] risposta Bedrock
-  #
-  # @raise [Aws::BedrockRuntime::Errors::ServiceError] se fallback fallisce o non configurato
   def invoke_bedrock_with_fallback(model_id, messages, system_prompt)
     # Tentativo con modello primario
     converse_with_model(model_id, messages, system_prompt)
@@ -131,8 +85,6 @@ class AiTextGenerator
     fallback = ENV[FALLBACK_MODEL_ENV].presence
     
     # Verifica che fallback sia configurato E diverso da modello fallito
-    # && = AND logico, tutte condizioni devono essere vere
-    # != = operatore diverso (not equal)
     if fallback && fallback != model_id
       Rails.logger.info("Retrying with fallback model=#{fallback}")
       # Riprova con fallback model
@@ -144,31 +96,13 @@ class AiTextGenerator
     end
   end
 
-  # Invoca Bedrock Converse API per un model_id specifico
-  #
+
   # Converse è l'API unificata Bedrock per modelli conversazionali.
   # Parametri:
   # - model_id: identificatore modello (es. "anthropic.claude-3-5-sonnet-20241022-v2:0")
   # - messages: array messaggi [{role, content}]
   # - system: array istruzioni sistema [{text}]
   # - inference_config: temperature, max_tokens, top_p, etc.
-  #
-  # @param model_id [String] identificatore modello Bedrock
-  # @param messages [Array<Hash>] messaggi conversazione
-  # @param system_prompt [String] prompt sistema
-  #
-  # @return [Aws::BedrockRuntime::Types::ConverseResponse] risposta AWS
-  #
-  # Esempio risposta:
-  #   {
-  #     output: {
-  #       message: {
-  #         role: "assistant",
-  #         content: [{text: "Gentile cliente..."}]
-  #       }
-  #     },
-  #     usage: {input_tokens: 50, output_tokens: 120}
-  #   }
   def converse_with_model(model_id, messages, system_prompt)
     # @client.converse = chiamata HTTP POST a Bedrock Converse API
     # Sintassi Ruby: hash come ultimo parametro non richiede {}

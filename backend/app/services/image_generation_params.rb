@@ -5,11 +5,7 @@
 # - Applica default (width/height = 1024 se nil)
 # - Valida presenza campi obbligatori (prompt, company_id)
 # - Fornisce metodo to_service_params per passare a ImageService
-#
-# Vantaggi:
-# - Testabile separatamente da controller
-# - Riusabile in API, background jobs, console
-# - Evita codice validazione duplicato
+
 class ImageGenerationParams
   # attr_reader = genera getter methods per leggere instance variables
   # Equivalente a scrivere:
@@ -63,18 +59,7 @@ class ImageGenerationParams
   # @param width [String, Integer, nil] larghezza pixel (default 1024)
   # @param height [String, Integer, nil] altezza pixel (default 1024)
   # @param seed [String, Integer, nil] seed riproducibilità (optional)
-  #
-  # Esempio:
-  #   params = ImageGenerationParams.new(
-  #     prompt: "  Logo aziendale  ",
-  #     company_id: "1",  # String da params HTTP
-  #     width: "1024",    # String da params HTTP
-  #     height: nil       # Non fornito
-  #   )
-  #   params.prompt      # => "Logo aziendale" (stripped)
-  #   params.company_id  # => 1 (Integer)
-  #   params.width       # => 1024 (Integer)
-  #   params.height      # => 1024 (default)
+
   def initialize(prompt:, company_id:, conversation_id: nil, width: nil, height: nil, seed: nil)
     # Normalizza prompt: strip rimuove spazi inizio/fine
     # if prompt = guard clause, evita .strip su nil (causerebbe NoMethodError)
@@ -111,13 +96,6 @@ class ImageGenerationParams
   # Campi obbligatori:
   # - prompt: descrizione immagine (non può essere blank)
   # - company_id: ownership immagine (non può essere nil/blank)
-  #
-  # @return [Boolean] true se validazione passa, false altrimenti
-  #
-  # Esempio:
-  #   params = ImageGenerationParams.new(prompt: "", company_id: nil)
-  #   params.valid?   # => false
-  #   params.errors   # => ["prompt e company_id sono obbligatori"]
   def valid?
     # Reset errori (necessario se valid? chiamato più volte)
     @errors = []
@@ -138,24 +116,6 @@ class ImageGenerationParams
   end
 
   # Converte parametri in Hash per passare a ImageService
-  #
-  # Service si aspetta Hash con chiavi Symbol.
-  # @return [Hash] parametri normalizzati pronti per service
-  #
-  # Esempio:
-  #   params.to_service_params
-  #   # => {
-  #   #   prompt: "Logo aziendale",
-  #   #   company_id: 1,
-  #   #   conversation_id: nil,
-  #   #   width: 1024,
-  #   #   height: 1024,
-  #   #   seed: nil
-  #   # }
-  #
-  # Uso in controller:
-  #   result = image_service.genera(**params.to_service_params)
-  #   # ** = splat operator, espande Hash in named arguments
   def to_service_params
     # Hash con Symbol keys
     # Tutti i valori sono già normalizzati dal constructor
