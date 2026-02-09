@@ -140,9 +140,9 @@
 \hline
 \rowcolor{primaryblue!40}
 \textbf{\color{white} Versione} & \textbf{\color{white} Data} & \textbf{\color{white} Descrizione} & \textbf{\color{white} Redatto} & \textbf{\color{white} Verificato} & \textbf{\color{white} Approvato} \\
-1.0.0 & 31/01/2026 & Sistemata sezione su Linux & - & - & Luca Slongo \\
+1.0.0 & 31/01/2026 & Approvazione del documento & - & - & Luca Slongo \\
 \hline
-0.1.0 & 31/01/2026 & Sistemata sezione su Linux & - & Alberto Pignat & - \\
+0.1.0 & 31/01/2026 & Verifica del documento & - & Alberto Pignat & - \\
 \hline
 0.0.5 & 31/01/2026 & Sistemata sezione su Linux & Luca Slongo & - & - \\
 \hline
@@ -259,8 +259,6 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
     \item \textbf{Linux (Ubuntu/Debian)}: \\
     \texttt{sudo apt-get install ruby-full build-essential}
     
-    \item \textbf{Linux (Fedora/RHEL)}: \\
-    \texttt{sudo dnf install ruby ruby-devel}
 \end{itemize}
 
 \noindent Dopo l'installazione, \textbf{per macOS}, è necessario configurare il percorso:
@@ -268,6 +266,13 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 \begin{lstlisting}[language=bash, caption=Configurazione PATH Ruby su macOS]
 echo 'export PATH="/opt/homebrew/opt/ruby/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
+\end{lstlisting}
+
+\noindent \textbf{Per Ubuntu/Debian} invece:
+
+\begin{lstlisting}[language=bash, caption=Configurazione PATH Ruby su Ubuntu/Debian]
+echo 'export PATH="$(ruby -e "print Gem.user_dir")/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 \end{lstlisting}
 
 \noindent Successivamente, verificare l'installazione:
@@ -294,13 +299,6 @@ postgres --version
 \textbf{Linux (Ubuntu/Debian)}:
 \begin{lstlisting}[language=bash, caption=PostgreSQL su Ubuntu/Debian]
 sudo apt-get install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-\end{lstlisting}
-
-\textbf{Linux (Fedora/RHEL)}:
-\begin{lstlisting}[language=bash, caption=PostgreSQL su Fedora/RHEL]
-sudo dnf install postgresql postgresql-server
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 \end{lstlisting}
@@ -332,7 +330,7 @@ npm install
 
 La configurazione del progetto avviene tramite il file \texttt{backend/.env}. Una copia di esempio è fornita in \texttt{backend/.env.example}.
 
-\subsubsection{Creare il file .env}
+\subsubsection{Creare il file .env e installare le dipendenze Rails}
 \label{subsubsec:create-env}
 
 Copiare \texttt{.env.example} e rinominarlo in \texttt{.env}:
@@ -343,11 +341,30 @@ cd backend
 Copy-Item .env.example .env
 \end{lstlisting}
 
-\textbf{Linux/macOS}:
-\begin{lstlisting}[language=bash, caption=Creare .env su Linux/macOS]
+\textbf{macOS}:
+\begin{lstlisting}[language=bash, caption=Creare .env su macOS]
 cd backend
 bundle install
 cp .env.example .env
+\end{lstlisting}
+
+\textbf{Ubuntu/Debian}:
+\begin{lstlisting}[language=bash, caption=Creare .env e installare le dipendenze Rails su Ubuntu/Debian]
+cd backend
+bundle install
+cp .env.example .env
+\end{lstlisting}
+
+\noindent In caso in cui bundle install restituisca errori di librerie mancanti, eseguire:
+\begin{lstlisting}[language=bash, caption=Librerie mancanti su Ubuntu/Debian]
+sudo apt-get install -y libyaml-dev pkg-config
+\end{lstlisting}
+
+\noindent In caso in cui bundle install restituisca errori di installazione delle gemme, eseguire:
+\begin{lstlisting}[language=bash, caption=Correzione installazione di gemme su Ubuntu/Debian]
+bundle config set --local path 'vendor/bundle'
+bundle config set --local cache_path "$HOME/.bundle/cache"
+bundle config unset --local without
 \end{lstlisting}
 
 \subsubsection{Completare le Credenziali AWS}
