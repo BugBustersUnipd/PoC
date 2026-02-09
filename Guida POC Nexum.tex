@@ -121,9 +121,9 @@
 \begin{center}
 \begin{tcolorbox}[colback=lightgray,colframe=primaryblue,width=0.85\textwidth,arc=3mm,boxrule=0.5pt]
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}X@{}}
-	{Stato} & In redazione \\
-	{Verificatore} &  \\
-	{Redattori} & Alberto Autiero \\
+	{Stato} & Approvato per RTB \\
+	{Verificatore} & Alberto Pignat \\
+	{Redattori} & Marco Piro, Marco Favero, Luca Slongo \\
 	{Destinatari} & BugBusters, Eggon, Prof. Tullio Vardanega, Prof. Riccardo Cardin \\
 \end{tabularx}
 \end{tcolorbox}
@@ -140,7 +140,15 @@
 \hline
 \rowcolor{primaryblue!40}
 \textbf{\color{white} Versione} & \textbf{\color{white} Data} & \textbf{\color{white} Descrizione} & \textbf{\color{white} Redatto} & \textbf{\color{white} Verificato} & \textbf{\color{white} Approvato} \\
-0.0.3 & 05/02/2026 & Aggiunta sezione installazione su MACOS e Linux & Marco Favero & - & - \\
+1.0.0 & 31/01/2026 & Sistemata sezione su Linux & - & - & Luca Slongo \\
+\hline
+0.1.0 & 31/01/2026 & Sistemata sezione su Linux & - & Alberto Pignat & - \\
+\hline
+0.0.5 & 31/01/2026 & Sistemata sezione su Linux & Luca Slongo & - & - \\
+\hline
+0.0.4 & 31/01/2026 & Sistemata sezione su macOS & Marco Piro & - & - \\
+\hline
+0.0.3 & 31/01/2026 & Aggiunta sezione installazione su MACOS e Linux & Marco Favero & - & - \\
 \hline
 0.0.2 & 31/12/2025 & Migliorie alla guida & Alberto Autiero & - & - \\
 \hline
@@ -240,12 +248,30 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 \label{subsec:lm-ruby}
 
 \begin{itemize}
-    \item \textbf{macOS}: \texttt{brew install ruby}
-    \item \textbf{Linux (Ubuntu/Debian)}: \texttt{sudo apt-get install ruby-full build-essential}
-    \item \textbf{Linux (Fedora/RHEL)}: \texttt{sudo dnf install ruby ruby-devel}
+    \item \textbf{macOS}:
+    \begin{itemize}
+        \item[-] \textit{Se Homebrew non è installato, eseguire prima:} \\
+        \texttt{\footnotesize /bin/bash -c "\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"}
+        \item[-] Installazione Ruby: \\
+        \texttt{brew install ruby}
+    \end{itemize}
+    
+    \item \textbf{Linux (Ubuntu/Debian)}: \\
+    \texttt{sudo apt-get install ruby-full build-essential}
+    
+    \item \textbf{Linux (Fedora/RHEL)}: \\
+    \texttt{sudo dnf install ruby ruby-devel}
 \end{itemize}
 
-Dopo l'installazione:
+\noindent Dopo l'installazione, \textbf{per macOS}, è necessario configurare il percorso:
+
+\begin{lstlisting}[language=bash, caption=Configurazione PATH Ruby su macOS]
+echo 'export PATH="/opt/homebrew/opt/ruby/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+\end{lstlisting}
+
+\noindent Successivamente, verificare l'installazione:
+
 \begin{lstlisting}[language=bash, caption=Verificare e completare Ruby]
 ruby --version
 gem install bundler
@@ -255,9 +281,14 @@ gem install bundler
 \label{subsec:lm-postgresql}
 
 \textbf{macOS}:
-\begin{lstlisting}[language=bash, caption=PostgreSQL su macOS]
+\begin{lstlisting}[language=bash, caption=Installazione e configurazione PostgreSQL 18 su macOS]
 brew install postgresql@18
+
+echo 'export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
 brew services start postgresql@18
+postgres --version
 \end{lstlisting}
 
 \textbf{Linux (Ubuntu/Debian)}:
@@ -280,6 +311,8 @@ sudo systemctl enable postgresql
 \textbf{macOS}:
 \begin{lstlisting}[language=bash, caption=Node.js su macOS]
 brew install node
+node -v
+npm -v
 \end{lstlisting}
 
 \textbf{Linux}: Seguire \url{https://nodejs.org/en/download/package-manager}
@@ -313,6 +346,7 @@ Copy-Item .env.example .env
 \textbf{Linux/macOS}:
 \begin{lstlisting}[language=bash, caption=Creare .env su Linux/macOS]
 cd backend
+bundle install
 cp .env.example .env
 \end{lstlisting}
 
@@ -438,20 +472,29 @@ Il progetto include diversi script PowerShell utili:
 \subsection{Errore: "Problemi di permessi in fase di configurazione"}
 \label{subsec:errore-permessi}
 \begin{itemize}
-    \item Esegui PowerShell/cmd come amministratore o usa \texttt{sudo} su Linux/macOS.
+    \item \textbf{Windows}: Esegui PowerShell o il prompt dei comandi come amministratore.
+    \item \textbf{macOS/Linux}: Evita di usare \texttt{sudo} con \texttt{brew} o \texttt{npm} per non corrompere i permessi. Se ricevi errori come "Permission denied" o "EACCES", riprendi il possesso della cartella corrente eseguendo: \\
+    \texttt{sudo chown -R \$USER .}
 \end{itemize}
 
 \subsection{Errore: "Database non inizializzato"}
-\label{subsec:errore-database}
-\begin{itemize}
-    \item Esegui manualmente: \texttt{cd backend \&\& bundle exec rails db:create db:migrate db:seed}
-\end{itemize}
+Se all'avvio si presentano errori relativi a tabelle mancanti o database inesistente, eseguire manualmente il comando di inizializzazione (dalla cartella principale del progetto):
+
+\begin{lstlisting}[language=bash, caption=Inizializzazione manuale Database]
+cd backend && bundle exec rails db:create db:migrate db:seed
+\end{lstlisting}
 
 \subsection{Errore: "Password PostgreSQL errata"}
 \label{subsec:errore-password}
 \begin{itemize}
-    \item Verifica che la password in \texttt{backend/.env} corrisponda alla password dell'utente \texttt{postgres} impostata durante l'installazione
-    \item Usa lo script \texttt{verifica-postgres.ps1} (su Windows) per testare la connessione
+    \item Verifica che la password nel file \texttt{backend/.env} corrisponda a quella dell'utente \texttt{postgres} impostata durante l'installazione.
+    \item \textbf{Windows}: Usa lo script \texttt{verifica-postgres.ps1} per testare la connessione.
+    \item \textbf{macOS/Linux}: Per testare la connessione manualmente, apri il terminale e lancia:
+    \begin{lstlisting}[language=bash]
+    psql -h localhost -U postgres
+    \end{lstlisting}
+    Se compare il prompt \texttt{postgres=\#}, la connessione è riuscita (digita \texttt{\textbackslash q} per uscire).
+    Se richiede una password, prova a inserirne una vuota o quella che hai messo nel file \texttt{.env}.
 \end{itemize}
 
 \subsection{Errore: "AWS credentials expired"}
@@ -464,9 +507,12 @@ Il progetto include diversi script PowerShell utili:
 
 \subsection{Errore: "Could not find gem"}
 \label{subsec:errore-gem}
-\begin{itemize}
-    \item Esegui: \texttt{cd backend \&\& bundle install}
-\end{itemize}
+Se compare questo errore, significa che mancano alcune dipendenze Ruby. Eseguire i seguenti comandi per installarle:
+
+\begin{lstlisting}[language=bash, caption=Installazione dipendenze mancanti]
+cd backend
+bundle install
+\end{lstlisting}
 
 \subsection{Errore: "Port already in use"}
 \label{subsec:errore-porta}
@@ -491,19 +537,23 @@ Il progetto include diversi script PowerShell utili:
 
 \subsection{Errore: "Script execution is disabled on this system"}
 \label{subsec:errore-powershell-policy}
+\textit{(Solo per Windows)} \\
 Se ricevi un errore quando provi a eseguire gli script PowerShell:
 
 \textbf{Soluzione 1: Cambiare la policy di esecuzione (permanente)}
 \label{subsubsec:soluzione-powershell-1}
-Per l'utente corrente:
+Per l'utente corrente eseguire il seguente comando:
 
+% Cambiato da 'powershell' a 'bash' per evitare errori di compilazione
 \begin{lstlisting}[language=bash, caption=Cambiare policy di esecuzione PowerShell]
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 \end{lstlisting}
 
-Questo comando permette l'esecuzione di script locali e richiede la firma solo per script scaricati da Internet.
+\noindent Questo comando permette l'esecuzione di script locali e richiede la firma solo per script scaricati da Internet.
 
-\textbf{Nota}: Potrebbe essere richiesto di confermare con \texttt{S} o \texttt{Y}.
+\vspace{0.2cm}
+\noindent \textbf{Nota}: Potrebbe essere richiesto di confermare digitando \texttt{S} (Sì) o \texttt{Y} (Yes).
+
 
 % Sezione 9: Note Importanti
 \section{Note Importanti}
